@@ -1,3 +1,4 @@
+#%%
 # -*- coding: utf-8 -*-
 """
 Created on Thu Dec 22 22:51:15 2022
@@ -62,6 +63,7 @@ elif style == 'ppt':
 # choice = 'NUTS3'
 # choice = 'NUTS2'
 choice = 'NordpoolReal'
+# choice = 'BalmorelVREAreas'
 
 # 0.2 Parameters
 growth = 10 # Maximum growth of areas with no grid connection in km
@@ -94,7 +96,7 @@ DCOST_E = 5 # €/MWh Electricity distribution cost
 ### ----------------------------- ###
 
 ### 1.1 Load geodata
-the_index, areas = PreProcessShapes(choice)
+the_index, areas, country_code = PreProcessShapes(choice)
 
 if 'nuts' in choice.lower():
     areas = areas[areas.CNTR_CODE == 'DK']
@@ -118,10 +120,10 @@ PL = PL[~idx]
 fig, ax = plt.subplots(1)
 areas.plot(ax=ax)
 PL.plot(ax=ax, color='k')
-# plt.xlim([7, 16])
-# plt.ylim([54, 59])
 plt.xlim([7, 16])
 plt.ylim([54, 59])
+# plt.xlim([7, 16])
+# plt.ylim([54, 59])
 
 ### 1.3 Assume capacities 
 kVtoMW = {132 : 100, 220 : 200,

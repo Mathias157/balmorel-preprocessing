@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#%%# -*- coding: utf-8 -*-
 """
 Created on Sat Dec  3 15:33:10 2022
 
@@ -91,7 +91,7 @@ cap_per_sqkm_wind = 0.67 # MW/km2 According to NREL: 2 MW / 1.5 acres (0.0060702
 
 
 ### 0.2 Choice of technologies
-panel = atlite.solarpanels.CSi_Nicolas # Possible to choose crystalline Si (CSi) or advanced cadmium-tellurium (CdTe)
+panel = atlite.solarpanels.CSi # Possible to choose crystalline Si (CSi) or advanced cadmium-tellurium (CdTe)
 # wind_turbine = atlite.windturbines.Vestas_V66_1750kW
 wind_turbine = atlite.windturbines.Enercon_E82_3000kW
 # wind_turbine = atlite.windturbines.Bonus_B1000_1000kW
@@ -125,7 +125,7 @@ T = '2017'
 OverW = False
 
 ### 0.6 Read Geodata
-the_index, areas = PreProcessShapes(choice)
+the_index, areas, country_code = PreProcessShapes(choice)
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
 # Read homemade offshore potentials for DK

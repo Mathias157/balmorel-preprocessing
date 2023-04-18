@@ -1,3 +1,4 @@
+#%%
 # -*- coding: utf-8 -*-
 """
 Created on Thu Dec 22 17:17:25 2022
@@ -125,7 +126,7 @@ ax.set_title('Fraction of population - ' + Y)
 
 
 ### 1.3 Read geodata
-the_index, areas = PreProcessShapes(choice)
+the_index, areas, country_code = PreProcessShapes(choice)
 if 'nuts' in choice.lower():
     areas = areas[(areas[the_index].str.find('DK') != -1)]
 areas.plot()

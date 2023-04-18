@@ -36,8 +36,8 @@ elif style == 'ppt':
 # choice = 'NUTS1'
 # choice = 'NUTS2'
 # choice = 'NUTS3'
-choice = 'DK Municipalities'
-# choice = 'BalmorelVREAreas'
+# choice = 'DK Municipalities'
+choice = 'BalmorelVREAreas'
 
 ### 0.2 Choose country 
 
@@ -50,7 +50,7 @@ choice = 'DK Municipalities'
 ### 1. Load Geodata and Pre-process ###
 ### ------------------------------- ###
 
-the_index, areas = PreProcessShapes(choice)
+the_index, areas, country_code = PreProcessShapes(choice)
 areas.plot()
 
 

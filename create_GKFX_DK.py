@@ -1,3 +1,4 @@
+#%%
 # -*- coding: utf-8 -*-
 """
 Created on Fri Nov 25 13:33:33 2022
@@ -283,7 +284,7 @@ pp.decommissioning = pp.decommissioning.astype(int)
 pp.loc[pp.loc[:, 'decommissioning'] < 2030, 'decommissioning'] = 2030
 
 
-#%% 2.6 Make Prefix - ASSUMPTIONS
+### 2.7 Make Prefix - ASSUMPTIONS
 # All possibilities from Balmorel:
 E = pd.Series(['GNR_BIOGASUPGRADING_E-99_Y-2020                 ' ,
     'GNR_BO_BGAS_E-100                               ' ,
@@ -585,7 +586,7 @@ for u in units:
         except IndexError:
             pass
 
-#%% Missing power plants
+### Missing power plants
 print('Missing capacity:', round(pp[pp.G.isna()].electric_capacity_MW.sum()), 'MW')
 
 # Typically too small to matter, so delete
@@ -596,7 +597,7 @@ pp = pp[~pp.G.isna()]
 ### ------------------------------- ###
 
 
-the_index, areas = PreProcessShapes(choice)
+the_index, areas, country_code = PreProcessShapes(choice)
 areas.plot()
 
 # ## 3.1 Choose geodata file
