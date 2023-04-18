@@ -23,3 +23,8 @@ Please use the scripts within this environment.
 
 How to install using conda:
 	conda env create --name environment_name -f environment.yml
+
+Data:
+The data is collected from various sources, with varying degrees of metadata and documentation.
+It can be downloaded in the following link:
+https/............
