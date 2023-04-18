@@ -156,7 +156,7 @@ def PreProcessShapes(choice, plot='n'):
         area_names = 'RRR'
     
     elif choice.replace(' ','').lower() == 'balmorelvreareas':
-        areas = gpd.read_file(r'.\Data\Shapefiles\BalmorelVREAreas.gpkg')
+        areas = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmorelVREAreas.gpkg')
         area_names = 'Region' 
         country_code = 'Country'
     
