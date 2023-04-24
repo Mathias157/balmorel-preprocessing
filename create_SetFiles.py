@@ -32,17 +32,17 @@ elif style == 'ppt':
 
 ### 0.1 Load geodata
 # What areas to load?
-# choice = 'Nordpool'
+choice = 'NordpoolReal'
 # choice = 'NUTS1'
 # choice = 'NUTS2'
 # choice = 'NUTS3'
 # choice = 'DK Municipalities'
-choice = 'BalmorelVREAreas'
+# choice = 'BalmorelVREAreas'
 
 ### 0.2 Choose country 
 
 ### ASSUMPTIONS
-# 2.1 Only DK right now
+# 2.1 Only DK right now, and the amount of areas in the loaded shapefile = amount of created areas
 # 2.2 - Investment options!!! How to distribute? Right now a semi-automatic hack
 
 
@@ -52,6 +52,8 @@ choice = 'BalmorelVREAreas'
 
 the_index, areas, country_code = PreProcessShapes(choice)
 areas.plot()
+
+areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
 
 
 #%% ------------------------------- ###
@@ -129,18 +131,18 @@ with open('./Output/RRR.inc', 'w') as f:
 
 # AGKN - Allowed investments how to do?
 # Hack for now
-with open('./Output/AGKN.inc', 'w') as f:
-    for a in areas.index:
-        f.write("""
-                AGKN('%s', GGG) = AGKN('DK2_Large',GGG) + AGKN('DK2_NoDH',GGG);
-                AGKN('%s', 'GNR_ST_NUCL_CND_E-33') = YES;
-                AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GWND)  = YES  ;
-                AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GHSTO) = YES  ;          
-                AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTO) = YES  ;          
-                AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTOS) = YES ;          
-                AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLE) = YES  ;          
-                AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLH) = YES  ;          
-                """%tuple(8*[a + '_A']))
-                #.replace(' ', '')%tuple(8*[a + '_A']))
+# with open('./Output/AGKN.inc', 'w') as f:
+#     for a in areas.index:
+#         f.write("""
+#                 AGKN('%s', GGG) = AGKN('DK2_Large',GGG) + AGKN('DK2_NoDH',GGG);
+#                 AGKN('%s', 'GNR_ST_NUCL_CND_E-33') = YES;
+#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GWND)  = YES  ;
+#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GHSTO) = YES  ;          
+#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTO) = YES  ;          
+#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTOS) = YES ;          
+#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLE) = YES  ;          
+#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLH) = YES  ;          
+#                 """%tuple(8*[a + '_A']))
+#                 #.replace(' ', '')%tuple(8*[a + '_A']))
 
 
