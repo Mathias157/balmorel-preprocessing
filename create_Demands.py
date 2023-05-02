@@ -47,7 +47,7 @@ elif style == 'ppt':
 
 ### 0.1 Limit area
 # If you type 'All', then no filter is applied
-Afilt = 'DK'
+Afilt = 'All'
 
 
 ### 0.2 Population Year
@@ -56,11 +56,11 @@ Y = '2019'
 
 ### 0.3 Load geodata
 # What areas to load?
-choice = 'DK Municipalities'
+# choice = 'DK Municipalities'
 # choice = 'NUTS1'
 # choice = 'NUTS2'
 # choice = 'NUTS3'
-# choice = 'Nordpool'
+choice = 'NordpoolReal'
 
 ### 0.4 Input parameters
 DE = pd.DataFrame({'MWh' : 37000000}, index=['DK']) ### DUMMY DATA only for DK
@@ -80,7 +80,7 @@ profYear = 2017 # Year for profiles
 
 #%% ----------------------------- ###
 ###        1. Read files          ###
-### ----------------------------- ###
+### ----------------------------- ###a
 
 ### 1.1 Read NUTS3 data
 pop = pd.read_csv(r'.\Data\demo_r_d3dens.tsv', sep='\t')
@@ -101,6 +101,7 @@ if Afilt.lower() != 'all':
 # Year
 pop = pop[['NUTS_ID', Y]]
 # Convert to Numbers
+pop[Y] = pop[Y].str.replace(':','0')
 pop[Y] = pop[Y].astype(float)
    
 ## Merge
@@ -130,8 +131,11 @@ the_index, areas, country_code = PreProcessShapes(choice)
 if 'nuts' in choice.lower():
     areas = areas[(areas[the_index].str.find('DK') != -1)]
 areas.plot()
+areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
 
 ## Change projections to a geocentric one
+if choice.lower().replace(' ', '') == 'nordpoolreal':
+    areas.crs = 4326
 areas = areas.to_crs(4328)
 
 

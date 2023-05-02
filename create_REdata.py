@@ -8,7 +8,7 @@ See the following documentation, for understanding how this script works:
     Cutouts: https://atlite.readthedocs.io/en/latest/examples/create_cutout.html
     Power potentials: https://atlite.readthedocs.io/en/latest/examples/landuse-availability.html
 
-"""
+""" 
 
 import pandas as pd
 import numpy as np
@@ -127,6 +127,8 @@ T = '2017'
 
 ### 0.6 Read Geodata
 the_index, areas, country_code = PreProcessShapes(choice)
+areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
+
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
 # Read homemade offshore potentials for DK

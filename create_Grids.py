@@ -97,6 +97,8 @@ DCOST_E = 5 # €/MWh Electricity distribution cost
 
 ### 1.1 Load geodata
 the_index, areas, country_code = PreProcessShapes(choice)
+areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
+
 
 if 'nuts' in choice.lower():
     areas = areas[areas.CNTR_CODE == 'DK']
@@ -322,6 +324,9 @@ XKFX(YYY,'DK_3_10_1','DK_3_8_1') = 200;
 ### ----------------------------- ###
 
 # Convert to geocentric coordinates for meter units
+if choice.lower().replace(' ','') == 'nordpoolreal':
+    areas.crs = 4326 
+
 areas = areas.to_crs(4328)
 
 
