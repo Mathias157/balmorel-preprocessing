@@ -82,8 +82,7 @@ GDATASTRING2 = "GDTYPE	GDFUEL	GDCV	GDCB	GDFE	GDCH4	GDNOX	GDDESO2	GDINVCOST0	GDOM
 GDATA = pd.DataFrame(data={}, columns=GDATASTRING2)
 
 ## Dictionary for converting terminology
-eldh2balm = {'type' : 'GDTYPE',
-             ''}
+eldh2balm = {'type' : 'GDTYPE'}
 
 eldh2TYPE = {'back pressure' : 'GBPR',
             'extraction' : 'GEXT',
@@ -245,9 +244,11 @@ GDATA.loc[:, 'GDTECHGROUP'] = 'COMBINEDCYCLE'
 
 
 
-### 3.X Save GDATA
-with open('./Output/GDATA.inc', 'w') as f:
-    f.write("TABLE GDATA(GGG,GDATASET)  'Technologies characteristics'\n")
+### 3.X Save ANTBALM_GDATA
+with open('./Output/ANTBALM_GDATA.inc', 'w') as f:
+    f.write("* Turn of all investment options not aligned in soft-link\n")
+    f.write("GDATA(GGG,'GDKVARIABL') = 0;\n")
+    f.write("TABLE ANTBALM_GDATA(GGG,GDATASET)  'Technologies characteristics'\n") 
     f.write("* Most technologies come from the technology catalogue of the Danish Energy Agency:\n")
     f.write("* - District Heating and Power Generation, June 2022 https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and\n")
     f.write("* - Renewable Fuels, March 2023 https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-renewable-fuels\n")
@@ -256,9 +257,16 @@ with open('./Output/GDATA.inc', 'w') as f:
     f.write(dfAsString)
     # f.write('\n;')
 
-### 3.X Save GGG
-with open('./Output/GGG.inc', 'w') as f:
+### 3.X Save ANTBALM_GGG
+with open('./Output/ANTBALM_GGG.inc', 'w') as f:
     f.write("SET GGG  'All generation technologies'\n")
+    f.write('/\n')
+    f.write('\n'.join(GDATA.index))
+    # f.write('\n/;')  
+
+### 3.X Save ANTBALM_G
+with open('./Output/ANTBALM_G.inc', 'w') as f:
+    f.write("SET G  'All generation technologies'\n")
     f.write('/\n')
     f.write('\n'.join(GDATA.index))
     # f.write('\n/;')  
@@ -268,11 +276,19 @@ with open('./Output/GGG.inc', 'w') as f:
 ### ------------------------------------- ###
 
 ### 4.1 Hack, all techs can be invested everywhere
-with open('./Output/AGKN.inc', 'w') as f:
+with open('./Output/HYDROGEN_AGKN.inc', 'w') as f:
     # f.write("SET GGG  'All generation technologies'\n")
+    f.write("* Turn of all investment options not aligned in soft-link\n")
+    f.write("AGKN(AAA,GGG) = NO;\n")
     for A in areas[the_index]:
         for G in GDATA.index:
             f.write("AGKN('%s_A', '%s') = YES;\n"%(A, G))
     # f.write('/\n')
     # f.write('\n/;')  
 
+
+#%% ------------------------------------- ###
+###      5. Create Costs for Antares      ###
+### ------------------------------------- ###
+
+### Calculate fixed and variable costs 
