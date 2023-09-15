@@ -121,7 +121,8 @@ for fuel in GDATA.loc[GBPR, 'GDFUEL'].unique():
         except:
             print(col, ' = a string')
 GDATANEW = GDATANEW.fillna('')
-    
+GDATANEW['GDTYPE'] = 'GBPR'
+
 # Save
 with open('Output/ANTBALM_GDATA.inc', 'w') as f:
     f.write("TABLE GDATA(GGG,GDATASET)  'Technologies characteristics'\n")
