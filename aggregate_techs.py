@@ -121,7 +121,24 @@ for fuel in GDATA.loc[GBPR, 'GDFUEL'].unique():
         except:
             print(col, ' = a string')
 GDATANEW = GDATANEW.fillna('')
-GDATANEW['GDTYPE'] = 'GBPR'
+GDATANEW['GDTYPE'] = 'GBPRAGG'
+
+# Approximate heat capacity compared to before aggregation (but electricity capacity will be off)
+CapCorrection = {'BIOGAS'	: 100-33.71,
+                 'COAL'	: 100-23.75,
+                 'FUELOIL'	: 100-10.33,
+                 'HEAT'	: 100-0.00,
+                 'LIGHTOIL'	: 100-52.71,
+                 'LIGNITE'	: 100-0.00,
+                 'MUNIWASTE':	100-14.89,
+                 'NATGAS'	: 100-37.73,
+                 'OTHERGAS'	: 100-6.19,
+                 'PEAT'	: 100-9.41,
+                 'STRAW'	:100+16.08,
+                 'WOODCHIPS'	: 100-4.28,
+                 'WOODPELLETS'	: 100-10.57,
+                 'WOODWASTE' :	100+5.21,
+}
 
 # Save
 with open('Output/ANTBALM_GDATA.inc', 'w') as f:
@@ -135,7 +152,7 @@ with open('Output/ANTBALM_GKFX.inc', 'w') as f:
         # Find new aggregated tech 
         idx = GDATANEW['GDFUEL'] == fuel
         aggtech = GDATANEW.index[idx][0]
-        f.write("GKFX(YYY,AAA,'%s') = SUM(GGG, GKFX(YYY,AAA,GGG)$(GDATA(GGG,'GDTYPE') EQ GBPR AND GDATA(GGG,'GDFUEL') EQ %s)); \n"%(aggtech, fuel))
+        f.write("GKFX(YYY,AAA,'%s') = SUM(GGG$(GDATA(GGG,'GDTYPE') EQ GBPR AND GDATA(GGG,'GDFUEL') EQ %s), GKFX(YYY,AAA,GGG)); \n"%(aggtech, fuel))
         f.write("GKFX(YYY,AAA,GGG)$(GDATA(GGG,'GDTYPE') EQ GBPR AND GDATA(GGG,'GDFUEL') EQ %s) = 0;\n"%(fuel))
 
 with open('Output/ANTBALM_G.inc', 'w') as f:
