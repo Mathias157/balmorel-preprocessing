@@ -82,8 +82,7 @@ GDATASTRING2 = "GDTYPE	GDFUEL	GDCV	GDCB	GDFE	GDCH4	GDNOX	GDDESO2	GDINVCOST0	GDOM
 GDATA = pd.DataFrame(data={}, columns=GDATASTRING2)
 
 ## Dictionary for converting terminology
-eldh2balm = {'type' : 'GDTYPE',
-             ''}
+eldh2balm = {'type' : 'GDTYPE'}
 
 eldh2TYPE = {'back pressure' : 'GBPR',
             'extraction' : 'GEXT',
