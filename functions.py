@@ -54,6 +54,7 @@ def PreProcessShapes(choice, plot='n'):
             'Nordpool'.
             'NordpoolReal'
             'BalmorelVREAreas'
+            'Antbalm'
             
     plot : str
         Chooses to plot or not
@@ -160,7 +161,17 @@ def PreProcessShapes(choice, plot='n'):
         areas = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmorelVREAreas.gpkg')
         area_names = 'Region' 
         country_code = 'Country'
-    
+    elif choice.replace(' ','').lower() == 'antbalm':
+        areas = gpd.read_file(r'.\Data\Shapefiles\231206 AntBalmMap.geojson')
+        areas.loc[(areas.ISO_A3 == 'FIN'), 'id'] = 'FIN'
+        areas.loc[(areas.ISO_A3 == 'DZA'), 'id'] = 'DZA'
+        areas.loc[(areas.ISO_A3 == 'EGY'), 'id'] = 'EGY'
+        areas.loc[(areas.ISO_A3 == 'LBY'), 'id'] = 'LBY'
+        areas.loc[(areas.ISO_A3 == 'MAR'), 'id'] = 'MAR'
+        areas.loc[(areas.ISO_A3 == 'TUN'), 'id'] = 'TUN'
+        areas = areas[areas.NAME_0 != 'Finland']
+        area_names = 'id'
+        country_code = 'ADMIN'
     else:
         print("You didn't choose any geodata! Check spelling or create new elif statement in code block 1.2")
     

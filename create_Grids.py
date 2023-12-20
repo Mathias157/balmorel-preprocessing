@@ -43,7 +43,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from functions import PreProcessShapes
 from pyproj import Proj
-
+from scipy.spatial import distance_matrix
         
 style = 'report'
 
@@ -62,8 +62,9 @@ elif style == 'ppt':
 # choice = 'DK municipalities'
 # choice = 'NUTS3'
 # choice = 'NUTS2'
-choice = 'NordpoolReal'
+# choice = 'NordpoolReal'
 # choice = 'BalmorelVREAreas'
+choice = 'Antbalm'
 
 # 0.2 Parameters
 growth = 10 # Maximum growth of areas with no grid connection in km
@@ -97,7 +98,7 @@ DCOST_E = 5 # €/MWh Electricity distribution cost
 
 ### 1.1 Load geodata
 the_index, areas, country_code = PreProcessShapes(choice)
-areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
+# areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
 
 
 if 'nuts' in choice.lower():
@@ -108,6 +109,8 @@ elif 'nordpool' == choice.lower():
     areas = areas[idx]
 elif 'nordpoolreal' == choice.lower():
     areas = areas[areas.RRR != 'RU']
+elif 'antbalm' == choice.replace(' ', '').lower():
+    areas = areas[(areas.ADMIN != 'Russia')]
     
 ### 1.2 Load power grid data
 PL = pd.read_csv("Data/Power Grid/entsoe/links.csv", quotechar="'")
@@ -122,8 +125,8 @@ PL = PL[~idx]
 fig, ax = plt.subplots(1)
 areas.plot(ax=ax)
 PL.plot(ax=ax, color='k')
-plt.xlim([7, 16])
-plt.ylim([54, 59])
+# plt.xlim([7, 16])
+# plt.ylim([54, 59])
 # plt.xlim([7, 16])
 # plt.ylim([54, 59])
 
@@ -140,32 +143,62 @@ for kV in kVtoMW:
 
 
 #%% ----------------------------- ###
-###        2. Create XKFX         ###
+###     2. Calculate Distances    ###
 ### ----------------------------- ###
 
-    
-### 2.1 Create matrix for possible grid connections
-X = pd.DataFrame(np.zeros((len(areas), len(areas))).astype(int),
-                 index=areas.loc[:, the_index],
-                 columns=areas.loc[:, the_index])
-X.index.name = 'IRRRE'
-X.columns.name = 'IRRRI'
+# Convert to geocentric coordinates for meter units
+if choice.lower().replace(' ','') == 'nordpoolreal':
+    areas.crs = 4326 
 
-### 2.1 Find Neighbours
-# Use touches or intersects for areas not separated
-for i,a in areas.iterrows():
-    
-    # Index for touching regions
-    idx = areas.touches(a.geometry)
-    
-    # Assign possible links
-    X.loc[a[the_index], areas.loc[idx, the_index]] = 1
+areas = areas.to_crs(4328)
 
-# MAYBE ADD THAT IF NO ONE IS TOUCHING, THE CLOSEST ONES SHOULD BE CONNECTED?
-# Could solve over-seas-interconnector issue    
-# However, won't solve if several regions on each side of ocean!
+### 2.1 Calculate Distances
+# Use distance_matrix
+d = pd.DataFrame(
+    distance_matrix(areas.geometry.apply(lambda polygon: (polygon.centroid.x, polygon.centroid.y)).tolist(),
+                    areas.geometry.apply(lambda polygon: (polygon.centroid.x, polygon.centroid.y)).tolist()),
+    index=areas.index,
+    columns=areas.index
+)
 
-### 2.2 Manual Adjustments - ASSUMPTIONS
+#%% ----------------------------- ###
+###        3. Create XKFX         ###
+### ----------------------------- ###
+
+use_buffering = False    
+max_dist = 500000 # m
+
+### 3.1 Create matrix for possible grid connections, using buffering and touching
+if use_buffering:
+    X = pd.DataFrame(np.zeros((len(areas), len(areas))).astype(int),
+                    index=areas.loc[:, the_index],
+                    columns=areas.loc[:, the_index])
+    X.index.name = 'IRRRE'
+    X.columns.name = 'IRRRI'
+
+    # Use touches or intersects for areas not separated
+    buffering = 1 # minimum 0.000001 to take care of invalid geometries
+    for i,a in areas.iterrows():
+        # Index for touching regions
+        idx = areas.touches(a.geometry.buffer(buffering))
+        
+        # Assign possible links
+        X.loc[a[the_index], areas.loc[idx, the_index]] = 1
+
+    # MAYBE ADD THAT IF NO ONE IS TOUCHING, THE CLOSEST ONES SHOULD BE CONNECTED?
+    # Could solve over-seas-interconnector issue    
+    # However, won't solve if several regions on each side of ocean!
+
+### 3.2 Using max distance
+else:
+    X = d.copy().values
+    mask1 = X > max_dist
+    mask2 = X <= max_dist 
+    X[mask1] = 0 
+    X[mask2] = 1
+    X = pd.DataFrame(X, columns=areas.index, index=areas.index)
+
+### 3.3 Manual Adjustments - ASSUMPTIONS
 # Find those with no grids
 no_grids = list(X.columns[~X.any()])
 
@@ -251,6 +284,7 @@ for a in X.index:
 XKFX = X.copy()*0
 
 ### 2.5 Find intersects between power grid data and polygons
+areas = areas.to_crs(4326) # Back from meter-precise crs
 for i,line in PL.iloc[:].iterrows():
     
     # Intersects between areas and line i    
@@ -319,32 +353,6 @@ XKFX(YYY,'DK_3_10_1','DK_3_8_1') = 200;
                                            
 """
 
-#%% ----------------------------- ###
-###    3. Calculate Distances     ###
-### ----------------------------- ###
-
-# Convert to geocentric coordinates for meter units
-if choice.lower().replace(' ','') == 'nordpoolreal':
-    areas.crs = 4326 
-
-areas = areas.to_crs(4328)
-
-
-### 3.1 Calculate Distances
-d = X.copy()
-for a in X.index:
-    # Index for connecting areas
-    idx = X[a] == 1
-    
-    # Calculate centroid distances to a
-    dist = areas[idx].centroid.distance(areas.loc[a].geometry.centroid) # m
-
-    d.loc[a, idx] = dist * X.loc[a, idx]
-
-# Symmetricality
-for i,row in d.iterrows():
-    d.loc[:,i] = d.loc[i, :]
-
 
 #%% ----------------------------- ###
 ###         4. Save Costs         ###
@@ -356,10 +364,8 @@ for i,row in d.iterrows():
 D = d.sum().sum()/2  # Total, modelled length
 L = (d > 0).sum().sum()/2 # Total modelled lines
 
-XE = d * XE_cost # € pr. MW
-
-
-
+XE = X * d * XE_cost # € pr. MW
+# XE = d * 3.1/2 # seems like 1.65 €/MW/m 
 
 ### 4.2 XINVCOST.inc
 # Remove names
