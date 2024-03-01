@@ -15,16 +15,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from formplot import *
+# from formplot import *
 from scipy.optimize import curve_fit
-import atlite
+# import atlite
 import geopandas as gpd
 import cartopy.crs as ccrs
 from shapely.geometry import MultiPolygon
 from pyproj import Proj, Transformer
-from rasterio.plot import show
-import xarray as xr
-from atlite.gis import shape_availability, ExclusionContainer
+# from rasterio.plot import show
+# import xarray as xr
+# from atlite.gis import shape_availability, ExclusionContainer
 import os
 
 style = 'report'

@@ -32,7 +32,7 @@ Works with the environment.yaml distributed in XXX
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from formplot import *
+# from formplot import *
 import pandas as pd
 import geopandas as gpd
 import cartopy.crs as ccrs
@@ -69,9 +69,10 @@ choice = 'Antbalm'
 # 0.2 Parameters
 growth = 10 # Maximum growth of areas with no grid connection in km
 growth_step = 1 # Step towards maximum growth in km
-# Electricity transmission
-# From DEA 2021, 111 'Main electricity distribution grid' (no data for transmission? these costs are for 50/60 kV)
+# transmission
+# From DEA 2021, 111 'Main distribution grid' (no data for transmission? these costs are for 50/60 kV)
 XE_cost = 3.1 # €/MW/m high bound
+XE_cost = 150/1e3 # €/MW/m repurposed H2 onshore 
 # XE_cost = 2.511 # €/MW/m low bound
 # XE_cost = 2.175 # €/MW/m actual transmission data: Maxwell Brown, Wesley Cole, Kelly Eurek, Jonathon Becker, David Bielen, Ilya Chernyakhovskiy, Stuart Cohen, Allister Frazier, Pieter Gagnon, Nathaniel Gates, et al. Regional energy deployment system (reeds) model documentation: Version 2019. Technical report, National Renewable Energy Lab.(NREL), Golden, CO (United States), 2020.
 XE_substation_cost = 76000 # €/MW very high bound
@@ -79,12 +80,13 @@ XE_substation_cost = 76000 # €/MW very high bound
 # XE_substation_cost = 0 # No cost
 XE_FOM = 21.7/1e3 # €/MW/m/year
 Xsub = 99 # Amount of substations (assumed similar to today ~ one pr. municipality)
-XT = 40 # Lifetime of electricity grid elements
+XT = 40 # Lifetime of grid elements
+XT = 50 # Lifetime of H2 pipes
 
 XLOSS_E = 3.318383e-08 # fraction of loss pr. m, From Balmorel DK1-DK2 line
 XCOST_E = 0.0001 # €/MWh Transmission costs
-DLOSS_E = 0.05 # Electricity distribution loss
-DCOST_E = 5 # €/MWh Electricity distribution cost 
+DLOSS_E = 0.05 # Distribution loss
+DCOST_E = 5 # €/MWh distribution cost 
 
 ### See more assumptions in sections
 # 2.2 - Manual adjustments to links between regions
@@ -359,7 +361,7 @@ XKFX(YYY,'DK_3_10_1','DK_3_8_1') = 200;
 ### ----------------------------- ###
 
 
-### 4.1 Electricity Transmission - ASSUMPTIONS
+### 4.1 Transmission - ASSUMPTIONS
 # It is assumed that costs are symmmetrical
 D = d.sum().sum()/2  # Total, modelled length
 L = (d > 0).sum().sum()/2 # Total modelled lines
@@ -455,4 +457,14 @@ with open('./Output/DISCOST_E.inc', 'w') as f:
     
     
     
-    
+#%% This was used to create individual statements:
+for ind in d:
+    if 'NOS' in ind:
+        idx = d.loc[ind] < 1000000
+        d0 = d.loc[ind, idx]
+        print('* %s'%ind)
+        for indI in d0.index:
+            # print("XH2INVCOST('2030','%s','%s') \t= %0.2f * %0.4f;"%(ind, indI, d0[indI], XE_cost))
+            # print("XH2INVCOST('2030','%s','%s') \t= %0.2f * %0.4f;"%(indI, ind, d0[indI], XE_cost))
+            print("XH2LOSS('%s','%s') \t= %0.2f * 2.3e-05;"%(ind, indI, d0[indI]))
+            print("XH2LOSS('%s','%s') \t= %0.2f * 2.3e-05;"%(indI, ind, d0[indI]))

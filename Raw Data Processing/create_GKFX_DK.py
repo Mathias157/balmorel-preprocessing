@@ -680,6 +680,16 @@ ax.add_geometries(areas.geometry, crs = crs,
 ###          4. Aggregation         ###
 ### ------------------------------- ###
 
+# NOTE: This might be an incredibly stupid way to go!
+#       Try using spatial join (gpd.sjoin)
+#       This could, e.g., create a new gpd, where areas (on the left) is joined with
+#       powerplants if it's inside (using op='contains')
+#       Or the other way around:
+#       powerplants on the left are joined with an area (using op='within')
+#       Use the 'inner' option for deleting powerplants/areas that did not contain/within
+#       any of it's counterparts, or 'left' to keep those powerplants/areas with
+#       NaN values, to not lose data
+
 ### 4.1 Assign areas
 temp_pp = pp.copy()
 for i,row in areas.iterrows():
@@ -689,8 +699,7 @@ for i,row in areas.iterrows():
     
     # Assign area    
     pp.loc[idx, 'area'] = row[the_index]
-    
-    
+        
 # Assign the missing powerplants to nearest polygon (could be used for all, but this way is probably faster)
 # Typically offshore plants
 idx = pp['area'].isna()
