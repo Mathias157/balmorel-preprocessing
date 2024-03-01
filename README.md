@@ -16,7 +16,7 @@ I.e.: This will only load data (the inc-files)
 
 Balmorel_ReadData.gms and Balmorelbb4_ReadData.inc are, therefore, alterations to a recent (as of 1.3.2024) Balmorel version, where all code that relates to compiling, solving or post-processing has been deleted  
 
-dataprocessing.py will copy+paste these files into the Balmorel/base/model (or whatever scenario you want to read data from) folder that you specify in line 18 of dataprocessing.py 
+dataprocessing.py will copy+paste these files into the Balmorel/base/model folder (or whatever scenario you want to read data from) that you specify in line 18 of dataprocessing.py 
 It will then use the gams API to execute Balmorel_ReadData.gms and obtain the GDX database from it, from which all included data can be accessed as a pandas dataframe through the symbol_to_df function
 
 An example of converting a pandas dataframe into an .inc file using the IncFile class is also included, which can be used to alter data or create scenarios
