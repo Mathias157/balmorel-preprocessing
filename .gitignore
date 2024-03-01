@@ -1,0 +1,5 @@
+Raw Data Processing/Data/*
+Raw Data Processing/Output/*
+__pycache__
+
+*.pyc
