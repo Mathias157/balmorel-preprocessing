@@ -14,8 +14,7 @@ import shutil
 from functions import symbol_to_df, IncFile, ReadIncFilePrefix
 
 # Path to the GAMS system directory
-# project_dir = r'path\to\Balmorel\base\model' # <--- CHANGE THIS !!
-project_dir = r'C:\Users\mberos\gitRepos\balmorel-antares\Balmorel\base\model' # <--- CHANGE THIS !!
+project_dir = r'path\to\Balmorel\base\model' # <--- CHANGE THIS !!
 
 # Copy Balmorel_ReadData and Balmorelbb4_ReadData into the model folder
 shutil.copyfile('Balmorel_ReadData.gms', project_dir + '/Balmorel_ReadData.gms')
@@ -54,7 +53,7 @@ df['Value'] = df['Value'] * 1.2 # 20% more demand everywhere, in all years
 
 #%% 1.2 Create .inc file using the IncFile class in functions.py
 
-incfile_path = r'C:\Users\mberos\gitRepos\balmorel-antares\Balmorel\base\data'
+incfile_path = r'C:\path\to\Balmorel\base\data' # <--- CHANGE THIS !!
 
 # Define class and where to put the incfile relative to the project directory
 DH2 = IncFile(name='HYDROGEN_DH2_test',
