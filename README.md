@@ -11,7 +11,8 @@ The idea behind the dataprocessing.py script in this folder is to run the part o
   1) compiling the model
   2) solving the model
   3) post-processing results
-I.e.: Only load inc-files.
+
+I.e.: This will only load data (the inc-files)
 
 Balmorel_ReadData.gms and Balmorelbb4_ReadData.inc are, therefore, alterations to a recent (as of 1.3.2024) Balmorel version, where all code that relates to compiling, solving or post-processing has been deleted  
 
