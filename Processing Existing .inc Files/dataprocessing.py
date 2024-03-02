@@ -74,8 +74,8 @@ incfile_path = r'C:\path\to\Balmorel\base\model' # <--- CHANGE THIS !!
 # Define class and where to put the incfile relative to the project directory
 DH2 = IncFile(name='HYDROGEN_DH2_test',
               path=incfile_path,
-              prefix=read_lines('HYDROGEN_DH2_Prefix.inc', './'),
-              suffix=read_lines('HYDROGEN_DH2_Suffix.inc', './'))
+              prefix=read_lines('HYDROGEN_DH2_Prefix.inc', './Prefix and Suffix Files'),
+              suffix=read_lines('HYDROGEN_DH2_Suffix.inc', './Prefix and Suffix Files'))
 
 # Prefix and suffix could also be hardcoded like this:
 # DH2.prefix = "line1\nline2\nline3"
