@@ -51,11 +51,11 @@ class IncFile:
             f.write(self.body)
             f.write(self.suffix)
  
-def ReadIncFilePrefix(name, incfile_prefix_path, weather_year):
+def read_lines(name, file_path, make_space=True):
    
-    if ('WND' in name) | ('SOLE' in name) | ('DE' in name) | ('WTR' in name):
-        string = "* Weather year %d from Antares\n"%(weather_year+ 1) + ''.join(open(incfile_prefix_path + '/%s.inc'%name).readlines())
+    if make_space:
+        string = '\n' + ''.join(open(file_path + '/%s'%name).readlines()) + '\n'
     else:
-        string = ''.join(open(incfile_prefix_path + '/%s.inc'%name).readlines())
+        string = ''.join(open(file_path + '/%s'%name).readlines())
    
     return string

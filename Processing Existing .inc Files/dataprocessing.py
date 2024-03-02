@@ -11,10 +11,10 @@ import pandas as pd
 import gams
 import os
 import shutil
-from functions import symbol_to_df, IncFile, ReadIncFilePrefix
+from functions import symbol_to_df, IncFile, read_lines
 
 # Path to the GAMS system directory
-project_dir = r'C:\Users\mathi\gitRepos\balmorel-antares\Balmorel\base\model' # <--- CHANGE THIS !!
+project_dir = r'C:\path\to\Balmorel\base\model' # <--- CHANGE THIS !!
 
 # Copy Balmorel_ReadData and Balmorelbb4_ReadData 
 # into the model folder if there isn't one already
@@ -37,13 +37,13 @@ model_db = ws.add_job_from_file(project_dir + '/Balmorel_ReadData')
 # Run the GAMS file
 model_db.run()
 
-# Get the database
+# Get the database (will take some minutes, so run once as separate section with #%%)
 out_db = model_db.get_out_db()
 
-#%% 1.1 Read the specific symbol
+#%% 1.1 Read a specific symbol
 
 # In this example, hydrogen demand is read (assuming the addon is activated!)
-df = symbol_to_df(out_db, 'GKFX', ['Y', 'R', 'Value'])
+df = symbol_to_df(out_db, 'HYDROGEN_DH2', ['Y', 'R', 'Value'])
 
 # Or something larger, like renewable generation profiles 
 #df = symbol_to_df(out_db, 'SOLE_VAR_T')
@@ -60,23 +60,26 @@ print(GDATA_int.loc[(GDATA_int.G == H2_int.GGG.iloc[0]) &\
                     (GDATA_int.Var == 'GDFUEL'), 'Value'])
 
 
-#%% 1.2 Do your data manipulation
-df['Value'] = df['Value'] * 1.2 # 20% more demand everywhere, in all years
+#%% ------------------------------- ###
+###     2. Manipulate and Save      ###
+### ------------------------------- ###
+
+### 2.1 Do your data manipulation
+df['Value'] = df['Value'] * 1.2 # 20% more H2 demand everywhere, in all years
 
 
-#%% 1.2 Create .inc file using the IncFile class in functions.py
-
-incfile_path = r'C:\Users\mathi\gitRepos\balmorel-antares\Balmorel\base\model' # <--- CHANGE THIS !!
+### 2.2 Create .inc file using the IncFile class in functions.py
+incfile_path = r'C:\path\to\Balmorel\base\model' # <--- CHANGE THIS !!
 
 # Define class and where to put the incfile relative to the project directory
 DH2 = IncFile(name='HYDROGEN_DH2_test',
-              path=incfile_path)
+              path=incfile_path,
+              prefix=read_lines('HYDROGEN_DH2_Prefix.inc', './'),
+              suffix=read_lines('HYDROGEN_DH2_Suffix.inc', './'))
 
-
-# Define the first lines of the incfile, end with a space
-DH2.prefix ="""PARAMETER HYDROGEN_DH2(YYY,CCCRRRAAA)  'Yearly demand for hydrogen at a Regional level(MWh of H2)';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-TABLE HYDROGEN_DH22(CCCRRRAAA,YYY)
-"""
+# Prefix and suffix could also be hardcoded like this:
+# DH2.prefix = "line1\nline2\nline3"
+# DH2.suffix = "line1\nline2\nline3"
 
 # Define the actual table, by pivoting to get the actual format required 
 # (YYY set in index, CCCRRRAAA set in columns)
@@ -88,14 +91,6 @@ df_for_export.columns.name = ''
 
 # Place this table in the body of the class
 DH2.body = df_for_export.to_string()
-
-
-# Define the last lines, start with a space 
-DH2.suffix="""
-;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-HYDROGEN_DH2(YYY,CCCRRRAAA) = HYDROGEN_DH22(CCCRRRAAA,YYY);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-HYDROGEN_DH22(CCCRRRAAA,YYY)=0; 
-"""
 
 # Save (will save to incfile_path)
 DH2.save()
