@@ -14,12 +14,15 @@ import shutil
 from functions import symbol_to_df, IncFile, ReadIncFilePrefix
 
 # Path to the GAMS system directory
-project_dir = r'path\to\Balmorel\base\model' # <--- CHANGE THIS !!
+project_dir = r'C:\Users\mathi\gitRepos\balmorel-antares\Balmorel\base\model' # <--- CHANGE THIS !!
 
-# Copy Balmorel_ReadData and Balmorelbb4_ReadData into the model folder
-shutil.copyfile('Balmorel_ReadData.gms', project_dir + '/Balmorel_ReadData.gms')
-shutil.copyfile('Balmorelbb4_ReadData.inc', project_dir + '/Balmorelbb4_ReadData.inc')
-
+# Copy Balmorel_ReadData and Balmorelbb4_ReadData 
+# into the model folder if there isn't one already
+for file in ['Balmorel_ReadData.gms', 'Balmorelbb4_ReadData.inc']:
+    if not(os.path.exists(os.path.join(project_dir, file))):
+        shutil.copyfile(file, os.path.join(project_dir, file))
+        print(os.path.join(project_dir, file))
+    
 
 #%% ------------------------------- ###
 ###      1. Reading .inc-files      ###
@@ -40,20 +43,30 @@ out_db = model_db.get_out_db()
 #%% 1.1 Read the specific symbol
 
 # In this example, hydrogen demand is read (assuming the addon is activated!)
-df = symbol_to_df(out_db, 'HYDROGEN_DH2', ['Y', 'R', 'Value'])
-
+df = symbol_to_df(out_db, 'GKFX', ['Y', 'R', 'Value'])
 
 # Or something larger, like renewable generation profiles 
-#df = symbol_to_df(out_db, 'SOLH_VAR_T')
+#df = symbol_to_df(out_db, 'SOLE_VAR_T')
+
+# NOTE: The GAMS API converts string values to large integers (such as in GDATA,
+# where GDFUEL can have the value NATGAS). 
+# The Balmorelbb4_ReadData.inc therefore exports a csv of GDATA (as an example), 
+# which can be loaded here to map the integer values to the actual strings  
+GDATA_int = symbol_to_df(out_db, 'GDATA', ['G', 'Var', 'Value']) # <- contains large integer values instead of strings
+GDATA_str = pd.read_csv(os.path.join(project_dir, 'GDATA.csv'))
+# Get the integer value related to GDFUEL HYDROGEN:
+H2_int = GDATA_str[(GDATA_str.GDATASET == 'GDFUEL') & (GDATA_str.Val == 'HYDROGEN')]
+print(GDATA_int.loc[(GDATA_int.G == H2_int.GGG.iloc[0]) &\
+                    (GDATA_int.Var == 'GDFUEL'), 'Value'])
 
 
-### 1.2 Do your data manipulation
+#%% 1.2 Do your data manipulation
 df['Value'] = df['Value'] * 1.2 # 20% more demand everywhere, in all years
 
 
 #%% 1.2 Create .inc file using the IncFile class in functions.py
 
-incfile_path = r'C:\path\to\Balmorel\base\data' # <--- CHANGE THIS !!
+incfile_path = r'C:\Users\mathi\gitRepos\balmorel-antares\Balmorel\base\model' # <--- CHANGE THIS !!
 
 # Define class and where to put the incfile relative to the project directory
 DH2 = IncFile(name='HYDROGEN_DH2_test',

@@ -304,3 +304,7 @@ PARAMETER FUELPRICE_EXC(YYY,AAA,FFF)             "Fuel prices to be transferred 
 * All remaining (cf. ... .inc above) data files af included from the following file
 $ifi     exist "bb4datainc.inc" $include                   "bb4datainc.inc";
 $ifi not exist "bb4datainc.inc" $include  "../../base/model/bb4datainc.inc";
+
+* Save GDATA as csv, because it has string values that are converted to large integers
+execute_unload 'GDATA.gdx', GDATA;
+$call gdxdump GDATA.gdx output=GDATA.csv symb=GDATA format=csv
