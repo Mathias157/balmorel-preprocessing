@@ -1,17 +1,14 @@
-### Balmorel Pre-Processing
+# Balmorel Pre-Processing
 
 This repository contains two tools for pre-processing Balmorel data, which are described below.
 
 The necessary python packages can be installed in a virtual environment by following the commands below:
 
 ``
-# Create environment
 python -m venv .new_env
 
-# Activate environment
 .new_env\Scripts\activate
 
-# Install packages
 pip install -r requirements.txt
 ``
 
