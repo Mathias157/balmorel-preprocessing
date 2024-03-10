@@ -10,8 +10,11 @@ Created on 01.03.2024
 import pandas as pd
 import gams
 import os
+import sys
 import shutil
-from functions import symbol_to_df, IncFile, read_lines
+# Load general python functionalities for Balmorel
+sys.path.append('../')
+from pybalmorel.functions import symbol_to_df, IncFile, read_lines
 
 # Path to the GAMS system directory
 project_dir = r'C:\path\to\Balmorel\sc\model' # <--- CHANGE THIS !!
