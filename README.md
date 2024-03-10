@@ -4,18 +4,22 @@ This repository contains two tools for pre-processing Balmorel data, which are d
 
 The necessary python packages can be installed in a virtual environment by following the commands below:
 
-``
+
+````
+# Creating environment
 python -m venv .new_env
 
+# Activating environment
 .new_env\Scripts\activate
 
+# Installing packages
 pip install -r requirements.txt
-``
+````
 
 Or by using conda:
-``
-	conda env create --name .new_env -f environment.yml
-``
+```` 
+conda env create --name .new_env -f environment.yml
+````
 
 See more here
 https://www.gams.com/latest/docs/API_PY_GETTING_STARTED.html
