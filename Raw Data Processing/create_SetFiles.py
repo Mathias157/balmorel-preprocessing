@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from formplot import *
 from scipy.optimize import curve_fit
 import geopandas as gpd
 import cartopy.crs as ccrs

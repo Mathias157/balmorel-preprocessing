@@ -1,7 +1,4 @@
------------------------------
-CREATING BALMOREL INPUT FILES
------------------------------
-
+# Creating .inc Files for Balmorel
 
 Author: Mathias Berg Rosendal, PhD DTU Management 
 Last updates: 
@@ -27,4 +24,4 @@ How to install using conda:
 Data:
 The data is collected from various sources, with varying degrees of metadata and documentation.
 It can be downloaded in the following link:
-https/............
+https/............ (will arrive around April)

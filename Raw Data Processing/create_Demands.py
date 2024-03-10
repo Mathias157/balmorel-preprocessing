@@ -19,7 +19,6 @@ Works with the environment.yaml distributed in XXX
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from formplot import *
 import pandas as pd
 import geopandas as gpd
 import cartopy.crs as ccrs
@@ -56,11 +55,11 @@ Y = '2019'
 
 ### 0.3 Load geodata
 # What areas to load?
-# choice = 'DK Municipalities'
+choice = 'DK Municipalities'
 # choice = 'NUTS1'
 # choice = 'NUTS2'
 # choice = 'NUTS3'
-choice = 'NordpoolReal'
+# choice = 'NordpoolReal'
 
 ### 0.4 Input parameters
 DE = pd.DataFrame({'MWh' : 37000000}, index=['DK']) ### DUMMY DATA only for DK
@@ -115,7 +114,8 @@ N3[Y] = N3[Y]*N3.geometry.area
 N3[Y] = N3[Y] / N3[Y].sum() ### HAS TO BE DONE PR COUNTRY
 
 ## Plot density heatmap
-fig, ax = newplot(fc=fc)
+# fig, ax = newplot(fc=fc)
+fig, ax = plt.subplots(facecolor=fc)
 N3.plot(ax=ax, column=Y, cmap='coolwarm', legend=True, zorder=2)
 ax.set_title('Fraction of population - ' + Y)
 

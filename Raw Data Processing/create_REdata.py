@@ -14,7 +14,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from formplot import *
 from scipy.optimize import curve_fit
 import atlite
 import geopandas as gpd
@@ -39,7 +38,7 @@ elif style == 'ppt':
 ### Function fo load duration curve analysis
 def doLDC(file, cols, idx, r, c, title=''):
     global fc
-    fig, axes = newplot(nrows=r, ncols=c, figsize=(8,5), fc=fc)
+    fig, axes = plt.subplots(nrows=r, ncols=c, figsize=(8,5), facecolor=fc)
     axes = np.asarray(axes).reshape(-1) # Convert axes to array
     i = 0
     for c in cols:
