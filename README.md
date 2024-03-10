@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 Or by using conda:
 ```` 
-conda env create --name .new_env -f environment.yml
+conda env create --name .new_env -f environment.yaml
 ````
 
 See more here

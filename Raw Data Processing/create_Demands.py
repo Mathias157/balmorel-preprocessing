@@ -26,9 +26,13 @@ from shapely.geometry import MultiPolygon
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from functions import PreProcessShapes
+from pybalmorel.functions import PreProcessShapes
 from pyproj import Proj
 import datetime as dt
+import sys
+# Load general python functionalities for Balmorel
+sys.path.append('../')
+from pybalmorel.functions import IncFile
 
 
 style = 'report'
@@ -179,18 +183,18 @@ areas.loc[:, 'DH'] = areas.loc[:, 'DH'] * DH.loc['DK', 'MWh'] / areas.DH.sum()
 ###           3. Save             ###
 ### ----------------------------- ###
 
+inc = {} # Incfile container
+
 ### 3.1 Save DE and DH
 DEtable = pd.DataFrame({'2050' : areas['DE'].values}, index=areas.index + ' . %s'%Esector)
 DEtable.index.name = ''
 DHtable = pd.DataFrame({'2050' : areas['DH'].values}, index='%s . '%Hsector + areas.index + '_A')
 DHtable.index.name = ''
 
-with open('./Output/DE.inc', 'w') as f:
-    f.write("TABLE DE1(RRR, DEUSER, YYY)        'Annual electricity consumption (MWh)'\n")
-    dfAsString = DEtable.to_string(header=True, index=True)
-    f.write(dfAsString)
-    f.write('\n;')
-    f.write("\nDE(YYY,RRR,DEUSER) = DE1(RRR,DEUSER,YYY);\nDE1(RRR,DEUSER,YYY)=0;")
+inc['DE'] = IncFile(name='DE', path='./Output',
+                    prefix="TABLE DE1(RRR, DEUSER, YYY)        'Annual electricity consumption (MWh)'\n",
+                    body=DEtable.to_string(header=True, index=True),
+                    suffix="\n;\nDE(YYY,RRR,DEUSER) = DE1(RRR,DEUSER,YYY);\nDE1(RRR,DEUSER,YYY)=0;")
 
 with open('./Output/DH.inc', 'w') as f:
     f.write("PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';\n")
