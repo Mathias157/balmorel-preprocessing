@@ -1,11 +1,11 @@
 # Creating .inc Files for Balmorel
 
-Author: Mathias Berg Rosendal, PhD DTU Management 
 Last updates: 
-	- create_GKFX_DK in 2022
-	- create_REdata in 2022
-	- create_SetFiles in 2022
-	- create_Grids in 2022
+
+- create_GKFX_DK in 2022
+- create_REdata in 2022
+- create_SetFiles in 2022
+- create_Grids in 2022
 
 
 This folder contain 'create_XXX.py' scripts for creating Balmorel data inputs.
@@ -15,6 +15,7 @@ A further description of how each script works is found within each python file
 
 
 Data:
-The data is collected from various sources, with varying degrees of metadata and documentation.
+
+Data is collected from various sources, with varying degrees of metadata and documentation.
 It can be downloaded in the following link:
 https/............ (will arrive around April)
