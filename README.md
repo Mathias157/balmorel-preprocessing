@@ -1,12 +1,29 @@
-## Required packages 
-pip install pandas as pd
+### Balmorel Pre-Processing
 
-pip install gamsapi[transfer]
+This repository contains two tools for pre-processing Balmorel data, which are described below.
+
+The necessary python packages can be installed in a virtual environment by following the commands below:
+
+``
+# Create environment
+python -m venv .new_env
+
+# Activate environment
+.new_env\Scripts\activate
+
+# Install packages
+pip install -r requirements.txt
+``
+
+Or by using conda:
+``
+	conda env create --name .new_env -f environment.yml
+``
 
 See more here
 https://www.gams.com/latest/docs/API_PY_GETTING_STARTED.html
 
-### Processing Existing .inc Files
+## Processing Existing .inc Files
 The idea behind the dataprocessing.py script in this folder is to run the part of Balmorel that does not include, 
   1) compiling the model
   2) solving the model
@@ -23,7 +40,7 @@ It will then use the GAMS API to execute Balmorel_ReadData.gms and obtain the GD
 An example of converting a pandas dataframe into an .inc file using the IncFile class is also included, which can be used to alter data or create scenarios
 
 
-### Raw Data Processing
+## Raw Data Processing
 Will create Balmorel data from raw data.
 
 Scripts are not finished, and raw data not (yet) included in this repository

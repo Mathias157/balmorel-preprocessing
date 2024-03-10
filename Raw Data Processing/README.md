@@ -14,13 +14,6 @@ It utilise functions in the functions.py, which may need to be modified if new s
 A further description of how each script works is found within each python file
 
 
-REQUIREMENTS:
-The python scripts are only tested to work with the environment attached in this upper folder: 'environment.yaml'
-Please use the scripts within this environment.
-
-How to install using conda:
-	conda env create --name environment_name -f environment.yml
-
 Data:
 The data is collected from various sources, with varying degrees of metadata and documentation.
 It can be downloaded in the following link:
