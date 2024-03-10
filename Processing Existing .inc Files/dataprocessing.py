@@ -14,7 +14,7 @@ import shutil
 from functions import symbol_to_df, IncFile, read_lines
 
 # Path to the GAMS system directory
-project_dir = r'C:\Users\mathi\gitRepos\BalmorelOptiFlow_HPC_Final\1_Baseline\model' # <--- CHANGE THIS !!
+project_dir = r'C:\path\to\Balmorel\sc\model' # <--- CHANGE THIS !!
 
 # Are you using the provided 'ReadData'-Balmorel files or a custom one?
 use_provided = True
