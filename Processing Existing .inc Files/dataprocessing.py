@@ -14,15 +14,21 @@ import shutil
 from functions import symbol_to_df, IncFile, read_lines
 
 # Path to the GAMS system directory
-project_dir = r'C:\path\to\Balmorel\base\model' # <--- CHANGE THIS !!
+project_dir = r'C:\Users\mathi\gitRepos\BalmorelOptiFlow_HPC_Final\1_Baseline\model' # <--- CHANGE THIS !!
 
-# Copy Balmorel_ReadData and Balmorelbb4_ReadData 
-# into the model folder if there isn't one already
-for file in ['Balmorel_ReadData.gms', 'Balmorelbb4_ReadData.inc']:
-    if not(os.path.exists(os.path.join(project_dir, file))):
-        shutil.copyfile(file, os.path.join(project_dir, file))
-        print(os.path.join(project_dir, file))
-    
+# Are you using the provided 'ReadData'-Balmorel files or a custom one?
+use_provided = True
+
+if use_provided:
+    # Copy Balmorel_ReadData and Balmorelbb4_ReadData 
+    # into the model folder if there isn't one already
+    for file in ['Balmorel_ReadData.gms', 'Balmorelbb4_ReadData.inc']:
+        if not(os.path.exists(os.path.join(project_dir, file))):
+            shutil.copyfile(file, os.path.join(project_dir, file))
+            print(os.path.join(project_dir, file))
+    run_file = 'Balmorel_ReadData'
+else:
+    run_file = '' # <- Write name for your custom load-data .gms file here, if used    
 
 #%% ------------------------------- ###
 ###      1. Reading .inc-files      ###
@@ -32,7 +38,7 @@ for file in ['Balmorel_ReadData.gms', 'Balmorelbb4_ReadData.inc']:
 ws = gams.GamsWorkspace(working_directory=project_dir)
 
 # Load the GAMS model
-model_db = ws.add_job_from_file(project_dir + '/Balmorel_ReadData')
+model_db = ws.add_job_from_file(os.path.join(project_dir, run_file))
 
 # Run the GAMS file
 model_db.run()
