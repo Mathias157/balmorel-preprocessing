@@ -26,4 +26,4 @@ An example of converting a pandas dataframe into an .inc file using the IncFile 
 ### Raw Data Processing
 Will create Balmorel data from raw data.
 
-Scripts are not finished, and raw data not included in this repository
+Scripts are not finished, and raw data not (yet) included in this repository
