@@ -12,3 +12,4 @@ pyproj==3.6.1
 scipy==1.11.2
 shapely==2.0.2
 pybalmorel==0.0.8
+atlite==0.2.12

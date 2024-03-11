@@ -16,3 +16,4 @@ dependencies:
   - pyproj=3.6.1
   - scipy=1.11.2
   - shapely=2.0.2
+  - atlite

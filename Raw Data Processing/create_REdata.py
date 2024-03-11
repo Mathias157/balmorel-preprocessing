@@ -108,13 +108,13 @@ choice = 'NordpoolReal'
 
 ## Cutouts
 # path = "Nicolas_2015_full.nc"
-# path = "DK_2017.nc"
+path = "DK.nc"
 # cutout_bounds_x = (11.015880, 13.078094) # Longitude
 # cutout_bounds_y = (43.239006, 45.207804) # Latitude
 # cutout_bounds_x = (11.7, 12.2) # Longitude
 # cutout_bounds_y = (43.85, 44.4) # Latitude
-# cutout_bounds_x = (7.5, 16) # Longitude
-# cutout_bounds_y = (54.4, 58) # Latitude
+cutout_bounds_x = (7.5, 16) # Longitude
+cutout_bounds_y = (54.4, 58) # Latitude
 
 
 ### 0.4 What time to load?
@@ -122,12 +122,12 @@ choice = 'NordpoolReal'
 T = '2017'
 
 ### 0.5 Overwrite cutout?
-# OverW = False
+OverW = True
 
 ### 0.6 Read Geodata
 the_index, areas, country_code = PreProcessShapes(choice)
-areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
-
+areas = areas.loc[['DK1', 'DK2']] # Testing DK and DE
+areas.geometry = areas['geometry']
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
 # Read homemade offshore potentials for DK
@@ -157,193 +157,150 @@ ax.set_title(choice)
 ### 1. Load Geodata and Pre-process ###
 ### ------------------------------- ###
 
-# ## Projections
+## Projections
 
-# UTM32 = Proj(proj='utm', zone=32, ellps='WGS84', preserve_units=False)
-# GM = Proj('EPSG:900913', preserve_units=False)
-# # transformer = Transformer.from_crs('EPSG:900913', 'EPSG:4326')
-# # out = Transformer(GM, UTM32, (11, 13), (43, 45), always_xy=True) 
-
-# ## 1.1 Load geodata files
-# # DKmunicipal 
-# if choice == 'DK Municipalities':
-# # Filter away unnescescary columns
-# # areas = areas[['NAME_1', 'NAME_2', 'geometry']]
-#     areas = gpd.read_file('Denmark/Adm/gadm36_DNK_2.shp')
-#     # Aggregate hovedstaden - MODIFY TO USE NUTS3 AREAS FOR CAPITAL REGION
-#     idx = (areas.NAME_1 == 'Hovedstaden') & (areas.NAME_2 != 'Bornholm') & (areas.NAME_2 != 'Christiansø')
-#     hovedstaden = MultiPolygon(areas[idx].geometry.cascaded_union)
-    
-#     areas = areas.drop(index=list(areas.index[idx]))
-#     areas = pd.concat((areas, gpd.GeoDataFrame({'NAME_1' : 'Hovedstaden', 
-#                           'NAME_2' : 'København',
-#                           'GID_2' : 'DNK.5.23_1',
-#                           'geometry' : [hovedstaden]})))
-#     the_index = 'GID_2'
+UTM32 = Proj(proj='utm', zone=32, ellps='WGS84', preserve_units=False)
+GM = Proj('EPSG:900913', preserve_units=False)
+# transformer = Transformer.from_crs('EPSG:900913', 'EPSG:4326')
+# out = Transformer(GM, UTM32, (11, 13), (43, 45), always_xy=True) 
 
     
-# # NUTS3 (Also contains NUTS2, and NUTS1)
-# elif choice == 'NUTS3':
-#     areas = gpd.read_file('NUTS_RG_01M_2021_4326.shp')
-#     areas = areas[(areas.LEVL_CODE == 3) & (areas.NUTS_ID.str.find('DK') != -1)] # Only DK, NUTS3
-    
-#     # The index for next file
-#     the_index = 'NUTS_ID'
-    
-# # Nordpool market regions
-# elif choice == 'Nordpool':
-#     p = r'.\NordpoolRegions\geojson'
-    
-#     areas = gpd.GeoDataFrame()
-#     for file in os.listdir(p):
-#         areas = pd.concat((areas, gpd.read_file(p+'/'+file)))
-#     the_index = 'zoneName'
-    
-#     areas.index = areas['zoneName']
-    
-#     # Restrict
-#     areas = areas[(areas.index.str.find('DK') != -1)] # Only DK 
-    
-# else:
-#     print("You didn't choose any geodata! Check spelling or create new elif statement in code block 1.2")
-    
-    
-    
-# ### 1.2 Visualise current areas
-# # Set projection
-# crs = ccrs.UTM(32)
-# # Make compatible with geopandas
-# # projection = crs.proj4_init # doesn't work, so actually cartopy is useless - continuing only with geopandas
 
-# # Make figure
-# fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": crs},
-#                        dpi=200)
+### 1.2 Visualise current areas
+# Set projection
+crs = ccrs.UTM(32)
+# Make compatible with geopandas
+# projection = crs.proj4_init # doesn't work, so actually cartopy is useless - continuing only with geopandas
+
+# Make figure
+fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": crs},
+                       dpi=200)
 
 
-# # Add areas
-# ax.add_geometries(areas.geometry, crs = crs,
-#                   facecolor=[.9, .9,.9], edgecolor='grey',
-#                   linewidth=.2)
+# Add areas
+ax.add_geometries(areas.geometry, crs = crs,
+                  facecolor=[.9, .9,.9], edgecolor='grey',
+                  linewidth=.2)
 
-# ax.set_xlim(areas.bounds[['minx']].values.min(), areas.bounds[['maxx']].values.max())
-# ax.set_ylim(areas.bounds[['miny']].values.min(), areas.bounds[['maxy']].values.max())
-# # ax.set_xlim(7.5,16)      
-# # ax.set_ylim(54.4,58)  
+ax.set_xlim(areas.bounds[['minx']].values.min(), areas.bounds[['maxx']].values.max())
+ax.set_ylim(areas.bounds[['miny']].values.min(), areas.bounds[['maxy']].values.max())
+# ax.set_xlim(7.5,16)      
+# ax.set_ylim(54.4,58)  
 
 
-# ### 1.3 Load Nordpool regions
-# # NP = pd.read_csv(project_dir/'geo_files/coordinates_RRR.csv')
-# # NP = NP.loc[df_unique['Type'] == 'region', ]
+### 1.3 Load Nordpool regions
+# NP = pd.read_csv(project_dir/'geo_files/coordinates_RRR.csv')
+# NP = NP.loc[df_unique['Type'] == 'region', ]
 
 #%% ------------------------------- ###
 ###   2. Calculate RE Potentials    ###
 ### ------------------------------- ###
 
-# ### 2.1 Load Cutout
-# cutout = atlite.Cutout(path=path,
-#                        module="era5",
-#                        x=slice(cutout_bounds_x[0], cutout_bounds_x[1]),
-#                        y=slice(cutout_bounds_y[0], cutout_bounds_y[1]),
-#                        time=T
-#                        )
-# cutout.prepare(overwrite=OverW)
+### 2.1 Load Cutout
+cutout = atlite.Cutout(path=path,
+                       module="era5",
+                       x=slice(cutout_bounds_x[0], cutout_bounds_x[1]),
+                       y=slice(cutout_bounds_y[0], cutout_bounds_y[1]),
+                       time=T
+                       )
+cutout.prepare(overwrite=OverW)
 
 
 
 
-# ### 2.2 Load Map for RE Spatial Availabilities
-# # CORINE = 'corine.tif'
-# CORINE = r'Data\CORINE\u2018_clc2018_v2020_20u1_raster100m\u2018_clc2018_v2020_20u1_raster100m\DATA\U2018_CLC2018_V2020_20u1.tif'
-# excluder = ExclusionContainer()
-# excluder.add_raster(CORINE, codes=range(20))
+### 2.2 Load Map for RE Spatial Availabilities
+# CORINE = 'corine.tif'
+CORINE = r'Data\CORINE\u2018_clc2018_v2020_20u1_raster100m\u2018_clc2018_v2020_20u1_raster100m\DATA\U2018_CLC2018_V2020_20u1.tif'
+excluder = ExclusionContainer()
+excluder.add_raster(CORINE, codes=range(20))
 
-# # Convert crs to CORINE map
-# A = areas.geometry.to_crs(excluder.crs)
-# A.index = getattr(areas, the_index)
-
-
-
-
-# ### 2.3 Calculate eligible shares
-# masked, transform = shape_availability(A, excluder)
-# # eligible_share = masked.sum() * excluder.res**2 / A.loc[[3]].geometry.item().area # Only eligible share for bornholm 3
-# # Eligible share of all of A
-# Aall = gpd.GeoDataFrame({'geometry' : [A.geometry.cascaded_union]})
-# eligible_share = masked.sum() * excluder.res**2 / Aall.geometry.item().area # Only eligible share for bornholm 3
+# Convert crs to CORINE map
+A = areas.geometry.to_crs(excluder.crs)
+A.index = getattr(areas, the_index)
 
 
 
 
-# ### 2.4 Plot figures of availabilities (green is available land)
-# # Simple plot
-# # fig, ax = plt.subplots()
-# # ax = show(masked, transform=transform, cmap='Greens', ax=ax)
-# # A.plot(ax=ax, edgecolor='k', color='None')
-# # ax.set_title(f'Eligible area (green) {eligible_share * 100:2.2f}%')
+### 2.3 Calculate eligible shares
+masked, transform = shape_availability(A, excluder)
+# eligible_share = masked.sum() * excluder.res**2 / A.loc[[3]].geometry.item().area # Only eligible share for bornholm 3
+# Eligible share of all of A
+Aall = gpd.GeoDataFrame({'geometry' : [A.geometry.cascaded_union]})
+eligible_share = masked.sum() * excluder.res**2 / Aall.geometry.item().area # Only eligible share for bornholm 3
 
-# ### Plot that shows the discrete rectangles used
+
+
+
+### 2.4 Plot figures of availabilities (green is available land)
+# Simple plot
 # fig, ax = plt.subplots()
 # ax = show(masked, transform=transform, cmap='Greens', ax=ax)
 # A.plot(ax=ax, edgecolor='k', color='None')
-# # cutout.grid.plot(edgecolor='grey', color='None', ax=ax, ls=':')
-# cutout.grid.to_crs(excluder.crs).plot(edgecolor='grey', color='None', ax=ax, ls=':')
 # ax.set_title(f'Eligible area (green) {eligible_share * 100:2.2f}%')
 
-# # ax.set_xlim(4.5e6-0.1e6, 4.5e6+0.1e6)
-# # ax.set_ylim(2.46-0.1e6, 2.4e6+0.1e6)
+### Plot that shows the discrete rectangles used
+fig, ax = plt.subplots()
+ax = show(masked, transform=transform, cmap='Greens', ax=ax)
+A.plot(ax=ax, edgecolor='k', color='None')
+# cutout.grid.plot(edgecolor='grey', color='None', ax=ax, ls=':')
+cutout.grid.to_crs(excluder.crs).plot(edgecolor='grey', color='None', ax=ax, ls=':')
+ax.set_title(f'Eligible area (green) {eligible_share * 100:2.2f}%')
 
-# ### 2.5 Calculate Availability Matrix for all Regions
-# # Amat.index = ['Denmark']
-# A = A.geometry.set_crs(excluder.crs)
-# Amat = cutout.availabilitymatrix(A, excluder)
+# ax.set_xlim(4.5e6-0.1e6, 4.5e6+0.1e6)
+# ax.set_ylim(2.46-0.1e6, 2.4e6+0.1e6)
 
-# ### Plot first region availability  
-# fig, ax = plt.subplots()
-# Amat.sel({the_index :A.index[0]}).plot(ax=ax) # Amat gives fractional availabilities in each weather cell
-# A.plot(ax=ax, edgecolor='k', color='None')
-# cutout.grid.plot(ax=ax, color='None', edgecolor='grey', ls=':')
-# # ax.set_xlim(7.5,16)      
-# # ax.set_ylim(54.4,58) 
+### 2.5 Calculate Availability Matrix for all Regions
+# Amat.index = ['Denmark']
+A = A.geometry.set_crs(excluder.crs)
+Amat = cutout.availabilitymatrix(A, excluder)
 
-# ### Calculate areas in weather cells in sqkm
-# area = cutout.grid.set_index(['y', 'x']).to_crs(3035).area / 1e6 # 3035 is CRS of CORINE map
-# area = xr.DataArray(area, dims=('spatial'))
+### Plot first region availability  
+fig, ax = plt.subplots()
+Amat.sel({the_index :A.index[0]}).plot(ax=ax) # Amat gives fractional availabilities in each weather cell
+A.plot(ax=ax, edgecolor='k', color='None')
+cutout.grid.plot(ax=ax, color='None', edgecolor='grey', ls=':')
+# ax.set_xlim(7.5,16)      
+# ax.set_ylim(54.4,58) 
+
+### Calculate areas in weather cells in sqkm
+area = cutout.grid.set_index(['y', 'x']).to_crs(3035).area / 1e6 # 3035 is CRS of CORINE map
+area = xr.DataArray(area, dims=('spatial'))
 
 
 
 
-# ### 2.6 Calculate PV Potential
-# capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_pv # Converts fraction of weather cells to
-# cutout.prepare()
+### 2.6 Calculate PV Potential
+capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_pv # Converts fraction of weather cells to
+cutout.prepare()
 
-# # Sum of matrix is total potential...?
+# Sum of matrix is total potential...?
 
-# # Get production
-# # pv = cutout.pv(matrix=capacity_matrix, panel=panel,
-# #                 orientation='latitude_optimal', index=A.index)
+# Get production
 # pv = cutout.pv(matrix=capacity_matrix, panel=panel,
-#                 orientation={'slope': 30, 'azimuth': 180.}, index=A.index)
-# ax = pv.to_pandas().div(1e3).plot(ylabel='Solar Power [GW]', ls='--', figsize=(15, 4))
-# ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
+#                 orientation='latitude_optimal', index=A.index)
+pv = cutout.pv(matrix=capacity_matrix, panel=panel,
+                orientation={'slope': 30, 'azimuth': 180.}, index=A.index)
+ax = pv.to_pandas().div(1e3).plot(ylabel='Solar Power [GW]', ls='--', figsize=(15, 4))
+ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
 
-# # Getting a specific profile
-# pv.loc[:, getattr(pv, the_index).values[0]]
+# Getting a specific profile
+pv.loc[:, getattr(pv, the_index).values[0]]
 
 
 
 
-# ### 2.7 Calculate Wind Turbine Potential
-# capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_wind
-# cutout.prepare()
+### 2.7 Calculate Wind Turbine Potential
+capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_wind
+cutout.prepare()
 
-# # Get production
-# wind = cutout.wind(matrix=capacity_matrix, turbine=wind_turbine,
-#                 index=A.index)
-# ax = wind.to_pandas().div(1e3).plot(ylabel='Wind Power [GW]', ls='--', figsize=(15, 4)) 
-# ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
+# Get production
+wind = cutout.wind(matrix=capacity_matrix, turbine=wind_turbine,
+                index=A.index)
+ax = wind.to_pandas().div(1e3).plot(ylabel='Wind Power [GW]', ls='--', figsize=(15, 4)) 
+ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
 
-# # Getting a specific profile
-# wind.loc[:, getattr(wind, the_index).values[0]]
+# Getting a specific profile
+wind.loc[:, getattr(wind, the_index).values[0]]
 
 #%% ------------------------------- ###
 ###     3. Create Balmorel Input    ###
