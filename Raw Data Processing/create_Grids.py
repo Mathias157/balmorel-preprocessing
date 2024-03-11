@@ -32,7 +32,6 @@ Works with the environment.yaml distributed in XXX
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
-# from formplot import *
 import pandas as pd
 import geopandas as gpd
 import cartopy.crs as ccrs
@@ -263,7 +262,7 @@ for i,row in X.iterrows():
     X.loc[:,i] = X.loc[i, :]
 
 ### 2.3 Plot for inspection
-fig, ax = newplot(fc=fc)
+fig, ax = plt.subplots(facecolor=fc)
 areas.plot(ax=ax, zorder=2, edgecolor='k')
 
 line_center_x = []
