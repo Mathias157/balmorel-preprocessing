@@ -26,12 +26,10 @@ from shapely.geometry import MultiPolygon
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from pybalmorel.functions import PreProcessShapes
+from functions import PreProcessShapes
 from pyproj import Proj
 import datetime as dt
 import sys
-# Load general python functionalities for Balmorel
-sys.path.append('../')
 from pybalmorel.functions import IncFile
 
 
@@ -70,9 +68,10 @@ DE = pd.DataFrame({'MWh' : 37000000}, index=['DK']) ### DUMMY DATA only for DK
 DH = pd.DataFrame({'MWh' : 50000000}, index=['DK']) ### DUMMY DATA only for DK
 Esector = 'RESE'
 Hsector = 'RESH'
-Dprof = pd.read_excel(r'.\Data\DemandProfiles\DummyProfiles.xlsx')
+Dprof = pd.read_excel(r'.\Data\Timeseries\DummyProfiles.xlsx')
 profYear = 2017 # Year for profiles
 
+Dprof = pd.read_parquet('Data/Timeseries/DKMUNI36_DH.gzip')
 ### Assumptions
 # 2.3 ToDo: Only one country at a time right now
 # 2.3 ToDo: Should include yearly change

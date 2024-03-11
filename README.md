@@ -20,6 +20,10 @@ Or by using conda:
 ```` 
 conda env create --name .new_env -f environment.yaml
 ````
+conda requires an extra pip command to install the pybalmorel library:
+```` 
+pip install pybalmorel
+````
 
 See more here
 https://www.gams.com/latest/docs/API_PY_GETTING_STARTED.html
