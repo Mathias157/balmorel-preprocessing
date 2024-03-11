@@ -9,7 +9,9 @@ Created on 11.03.2024
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import geopandas as gpd
+import numpy as np
+from Modules.createDH import DistrictHeat
+from Modules.geofiles import preprocess_geofiles
 
 style = 'report'
 
@@ -20,16 +22,16 @@ elif style == 'ppt':
     plt.style.use('dark_background')
     fc = 'none'
     
+the_index, areas, c = preprocess_geofiles('nuts3')
+DH = DistrictHeat()
+
+
 #%% ------------------------------- ###
 ###        1. 
 ### ------------------------------- ###
 
-class DistrictHeat:
-    
-    def __init__(self) -> None:
-        # Load data
-        self.DH = pd.read_parquet('Data/Timeseries/DKMUNI36_DH.gzip')
-        self.DHT = pd.read_parquet('Data/Timeseries/DKMUNI36_DH_VAR_T.gzip')
-        self.geo = gpd.read_file('Data/Shapefiles/Balmorel Areas/Balmorel_areas.shp')
-        self.geo = self.geo.to_crs('EPSG:4326')
+DKareas = areas[areas[the_index].str.find('DK') != -1]
 
+fig, ax = plt.subplots()
+DKareas.plot(ax=ax, facecolor=[.8, .8, .8])
+DH.geo.plot(ax=ax, facecolor=[.6, 0, 0])
