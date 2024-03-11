@@ -31,7 +31,7 @@ elif style == 'ppt':
 ### ------------------------------- ###
 ### 1. Load Geodata and Pre-Process ###
 ### ------------------------------- ###
-def preprocess_geofiles(choice: str, plot: bool = False):
+def preprocess_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoDataFrame, str]:
     """
     Prepared geofiles for various spatial resolutions
 

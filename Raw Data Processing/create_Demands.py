@@ -26,10 +26,10 @@ from shapely.geometry import MultiPolygon
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from functions import preprocess_geofiles
+from Modules.geofiles import preprocess_geofiles
+from Modules.createDH import DistrictHeat
 from pyproj import Proj
 import datetime as dt
-import sys
 from pybalmorel.functions import IncFile
 
 
