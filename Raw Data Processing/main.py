@@ -30,8 +30,20 @@ DH = DistrictHeat()
 ###        1. 
 ### ------------------------------- ###
 
-DKareas = areas[areas[the_index].str.find('DK') != -1]
 
+DKareas = areas[areas[the_index].str.find('DK') != -1]
 fig, ax = plt.subplots()
 DKareas.plot(ax=ax, facecolor=[.8, .8, .8])
 DH.geo.plot(ax=ax, facecolor=[.6, 0, 0])
+
+DKareas = DKareas.to_crs(4328) # To geocentric (meters)
+DH.geo = DH.geo.to_crs(4328) # To geocentric (meters)
+
+df = pd.DataFrame()
+for element in DKareas.index:
+    df['DK areas'] = DH.geo.BalmorelAr
+    df['m^2 intersect'] = DH.geo.geometry.intersection(DKareas.geometry[element]).area
+print('Intersect of %s with \n%s'%(element, df.to_string()))
+    
+DH.geo = DH.geo.to_crs(4326) # To geocentric (meters)
+DKareas = DKareas.to_crs(4326) 
