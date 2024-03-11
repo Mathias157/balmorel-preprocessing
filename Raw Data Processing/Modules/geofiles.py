@@ -12,19 +12,10 @@ See the following documentation, for understanding how this script works:
 """
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import rc
-# from formplot import *
-from scipy.optimize import curve_fit
-# import atlite
 import geopandas as gpd
 import cartopy.crs as ccrs
-from shapely.geometry import MultiPolygon
-from pyproj import Proj, Transformer
-# from rasterio.plot import show
-# import xarray as xr
-# from atlite.gis import shape_availability, ExclusionContainer
+from pyproj import Proj
 import os
 
 style = 'report'
@@ -38,10 +29,11 @@ elif style == 'ppt':
 
 
 ### ------------------------------- ###
-### 1. Load Geodata and Pre-process ###
+### 1. Load Geodata and Pre-Process ###
 ### ------------------------------- ###
-def PreProcessShapes(choice, plot='n'):
+def preprocess_geofiles(choice: str, plot: bool = False):
     """
+    Prepared geofiles for various spatial resolutions
 
     Parameters
     ----------
@@ -66,12 +58,11 @@ def PreProcessShapes(choice, plot='n'):
         
     areas : GeoDataFrame
         The pre-processed shapefile, including all metadata.
-
     """
 
     ## Projections
-    UTM32 = Proj(proj='utm', zone=32, ellps='WGS84', preserve_units=False)
-    GM = Proj('EPSG:900913', preserve_units=False)
+    # UTM32 = Proj(proj='utm', zone=32, ellps='WGS84', preserve_units=False)
+    # GM = Proj('EPSG:900913', preserve_units=False)
     # transformer = Transformer.from_crs('EPSG:900913', 'EPSG:4326')
     # out = Transformer(GM, UTM32, (11, 13), (43, 45), always_xy=True) 
 
@@ -162,7 +153,7 @@ def PreProcessShapes(choice, plot='n'):
         area_names = 'Region' 
         country_code = 'Country'
     elif choice.replace(' ','').lower() == 'antbalm':
-        areas = gpd.read_file(r'.\Data\Shapefiles\231206 AntBalmMap.geojson')
+        areas = gpd.read_file(r'.\Data\Shapefiles\240112 AntBalmMap.gpkg')
         areas.loc[(areas.ISO_A3 == 'FIN'), 'id'] = 'FIN'
         areas.loc[(areas.ISO_A3 == 'DZA'), 'id'] = 'DZA'
         areas.loc[(areas.ISO_A3 == 'EGY'), 'id'] = 'EGY'
@@ -176,6 +167,7 @@ def PreProcessShapes(choice, plot='n'):
         print("You didn't choose any geodata! Check spelling or create new elif statement in code block 1.2")
     
     areas.index = areas[area_names]
+    areas.geometry = areas['geometry']
         
         
     ### 1.2 Visualise current areas
@@ -184,7 +176,7 @@ def PreProcessShapes(choice, plot='n'):
     # Make compatible with geopandas
     # projection = crs.proj4_init # doesn't work, so actually cartopy is useless - continuing only with geopandas
 
-    if plot == 'y':
+    if plot:
         # Make figure
         fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": crs},
                                dpi=200)

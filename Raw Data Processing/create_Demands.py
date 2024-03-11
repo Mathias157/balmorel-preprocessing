@@ -26,7 +26,7 @@ from shapely.geometry import MultiPolygon
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from functions import PreProcessShapes
+from functions import preprocess_geofiles
 from pyproj import Proj
 import datetime as dt
 import sys
@@ -130,7 +130,7 @@ ax.set_title('Fraction of population - ' + Y)
 
 
 ### 1.3 Read geodata
-the_index, areas, country_code = PreProcessShapes(choice)
+the_index, areas, country_code = preprocess_geofiles(choice)
 if 'nuts' in choice.lower():
     areas = areas[(areas[the_index].str.find('DK') != -1)]
 areas.plot()

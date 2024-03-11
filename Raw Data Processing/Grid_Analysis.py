@@ -24,7 +24,7 @@ from shapely.geometry import MultiPolygon, Point
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from functions import PreProcessShapes
+from functions import preprocess_geofiles
 from pyproj import Proj
 
 
@@ -112,7 +112,7 @@ elif choice.lower() == 'nordpool':
 ### ----------------------------- ###
 
 ### 1.1 Load geodata
-the_index, areas = PreProcessShapes(choice)
+the_index, areas = preprocess_geofiles(choice)
 
 if 'nuts' in choice.lower():
     areas = areas[areas.CNTR_CODE == 'DK']

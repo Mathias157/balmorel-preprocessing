@@ -20,7 +20,7 @@ from shapely.geometry import MultiPolygon, Point, LineString
 import numpy as np
 import matplotlib.pyplot as plt
 from pyproj import Proj
-from functions import *
+from Modules.geofiles import *
 
 ### Plot settings
 style = 'report'
@@ -93,7 +93,7 @@ eldh2TECH = {'Gas turbine, combined cycle' : 'CCGT'}
 felDH = pd.read_excel('./Data/Technology Data/technology_data_for_el_and_dh.xlsx', sheet_name='alldata_flat')
 
 ## Read shapefile data
-the_index, areas, country_code = PreProcessShapes(choice)
+the_index, areas, country_code = preprocess_geofiles(choice)
 areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
 areas.plot()
 

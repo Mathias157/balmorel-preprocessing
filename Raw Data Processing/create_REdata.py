@@ -8,7 +8,7 @@ See the following documentation, for understanding how this script works:
     Cutouts: https://atlite.readthedocs.io/en/latest/examples/create_cutout.html
     Power potentials: https://atlite.readthedocs.io/en/latest/examples/landuse-availability.html
 
-""" 
+"""
 
 import pandas as pd
 import numpy as np
@@ -24,7 +24,7 @@ from rasterio.plot import show
 import xarray as xr
 from atlite.gis import shape_availability, ExclusionContainer
 import os
-from functions import PreProcessShapes
+from Modules.geofiles import preprocess_geofiles
 
 style = 'report'
 
@@ -90,8 +90,8 @@ cap_per_sqkm_wind = 0.67 # MW/km2 According to NREL: 2 MW / 1.5 acres (0.0060702
 
 
 ### 0.2 Choice of technologies
-# panel = atlite.solarpanels.CSi # Possible to choose crystalline Si (CSi) or advanced cadmium-tellurium (CdTe)
-# wind_turbine = atlite.windturbines.Vestas_V66_1750kW
+panel = atlite.solarpanels.CSi # Possible to choose crystalline Si (CSi) or advanced cadmium-tellurium (CdTe)
+wind_turbine = atlite.windturbines.Vestas_V66_1750kW
 # wind_turbine = atlite.windturbines.Enercon_E82_3000kW
 # wind_turbine = atlite.windturbines.Bonus_B1000_1000kW
 
@@ -125,13 +125,13 @@ T = '2017'
 OverW = True
 
 ### 0.6 Read Geodata
-the_index, areas, country_code = PreProcessShapes(choice)
+the_index, areas, country_code = preprocess_geofiles(choice)
 areas = areas.loc[['DK1', 'DK2']] # Testing DK and DE
 areas.geometry = areas['geometry']
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
 # Read homemade offshore potentials for DK
-# OFFWNDPOT = gpd.read_file(r'.\Data\RandomOffWindPot\DK.gpkg')
+OFFWNDPOT = gpd.read_file(r'.\Data\RandomOffWindPot\DK.gpkg')
 
 # Plot
 fig, ax = plt.subplots()
@@ -307,144 +307,144 @@ wind.loc[:, getattr(wind, the_index).values[0]]
 ### ------------------------------- ###
 
 
-# ### 3.1 Convert data
-# # .to_pandas() can be used to store profiles from wind or pv
-# W = wind.to_pandas()
-# S = pv.to_pandas()
+### 3.1 Convert data
+# .to_pandas() can be used to store profiles from wind or pv
+W = wind.to_pandas()
+S = pv.to_pandas()
 
-# # Get correct timeseries index for Balmorel
-# t = W.index.isocalendar()
-# t['hour'] = t.index.hour
+# Get correct timeseries index for Balmorel
+t = W.index.isocalendar()
+t['hour'] = t.index.hour
 
-# # Filter away first week, from last year 
-# idx = t.index.year == t['year'] 
-# t = t[idx]
-# W = W[idx]
-# S = S[idx]
+# Filter away first week, from last year 
+idx = t.index.year == t['year'] 
+t = t[idx]
+W = W[idx]
+S = S[idx]
 
-# # Make seasons
-# t['S'] = t['week'].astype(str)
-# idx = t['S'].str.len() == 1
-# t.loc[idx, 'S'] = '0' + t.loc[idx, 'S']
-# t['S'] = 'S' + t['S']
+# Make seasons
+t['S'] = t['week'].astype(str)
+idx = t['S'].str.len() == 1
+t.loc[idx, 'S'] = '0' + t.loc[idx, 'S']
+t['S'] = 'S' + t['S']
 
-# # Make terms
-# try:
-#     t['T'] = np.array([i for i in range(1, 169)]*52)
-# except ValueError:
-#     print("\nWARNING!\nYou didn't load 8736 hours of data! Select a bit of the next year, in cutout (T parameter in beginning).")
-#     print("The current profile will be %d too short (%d hours in total)\n"%(8736-len(t), len(t)))
+# Make terms
+try:
+    t['T'] = np.array([i for i in range(1, 169)]*52)
+except ValueError:
+    print("\nWARNING!\nYou didn't load 8736 hours of data! Select a bit of the next year, in cutout (T parameter in beginning).")
+    print("The current profile will be %d too short (%d hours in total)\n"%(8736-len(t), len(t)))
     
-#     array = np.array([i for i in range(1, 169)]*52)
-#     t['T'] = array[:len(t)]
+    array = np.array([i for i in range(1, 169)]*52)
+    t['T'] = array[:len(t)]
     
-# t['T'] = t['T'].astype(str)
-# idx = t['T'].str.len() == 1
-# t.loc[idx, 'T'] = '00' + t['T']
-# idx = t['T'].str.len() == 2
-# t.loc[idx, 'T'] = '0' + t['T']
-# t['T'] = 'T' + t['T']
+t['T'] = t['T'].astype(str)
+idx = t['T'].str.len() == 1
+t.loc[idx, 'T'] = '00' + t['T']
+idx = t['T'].str.len() == 2
+t.loc[idx, 'T'] = '0' + t['T']
+t['T'] = 'T' + t['T']
  
 
-# # Create new index
-# W.index = t['S'] + ' . ' + t['T']
-# S.index = t['S'] + ' . ' + t['T']
+# Create new index
+W.index = t['S'] + ' . ' + t['T']
+S.index = t['S'] + ' . ' + t['T']
 
-# # Clean up areas
-# W.columns = W.columns.str.replace('.', '_')
-# W.columns.name = ''
-# W.columns = W.columns + '_A'
-# S.columns = S.columns.str.replace('.', '_')
-# S.columns.name = ''
-# S.columns = S.columns + '_A'
+# Clean up areas
+W.columns = W.columns.str.replace('.', '_')
+W.columns.name = ''
+W.columns = W.columns + '_A'
+S.columns = S.columns.str.replace('.', '_')
+S.columns.name = ''
+S.columns = S.columns + '_A'
 
-# # Clean up values
-# # W.iloc[:,:] = W.iloc[:,:].astype(str)
-# # S.iloc[:,:] = S.iloc[:,:].astype(str)
-
-
-
-
-# ### 3.2 Variation Profiles
-# # Format of SOLE_VAR_T and WND_VAR_T
-# # TABLE WND/SOLE_VAR_T1(SSS,TTT,AAA)               "Variation of the wind/solar generation"    
-# #               A1     A2     ...
-# # S01.T001      val    val
-# # ...
-# # S52.T168      val    val
-# # ;
-# #
-
-# ## Saving directly to .inc files:
-# # Wind
-# # f = open('WND_VAR_T.inc', 'w')
-# with open('./Output/WND_VAR_T.inc', 'w') as f:
-#     f.write('TABLE WND_VAR_T1(SSS,TTT,AAA)            "Variation of the wind generation"\n')
-#     # f.write('+') # If adding to another WND_VAR_T
-#     dfAsString = W.to_string(header=True, index=True)
-#     f.write(dfAsString)
-#     f.write('\n;')
-#     f.write('\nWND_VAR_T(AAA,SSS,TTT) = WND_VAR_T1(SSS,TTT,AAA);')
-#     f.write('\nWND_VAR_T1(SSS,TTT,AAA) = 0;')
-
-# # Solar
-# # f = open('SOLE_VAR_T.inc', 'w')
-# with open('./Output/SOLE_VAR_T.inc', 'w') as f:
-#     f.write('TABLE SOLE_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
-#     dfAsString = S.to_string(header=True, index=True)
-#     f.write(dfAsString)
-#     f.write('\n;\n')
-#     f.write('SOLE_VAR_T(AAA,SSS,TTT) = SOLE_VAR_T1(SSS,TTT,AAA);\n')
-#     f.write('SOLE_VAR_T1(SSS,TTT,AAA) = 0;\n')
+# Clean up values
+# W.iloc[:,:] = W.iloc[:,:].astype(str)
+# S.iloc[:,:] = S.iloc[:,:].astype(str)
 
 
 
 
-# ### 3.3 Full load hours
-# # Format of SOLEFLH and WNDFLH
-# # TABLE WND/SOLEFLH(AAA)               "Full load hours for wind/solar power" 
-# # /   
-# # A1        val
-# # A2        val
-# # ...
-# # An        val
-# # /;
-# #
+### 3.2 Variation Profiles
+# Format of SOLE_VAR_T and WND_VAR_T
+# TABLE WND/SOLE_VAR_T1(SSS,TTT,AAA)               "Variation of the wind/solar generation"    
+#               A1     A2     ...
+# S01.T001      val    val
+# ...
+# S52.T168      val    val
+# ;
+#
 
-# # Calculating full load hours by sum of normalised timeseries
-# FLH_W = W.sum() / W.max() * (8736/len(t))
-# FLH_S = S.sum() / S.max() * (8736/len(t))
-# with open('./Output/SOLEFLH.inc', 'w') as f:
-#     f.write('Parameter SOLEFLH(AAA)            "Full load hours for solar power (hours)"\n')
-#     f.write('/')
-#     dfAsString = FLH_S.to_string(header=True, index=True)
-#     f.write(dfAsString)
-#     f.write('\n/\n;')
+## Saving directly to .inc files:
+# Wind
+# f = open('WND_VAR_T.inc', 'w')
+with open('./Output/WND_VAR_T.inc', 'w') as f:
+    f.write('TABLE WND_VAR_T1(SSS,TTT,AAA)            "Variation of the wind generation"\n')
+    # f.write('+') # If adding to another WND_VAR_T
+    dfAsString = W.to_string(header=True, index=True)
+    f.write(dfAsString)
+    f.write('\n;')
+    f.write('\nWND_VAR_T(AAA,SSS,TTT) = WND_VAR_T1(SSS,TTT,AAA);')
+    f.write('\nWND_VAR_T1(SSS,TTT,AAA) = 0;')
+
+# Solar
+# f = open('SOLE_VAR_T.inc', 'w')
+with open('./Output/SOLE_VAR_T.inc', 'w') as f:
+    f.write('TABLE SOLE_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
+    dfAsString = S.to_string(header=True, index=True)
+    f.write(dfAsString)
+    f.write('\n;\n')
+    f.write('SOLE_VAR_T(AAA,SSS,TTT) = SOLE_VAR_T1(SSS,TTT,AAA);\n')
+    f.write('SOLE_VAR_T1(SSS,TTT,AAA) = 0;\n')
+
+
+
+
+### 3.3 Full load hours
+# Format of SOLEFLH and WNDFLH
+# TABLE WND/SOLEFLH(AAA)               "Full load hours for wind/solar power" 
+# /   
+# A1        val
+# A2        val
+# ...
+# An        val
+# /;
+#
+
+# Calculating full load hours by sum of normalised timeseries
+FLH_W = W.sum() / W.max() * (8736/len(t))
+FLH_S = S.sum() / S.max() * (8736/len(t))
+with open('./Output/SOLEFLH.inc', 'w') as f:
+    f.write('Parameter SOLEFLH(AAA)            "Full load hours for solar power (hours)"\n')
+    f.write('/')
+    dfAsString = FLH_S.to_string(header=True, index=True)
+    f.write(dfAsString)
+    f.write('\n/\n;')
     
-# with open('./Output/WNDFLH.inc', 'w') as f:
-#     f.write('Parameter WNDFLH(AAA)            "Full load hours for wind power (hours)"\n')
-#     f.write('/')
-#     dfAsString = FLH_W.to_string(header=True, index=True)
-#     f.write(dfAsString)
-#     f.write('\n/\n;')
+with open('./Output/WNDFLH.inc', 'w') as f:
+    f.write('Parameter WNDFLH(AAA)            "Full load hours for wind power (hours)"\n')
+    f.write('/')
+    dfAsString = FLH_W.to_string(header=True, index=True)
+    f.write(dfAsString)
+    f.write('\n/\n;')
     
-# # Quick fix for solar heating profiles
-# FLH_SH = FLH_S / 5
-# with open('./Output/SOLHFLH.inc', 'w') as f:
-#     f.write('Parameter SOLHFLH(AAA)            "Full load hours for solar heat (hours)"\n')
-#     f.write('/')
-#     dfAsString = FLH_SH.to_string(header=True, index=True)
-#     f.write(dfAsString)
-#     f.write('\n/\n;')
+# Quick fix for solar heating profiles
+FLH_SH = FLH_S / 5
+with open('./Output/SOLHFLH.inc', 'w') as f:
+    f.write('Parameter SOLHFLH(AAA)            "Full load hours for solar heat (hours)"\n')
+    f.write('/')
+    dfAsString = FLH_SH.to_string(header=True, index=True)
+    f.write(dfAsString)
+    f.write('\n/\n;')
     
     
-# with open('./Output/SOLH_VAR_T.inc', 'w') as f:
-#     f.write('TABLE SOLH_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
-#     dfAsString = S.to_string(header=True, index=True)
-#     f.write(dfAsString)
-#     f.write('\n;\n')
-#     f.write('SOLH_VAR_T(AAA,SSS,TTT) = SOLH_VAR_T1(SSS,TTT,AAA);\n')
-#     f.write('SOLH_VAR_T1(SSS,TTT,AAA) = 0;\n')
+with open('./Output/SOLH_VAR_T.inc', 'w') as f:
+    f.write('TABLE SOLH_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
+    dfAsString = S.to_string(header=True, index=True)
+    f.write(dfAsString)
+    f.write('\n;\n')
+    f.write('SOLH_VAR_T(AAA,SSS,TTT) = SOLH_VAR_T1(SSS,TTT,AAA);\n')
+    f.write('SOLH_VAR_T1(SSS,TTT,AAA) = 0;\n')
 
 ### X.X CALCULATE POTENTIALS
 exc_points = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmGrid-Urb-GLWD123-WDPA012-MTabove1km.gpkg')

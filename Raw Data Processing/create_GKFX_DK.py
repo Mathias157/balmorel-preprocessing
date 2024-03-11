@@ -24,7 +24,7 @@ from shapely.geometry import MultiPolygon
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from functions import PreProcessShapes
+from Modules.geofiles import preprocess_geofiles
 
 #%% ----------------------------- ###
 ###         0. ASSUMPTIONS        ###
@@ -597,7 +597,7 @@ pp = pp[~pp.G.isna()]
 ### ------------------------------- ###
 
 
-the_index, areas, country_code = PreProcessShapes(choice)
+the_index, areas, country_code = preprocess_geofiles(choice)
 areas.plot()
 
 # ## 3.1 Choose geodata file
