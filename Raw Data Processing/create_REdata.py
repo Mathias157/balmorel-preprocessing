@@ -24,7 +24,7 @@ from rasterio.plot import show
 import xarray as xr
 from atlite.gis import shape_availability, ExclusionContainer
 import os
-from Modules.geofiles import preprocess_geofiles
+from Modules.geofiles import prepared_geofiles
 
 style = 'report'
 
@@ -125,7 +125,7 @@ T = '2017'
 OverW = True
 
 ### 0.6 Read Geodata
-the_index, areas, country_code = preprocess_geofiles(choice)
+the_index, areas, country_code = prepared_geofiles(choice)
 areas = areas.loc[['DK1', 'DK2']] # Testing DK and DE
 areas.geometry = areas['geometry']
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')

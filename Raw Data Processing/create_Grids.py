@@ -40,7 +40,7 @@ import shapely
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.geofiles import preprocess_geofiles
+from Modules.geofiles import prepared_geofiles
 from pyproj import Proj
 from scipy.spatial import distance_matrix
         
@@ -98,7 +98,7 @@ DCOST_E = 5 # €/MWh distribution cost
 ### ----------------------------- ###
 
 ### 1.1 Load geodata
-the_index, areas, country_code = preprocess_geofiles(choice)
+the_index, areas, country_code = prepared_geofiles(choice)
 # areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
 
 

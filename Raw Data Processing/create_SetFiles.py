@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit
 import geopandas as gpd
 import cartopy.crs as ccrs
 from shapely.geometry import MultiPolygon
-from Modules.geofiles import preprocess_geofiles
+from Modules.geofiles import prepared_geofiles
 
 style = 'ppt'
 
@@ -49,7 +49,7 @@ choice = 'NordpoolReal'
 ### 1. Load Geodata and Pre-process ###
 ### ------------------------------- ###
 
-the_index, areas, country_code = preprocess_geofiles(choice)
+the_index, areas, country_code = prepared_geofiles(choice)
 areas.plot()
 
 areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE

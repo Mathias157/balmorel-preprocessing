@@ -93,7 +93,7 @@ eldh2TECH = {'Gas turbine, combined cycle' : 'CCGT'}
 felDH = pd.read_excel('./Data/Technology Data/technology_data_for_el_and_dh.xlsx', sheet_name='alldata_flat')
 
 ## Read shapefile data
-the_index, areas, country_code = preprocess_geofiles(choice)
+the_index, areas, country_code = prepared_geofiles(choice)
 areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
 areas.plot()
 

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from Modules.createDH import DistrictHeat
-from Modules.geofiles import preprocess_geofiles
+from Modules.geofiles import prepared_geofiles
 
 style = 'report'
 
@@ -22,8 +22,7 @@ elif style == 'ppt':
     plt.style.use('dark_background')
     fc = 'none'
     
-the_index, areas, c = preprocess_geofiles('nuts3')
-DH = DistrictHeat()
+the_index, areas, c = prepared_geofiles('nuts3')
 
 
 #%% ------------------------------- ###
@@ -31,19 +30,27 @@ DH = DistrictHeat()
 ### ------------------------------- ###
 
 
+choice = 'DKMunicipalities'
+the_index, areas, c = prepared_geofiles(choice)
+
+
 DKareas = areas[areas[the_index].str.find('DK') != -1]
-fig, ax = plt.subplots()
-DKareas.plot(ax=ax, facecolor=[.8, .8, .8])
-DH.geo.plot(ax=ax, facecolor=[.6, 0, 0])
+DH = DistrictHeat('Denmark')
+DH.dfint = DH.find_intersects(DKareas) # Find intersects between district heat areas and chosen areas
+DH.assign_DH(DKareas, DH.dfint)
 
-DKareas = DKareas.to_crs(4328) # To geocentric (meters)
-DH.geo = DH.geo.to_crs(4328) # To geocentric (meters)
 
-df = pd.DataFrame()
-for element in DKareas.index:
-    df['DK areas'] = DH.geo.BalmorelAr
-    df['m^2 intersect'] = DH.geo.geometry.intersection(DKareas.geometry[element]).area
-print('Intersect of %s with \n%s'%(element, df.to_string()))
-    
-DH.geo = DH.geo.to_crs(4326) # To geocentric (meters)
-DKareas = DKareas.to_crs(4326) 
+# Check that the aggregation got all data:
+# Annual DH
+print('\nOriginal data, annual DH:')
+print(DH.DH[DH.DH.A.str.find('DK') != -1].pivot_table(index='A', columns='Y').sum() / 1e6)
+print('\nNew data, annual DH:')
+print(DH.dfDH.sum() / 1e6)
+
+
+## Plot aggregated data
+year = '2050'
+
+DH.plot_original_data(year, DKareas, plot_density=True)
+
+DH.plot_aggregated_data(year, DKareas, True)
