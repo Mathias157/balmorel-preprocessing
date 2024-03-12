@@ -85,26 +85,6 @@ class DistrictHeat:
             print("Dataset doesn't exist - this is an empty object\n")
             print("Available datasets:\n- Denmark (default)")
 
-    def find_intersects(self, areas: gpd.GeoDataFrame, sum_total: bool = False) -> pd.DataFrame:        
-        # Convert to geocentric projection
-        temp_areas = areas.to_crs(4328) # To geocentric (meters)
-        temp_DH = self.geo.to_crs(4328) # To geocentric (meters)
-
-        # Find intersection of DH shapes to each element in aggregated areas
-        df_intercepts = pd.DataFrame()
-        for agg_area in temp_areas.index:
-            df_intercepts[agg_area] = temp_DH.geometry.intersection(temp_areas.geometry[agg_area]).area
-        
-        if sum_total:
-            # Divide by total area:
-            df_intercepts = df_intercepts.div(temp_DH.area, axis=0)
-            
-        else:
-            # Divide by sum of intersected areas
-            df_intercepts = df_intercepts.div(df_intercepts.sum(axis=1), axis=0)
-        
-        return df_intercepts
-
     def assign_DH(self, areas: gpd.GeoDataFrame, df_intercepts: pd.DataFrame,
                   value_col: str = 'Value') -> None:
         """DH data must have A and Y sets, where A matches the areas index\n

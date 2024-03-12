@@ -203,7 +203,38 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
 
     return area_names, areas, country_code
 
+def calculate_intersects(areas_inter1: gpd.GeoDataFrame, 
+                    areas_inter2: gpd.GeoDataFrame, 
+                    sum_total: bool = False) -> pd.DataFrame:        
+        """Calculates intersection of the series of areas_inter2 to each areas_inter1 element 
 
+        Args:
+            areas_inter1 (gpd.GeoDataFrame): _description_
+            areas_inter2 (gpd.GeoDataFrame): _description_
+            sum_total (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            pd.DataFrame: _description_
+        """
+
+        # Convert to geocentric projection
+        temp_area1 = areas_inter1.to_crs(4328) # To geocentric (meters)
+        temp_area2 = areas_inter2.to_crs(4328) # To geocentric (meters)
+
+        # Find intersection of DH shapes to each element in aggregated areas
+        df_intercepts = pd.DataFrame()
+        for agg_area in temp_area1.index:
+            df_intercepts[agg_area] = temp_area2.geometry.intersection(temp_area1.geometry[agg_area]).area
+        
+        if sum_total:
+            # Divide by total area:
+            df_intercepts = df_intercepts.div(temp_area2.area, axis=0)
+            
+        else:
+            # Divide by sum of intersected areas
+            df_intercepts = df_intercepts.div(df_intercepts.sum(axis=1), axis=0)
+        
+        return df_intercepts
 
 
 

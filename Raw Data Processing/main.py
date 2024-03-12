@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 from pybalmorel.functions import IncFile, read_lines
 from Modules.createDH import DistrictHeat
-from Modules.geofiles import prepared_geofiles
+from Modules.geofiles import prepared_geofiles, calculate_intersects
 
 style = 'report'
 
@@ -37,7 +37,7 @@ the_index, areas, c = prepared_geofiles(choice)
 ### 1.1 Aggregate district heating data
 DKareas = areas[areas[the_index].str.find('DK') != -1]
 DH = DistrictHeat('Denmark')
-DH.dfint = DH.find_intersects(DKareas) # Find intersects between district heat areas and chosen areas
+DH.dfint2 = DH.find_intersects(DKareas) # Find intersects between district heat areas and chosen areas
 DH.assign_DH(DKareas, DH.dfint)
 DH.assign_DHT(DKareas, DH.dfint)
 
