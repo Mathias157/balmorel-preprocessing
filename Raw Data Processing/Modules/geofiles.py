@@ -38,15 +38,15 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
     Parameters
     ----------
     choice : str
-        Currently supports: 
-            'DK Municipalities'
-            'NUTS1'
-            'NUTS2'
-            'NUTS3' 
-            'Nordpool'.
-            'NordpoolReal'
-            'BalmorelVREAreas'
-            'Antbalm'
+        Currently supports:\n
+            'DK Municipalities'\n
+            'NUTS1'\n
+            'NUTS2'\n
+            'NUTS3'\n
+            'Nordpool'\n
+            'NordpoolReal'\n
+            'BalmorelVREAreas'\n
+            'Antbalm'\n
             
     plot : str
         Chooses to plot or not
