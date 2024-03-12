@@ -51,22 +51,22 @@ class DistrictHeat:
             
             # Aggregate to the 36 DH areas:
             i = 0
-            for element in ['DK_SA_E_BG',
+            for dh_area in ['DK_SA_E_BG',
                             'DK_SA_E_NG_CHP',
                             'DK_SA_E_NG_HO',
                             'DK_SA_E_ST_CHP',
                             'DK_SA_E_ST_HO',
                             'DK_SA_E_WO_HO']:
                 if i == 0:
-                    temp = self.geo.loc[element].copy()
+                    temp = self.geo.loc[dh_area].copy()
                     temp.crs = 'EPSG:4326'
                 else:
-                    temp.geometry = temp.geometry.union(self.geo.loc[element].geometry) 
-                self.geo = self.geo.drop(index=element)
+                    temp.geometry = temp.geometry.union(self.geo.loc[dh_area].geometry) 
+                self.geo = self.geo.drop(index=dh_area)
                 i += 1 
             self.geo.loc['DK_E_Rural'] = temp
             i = 0
-            for element in ['DK_SA_W_BG',
+            for dh_area in ['DK_SA_W_BG',
                             'DK_SA_W_EB',
                             'DK_SA_W_NG_CHP',
                             'DK_SA_W_NG_HO',
@@ -74,10 +74,10 @@ class DistrictHeat:
                             'DK_SA_W_WO_CHP',
                             'DK_SA_W_WO_HO']:
                 if i == 0:
-                    temp = self.geo.loc[element].copy()
+                    temp = self.geo.loc[dh_area].copy()
                 else:
-                    temp.geometry = temp.geometry.union(self.geo.loc[element].geometry) 
-                self.geo = self.geo.drop(index=element)
+                    temp.geometry = temp.geometry.union(self.geo.loc[dh_area].geometry) 
+                self.geo = self.geo.drop(index=dh_area)
                 i += 1 
             self.geo.loc['DK_W_Rural'] = temp
             self.geo.crs = 'EPSG:4326'
@@ -90,10 +90,10 @@ class DistrictHeat:
         temp_areas = areas.to_crs(4328) # To geocentric (meters)
         temp_DH = self.geo.to_crs(4328) # To geocentric (meters)
 
-        # Find intersection of DH shapes to each element in areas
+        # Find intersection of DH shapes to each element in aggregated areas
         df_intercepts = pd.DataFrame()
-        for element in temp_areas.index:
-            df_intercepts[element] = temp_DH.geometry.intersection(temp_areas.geometry[element]).area
+        for agg_area in temp_areas.index:
+            df_intercepts[agg_area] = temp_DH.geometry.intersection(temp_areas.geometry[agg_area]).area
         
         if sum_total:
             # Divide by total area:
@@ -129,11 +129,53 @@ class DistrictHeat:
         else:
             print('Wrong column format!')
         
-        for element in areas.index:
+        for agg_area in areas.index:
             for year in temp.columns.get_level_values(1):
-                df_DH.loc[element, year] = (temp.loc[:,eval(col_ind)] * df_intercepts[element]).sum()
+                df_DH.loc[agg_area, year] = (temp.loc[:,eval(col_ind)] * df_intercepts[agg_area]).sum()
 
         self.dfDH = df_DH
+        
+        # Finalise index
+        self.dfDH.index = 'RESH . ' + pd.Series(self.dfDH.index)
+        self.dfDH.index.name = ''
+        
+    def assign_DHT(self, areas: gpd.GeoDataFrame, df_intercepts: pd.DataFrame,
+                  value_col: str = 'Value', agg_func: str = 'sum') -> None:
+        """DHT data must have S.T and A sets, where A matches the areas index\n
+        Ends up with format:\n
+        \t\t\tA1\tA2\tA3\t--\tAN\n
+        S01\t.\tT001\n
+        S01\t.\tT002\n
+        |\n
+        S52\t.\tT168\n
+        """
+        
+        # Pivot DHT
+        temp = self.DHT.pivot_table(index=['S', 'T'], columns='A')
+
+        # DHT table for IncFile
+        df_DHT = pd.DataFrame(index=temp.index, columns=areas.index,
+                              data=0) 
+        
+        # Check the dataframe structure
+        if type(temp.columns) == pd.Index:
+            col_ind = "dh_area"
+        elif type(temp.columns) == pd.MultiIndex:
+            col_ind = "(value_col, dh_area)"
+        else:
+            print('Wrong column format!')
+        
+        if agg_func.lower() == 'sum':
+            for agg_area in areas.index:
+                for dh_area in [dh_area0 for dh_area0 in df_intercepts[agg_area].index if df_intercepts.loc[dh_area0, agg_area] > 1e-10]:
+                    df_DHT[agg_area] += temp.loc[(slice(None),slice(None)),eval(col_ind)] * df_intercepts.loc[dh_area, agg_area]
+                    print()
+
+        self.dfDHT = df_DHT
+        
+        # Finalise index
+        self.dfDHT.index = pd.Series(self.dfDHT.index.get_level_values(0)) + ' . ' + pd.Series(self.dfDHT.index.get_level_values(1))
+        self.dfDHT.index.name = ''
 
 
     def assign_DH_profile():
@@ -170,7 +212,9 @@ class DistrictHeat:
         if hasattr(self, 'dfDH'):
             fig, ax = plt.subplots(facecolor=fc)
             df = areas.copy()
-            df = df.join(DH.dfDH, how='inner')
+            df2 = self.dfDH.copy()
+            df2.index = df2.index.str.replace('RESH . ', '')
+            df = df.join(df2, how='inner')
             df = df.to_crs('EPSG:4328')
             if plot_density:
                 df[year] = df[year] / df.area # Heat density (MWh/m^2)
@@ -181,7 +225,7 @@ class DistrictHeat:
             df2 = areas.copy()
             df2[year] = df[year]
             df2.plot(ax=ax, column =year, legend=True, cmap='viridis')
-            ax.set_title('%s Aggregation - %s'%(choice, leg))
+            ax.set_title('Aggregated Data - %s'%leg)
             
             return fig, ax
         
@@ -196,19 +240,20 @@ def find_value(df: pd.DataFrame, element: any,
     if l > 1:
         print('%d %s values! Picked index %d'%(l, func, ind))
     return temp[ind]
-        
-#%% Example
+     
+##Example
 
 if __name__ == '__main__':
+    
     choice = 'DKMunicipalities'
-    # the_index, areas, c = prepared_geofiles(choice)
-
+    the_index, areas, c = prepared_geofiles(choice)
 
     DKareas = areas[areas[the_index].str.find('DK') != -1]
     DH = DistrictHeat('Denmark')
     DH.dfint = DH.find_intersects(DKareas) # Find intersects between district heat areas and chosen areas
     DH.assign_DH(DKareas, DH.dfint)
-
+    DH.assign_DHT(DKareas, DH.dfint)   
+    
     # Check that the aggregation got all data:
     # Annual DH
     print('\nOriginal data, annual DH:')
