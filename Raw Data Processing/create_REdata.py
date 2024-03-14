@@ -2,12 +2,19 @@
 """
 Created on Sat Dec  3 15:33:10 2022
 
-@author: mathi
+@author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
 
-See the following documentation, for understanding how this script works:
+See the following documentation, for understanding how atlite works:
     Cutouts: https://atlite.readthedocs.io/en/latest/examples/create_cutout.html
     Power potentials: https://atlite.readthedocs.io/en/latest/examples/landuse-availability.html
 
+REQUIRED:
+    Using ERA5 requires an API-key from Copernicus
+    1) Sign up at https://cds.climate.copernicus.eu/#!/home
+    2) Create a file called .cdsapirc in your home drive (typically C:\Users\USERNAME)
+        Copy paste the UID and API key that you got into .cdsapirc in the following format:
+        url: https://cds.climate.copernicus.eu/api/v2
+        key: UID:API  
 """
 
 import pandas as pd
@@ -25,6 +32,8 @@ import xarray as xr
 from atlite.gis import shape_availability, ExclusionContainer
 import os
 from Modules.geofiles import prepared_geofiles
+import logging
+logging.basicConfig(level=logging.INFO)
 
 style = 'report'
 
