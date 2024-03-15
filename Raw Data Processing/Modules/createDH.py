@@ -11,6 +11,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
+try:
+    import cmcrameri
+    cmap = cmcrameri.cm.cmaps['roma_r']
+except ModuleNotFoundError:
+    print('cmrameri package not installed, using default colourmaps')
+    cmap = matplotlib.colormaps['virids']
 
 style = 'report'
 
@@ -169,7 +175,7 @@ class DistrictHeat:
                   plot_density: bool = False) -> tuple[matplotlib.figure.Figure, 
                                                        matplotlib.axes._axes.Axes]:        
         fig, ax = plt.subplots(facecolor=fc)
-        areas.plot(ax=ax, facecolor=[.8, .8, .8], edgecolor=[0,0,0], linewidth=.3)
+        areas.plot(ax=ax, facecolor=[.85, .85, .85], linewidth=.3)
         df = self.geo.copy()
         df = df.join(self.DH[self.DH.Y == year].pivot_table(index='A'), how='inner')
         df = df.to_crs('EPSG:4328')
@@ -180,8 +186,10 @@ class DistrictHeat:
             df['Value'] = df['Value'] / 1e6 # TWh 
             leg = 'TWh'
         df = df.to_crs('EPSG:4326')
-        df.plot(ax=ax, column ='Value', legend=True, cmap='viridis')
+        df.plot(ax=ax, column ='Value', legend=True, cmap=cmap)
         ax.set_title('Original Data - %s'%leg)
+        ax.set_ylabel('Latitude')
+        ax.set_xlabel('Longitude')
         
         return fig, ax
     
@@ -204,8 +212,10 @@ class DistrictHeat:
                 leg = 'TWh'
             df2 = areas.copy()
             df2[year] = df[year]
-            df2.plot(ax=ax, column =year, legend=True, cmap='viridis')
+            df2.plot(ax=ax, column =year, legend=True, cmap=cmap)
             ax.set_title('Aggregated Data - %s'%leg)
+            ax.set_ylabel('Latitude')
+            ax.set_xlabel('Longitude')
             
             return fig, ax
         
@@ -230,7 +240,7 @@ if __name__ == '__main__':
 
     DKareas = areas[areas[the_index].str.find('DK') != -1]
     DH = DistrictHeat('Denmark')
-    DH.dfint = DH.find_intersects(DKareas) # Find intersects between district heat areas and chosen areas
+    DH.dfint = calculate_intersects(DKareas, DH.geo) # Find intersects between district heat areas and chosen areas
     DH.assign_DH(DKareas, DH.dfint)
     DH.assign_DHT(DKareas, DH.dfint)   
     
@@ -245,6 +255,8 @@ if __name__ == '__main__':
     ## Plot aggregated data
     year = '2050'
 
-    DH.plot_original_data(year, DKareas, True)
+    fig, ax = DH.plot_original_data(year, DKareas, True)
+    fig.savefig('Output/Figures/DH_original.png', bbox_inches='tight')
+    fig.savefig('Output/Figures/DH_original.pdf', bbox_inches='tight')
 
     DH.plot_aggregated_data(year, DKareas)
