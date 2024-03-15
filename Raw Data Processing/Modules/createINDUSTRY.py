@@ -14,13 +14,23 @@ Sources:
 ### ------------------------------- ###
 
 import os 
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import geopandas as gpd
+from pybalmorel.functions import IncFile
 from Modules.geofiles import prepared_geofiles
 from shapely.geometry import Point, Polygon, LineString
 from typing import Union
+try:
+    import cmcrameri
+    cmap = cmcrameri.cm.cmaps['roma_r']
+    colors = [cmap(i) for i in range(256)]
+except ModuleNotFoundError:
+    print('cmrameri package not installed, using default colourmaps')
+    cmap = matplotlib.colormaps['viridis']
+    colors = [cmap(i) for i in range(256)]
 
 style = 'report'
 
@@ -35,11 +45,7 @@ elif style == 'ppt':
 ###        1. 
 ### ------------------------------- ###
 
-choice = 'NUTS3'
-the_index, areas, c = prepared_geofiles(choice)
-
-
-#%% 1.0 Assumptions
+### 1.0 Assumptions
 XHLOSS = 0.1        # MWh/Mwh
 XHCOST = 0.001      # €/Mwh
 XHINVCOST = 396000  # €/MW
@@ -87,7 +93,7 @@ class Industry:
         self.geoindex = the_index
         
 
-    def assign_original_region(self, geo_index):
+    def assign_original_region(self):
         self.PS['R'] = ''  
         for area in self.geo.index:
             # Find containing region
@@ -119,7 +125,25 @@ class Industry:
             self.PS.loc[idx, 'EmiFrac'] = self.PS.loc[idx, 'Emissions_ETS_2014'] / emisum.loc[R, 'Emissions_ETS_2014']  
 
 
+    def create_DH(self, incfiles: dict, original_area: str, 
+                  new_area: str, frac_sum: str, include_new_area: bool = False):
+        """Assign industry heat demand from original area to new area"""
+        
+        # Find original Balmorel data
+        temp = self.DH[self.DH.A.str.find(original_area) != -1]
     
+        # Apply sum to Balmorel data
+        temp.loc[:, 'Value'] = temp['Value'] * frac_sum
+        
+        # Replace original area name with new area name
+        temp.loc[:, 'A'] = temp['A'].str.replace(original_area, new_area)
+        
+        if include_new_area:
+            temp.loc[:, 'new_area'] = new_area # If wanting to plot it
+        
+        # Store in incfile 
+        incfiles['INDUSTRY_DH'].body = pd.concat((incfiles['INDUSTRY_DH'].body, temp)) 
+            
     
 # def find_containing_geometries(gdf: gpd.GeoDataFrame, 
 #                                geo: Union[Point, Polygon, LineString]) -> gpd.GeoDataFrame:
@@ -130,6 +154,7 @@ class Industry:
     
 
 IND = Industry()
+
 
 #%% 1.1 Take a look at DK
 fig, ax = plt.subplots()
@@ -143,7 +168,7 @@ fig.savefig('Output/Figures/IND_original.png', bbox_inches='tight')
 fig.savefig('Output/Figures/IND_original.pdf', bbox_inches='tight')
 
 ### 1.2 Assign Original Region
-IND.assign_original_region(IND.geoindex)
+IND.assign_original_region()
 
 # Assign fraction of emissions in region
 IND.assign_emission_fractions() # The numbers in EmiFrac can be used directly on 
@@ -153,22 +178,45 @@ IND.assign_emission_fractions() # The numbers in EmiFrac can be used directly on
 
 choice = 'NUTS3'
 the_index, areas, c = prepared_geofiles(choice)
-# areas = areas[areas[the_index].str.find('DK') != -1]
+areas = areas[areas[the_index].str.find('DK') != -1]
 
 
+# Placeholder for incfiles
+incfiles = {}
+incfilenames = pd.Series(os.listdir('Data/BalmorelData')).str.rstrip('.gzip') 
+for name in incfilenames:
+    incfiles[name] = IncFile(name=name,
+                            path='Output',
+                            body=pd.DataFrame())
 
 # Calculate demands in area
 fig, ax = plt.subplots()
-areas.plot(ax=ax)
+df = pd.DataFrame(index=areas.index)
 for R in areas.index:
     idx = IND.PS.within(areas.geometry[R])
     
     try:
-        IND.PS[idx].plot(ax=ax)
+        IND.PS[idx].plot(ax=ax, zorder=5)
+        
+        # Get original areas (can be more, if the chosen spatial resolution is coarser than the original)
+        original_areas = IND.PS.R[idx].unique()
+
+        # Go through original areas
+        for original_area in original_areas:    
+            
+            # Sum fraction of emissions in the new area
+            frac_sum = IND.PS.loc[idx & (IND.PS.R == original_area), 'EmiFrac'].sum()
+            
+            IND.create_DH(incfiles, original_area, R, frac_sum, True)
+            
+    
     except ValueError:
         print('No industry in %s'%R)
 
-
+temp = incfiles['INDUSTRY_DH'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
+areas['DH'] = temp.Value / 1e6
+areas.plot(ax=ax, zorder=2, column='DH', legend=True, cmap=cmap)
+areas.plot(ax=ax, zorder=1, facecolor=cmap(0))
 # Need to make incfiles:
 # INDUSTRY_AGKN
 # INDUSTRY_CCCRRRAAA
