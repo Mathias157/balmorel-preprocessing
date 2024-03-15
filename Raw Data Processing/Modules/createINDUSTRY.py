@@ -89,23 +89,21 @@ class Industry:
 
     def assign_original_region(self, geo_index):
         self.PS['R'] = ''  
-        for PS in self.PS.index:
+        for area in self.geo.index:
             # Find containing region
-            idx = self.geo.contains(self.PS.geometry[PS])
+            idx = self.PS.within(self.geo.geometry[area])
+            self.PS.loc[idx, 'R'] = area # Should only have one value
+
+        # If it's not contained within a region, use smallest distance to find remaining
+        for PS in self.PS[self.PS.R == ''].index:
+            temp = self.geo.copy().to_crs('EPSG:4328')
+            dist = temp.distance(self.PS.geometry[PS])
+
             try:
-                self.PS.loc[PS, 'R'] = self.geo.loc[idx, geo_index].iloc[0] # Should only have one value
+                self.PS.loc[PS, 'R'] = dist[dist == dist.min()].index[0] # Should only have one value
             except IndexError:
-                # If it's not contained within a region, use smallest distance
-                temp = self.geo.copy().to_crs('EPSG:4328')
-                dist = temp.distance(self.PS.geometry[PS])
-
-                try:
-                    self.PS.loc[PS, 'R'] = dist[dist == dist.min()].index[0] # Should only have one value
-                except IndexError:
-                    print('Datapoint %d probably had invalid geometry'%PS)
-            except:
-                print('something wrong with point %d'%PS)
-
+                print('Datapoint %d probably had invalid geometry'%PS)
+        
     def assign_emission_fractions(self):
         # Use EPRTR emissions for CH
         self.PS.loc[self.PS.R == 'CH', 'Emissions_ETS_2014'] = self.PS[self.PS.R == 'CH']['Emissions_EPRTR_2014']
@@ -113,12 +111,12 @@ class Industry:
         self.PS.loc[self.PS.R == 'RS', 'Emissions_ETS_2014'] = 0
 
         # Total emissions in a region
-        emisum = self.PS.pivot_table(index='R', values=['Emissions_ETS_2014'], fill_value=0)
+        emisum = self.PS.pivot_table(index='R', values=['Emissions_ETS_2014'], fill_value=0, aggfunc='sum')
 
         # The fraction of emissions at point sources
         for R in self.PS.R.unique():
             idx = self.PS.R == R
-            self.PS.loc[idx, 'EmiFrac'] = self.PS.loc[idx, 'Emissions_ETS_2014'] * emisum.loc[R, 'Emissions_ETS_2014']  
+            self.PS.loc[idx, 'EmiFrac'] = self.PS.loc[idx, 'Emissions_ETS_2014'] / emisum.loc[R, 'Emissions_ETS_2014']  
 
 
     
