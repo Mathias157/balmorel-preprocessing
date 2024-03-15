@@ -147,6 +147,16 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         areas['Country'] = areas.RRR.str[:2]
         area_names = 'RRR'
         country_code = 'Country'
+        
+    elif choice.replace(' ','').lower() == 'balmorel2022':
+        p = r'Data\Shapefiles\2022 BalmorelMap.geojson'
+        areas = gpd.read_file(p)
+        area_names = 'id'
+        areas = areas[areas.id != 'RU']
+        # country_code 
+        
+        # Remove regions with no id:
+        areas = areas[~areas.id.isnull()]
     
     elif choice.replace(' ','').lower() == 'balmorelvreareas':
         areas = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmorelVREAreas.gpkg')
