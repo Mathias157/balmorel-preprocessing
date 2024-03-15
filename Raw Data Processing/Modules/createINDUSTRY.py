@@ -42,7 +42,7 @@ elif style == 'ppt':
     fc = 'none'
 
 #%% ------------------------------- ###
-###        1. 
+###        1. Industry Data         ###
 ### ------------------------------- ###
 
 ### 1.0 Assumptions
@@ -125,8 +125,8 @@ class Industry:
             self.PS.loc[idx, 'EmiFrac'] = self.PS.loc[idx, 'Emissions_ETS_2014'] / emisum.loc[R, 'Emissions_ETS_2014']  
 
 
-    def create_industry_data(self, incfiles: dict, original_area: str, 
-                  new_area: str, frac_sum: str, include_new_area: bool = False):
+    def apply_ef_to_original_data(self, incfiles: dict, original_area: str, 
+                  new_area: str, frac_sum: str, include_new_area: bool = False) -> None:
         """Assign industry heat demand from original area to new area"""
 
         for attr in ['DH', 'DH_VAR_T', 'GKFX', 'DE']:
@@ -151,88 +151,102 @@ class Industry:
             # Concatenate to body in incfile 
             incfiles['INDUSTRY_' + attr].body_concat(temp) 
     
-    def create_industry_agkn():
-        ...  
-    
-# def find_containing_geometries(gdf: gpd.GeoDataFrame, 
-#                                geo: Union[Point, Polygon, LineString]) -> gpd.GeoDataFrame:
-#     # Find elements containing shape
-#     idx = gdf.geo.contains(geo)
-
-#     return gdf.loc[idx].iloc[0]    
-    
-
-IND = Industry()
-
-
-#%% 1.1 Take a look at DK
-fig, ax = plt.subplots()
-IND.geo.loc[['DK1', 'DK2']].plot(ax=ax, facecolor=[.85 for i in range(3)])
-IND.PS[IND.PS.Country == 'Denmark'].plot(ax=ax, marker='o', color=[.3, .3, .3],
-                                         markersize=IND.PS.loc[IND.PS.Country == 'Denmark', 
-                                                               'Emissions_ETS_2014']/1e4)
-ax.set_ylabel('Latitude')
-ax.set_xlabel('Longitude')
-fig.savefig('Output/Figures/IND_original.png', bbox_inches='tight')
-fig.savefig('Output/Figures/IND_original.pdf', bbox_inches='tight')
-
-### 1.2 Assign Original Region
-IND.assign_original_region()
-
-# Assign fraction of emissions in region
-IND.assign_emission_fractions() # The numbers in EmiFrac can be used directly on 
-
-
-#%%
-
-choice = 'NUTS3'
-the_index, areas, c = prepared_geofiles(choice)
-areas = areas[areas[the_index].str.find('DK') != -1]
-
-
-# Placeholder for incfiles
-incfiles = {}
-incfilenames = pd.Series(os.listdir('Data/BalmorelData')).str.rstrip('.gzip') 
-for name in incfilenames:
-    incfiles[name] = IncFile(name=name,
-                            path='Output',
-                            body=pd.DataFrame())
-
-# Calculate demands in area
-fig, ax = plt.subplots()
-df = pd.DataFrame(index=areas.index)
-for R in areas.index:
-    idx = IND.PS.within(areas.geometry[R])
-    
-    try:
-        IND.PS[idx].plot(ax=ax, zorder=5)
+    def create_industry_data(self, areas: gpd.GeoDataFrame,
+                             save_new_area_to_df: bool = False,
+                             plot_point_sources: bool = False,
+                             ax: matplotlib.axes.Axes = '') -> dict:
+        """Prepares industry data .inc files  
+        """
         
-        # Get original areas (can be more, if the chosen spatial resolution is coarser than the original)
-        original_areas = IND.PS.R[idx].unique()
+        # Placeholder for incfiles
+        incfiles = {}
+        incfilenames = pd.Series(os.listdir('Data/BalmorelData')).str.rstrip('.gzip') 
+        for name in incfilenames:
+            incfiles[name] = IncFile(name=name,
+                                    path='Output',
+                                    body=pd.DataFrame())
+            
+        for new_area in areas.index:
+            idx = self.PS.within(areas.geometry[new_area])
+            
+            try:
+                if plot_point_sources & (ax != ''):
+                    self.PS[idx].plot(ax=ax, zorder=5)
+                
+                # Get original areas (can be more, if the chosen spatial resolution is coarser than the original)
+                original_areas = self.PS.R[idx].unique()
 
-        # Go through original areas
-        for original_area in original_areas:    
+                # Go through original areas
+                for original_area in original_areas:    
+                    
+                    # Sum fraction of emissions in the new area
+                    frac_sum = self.PS.loc[idx & (self.PS.R == original_area), 'EmiFrac'].sum()
+                    
+                    # Disaggregate DH, DH_VAR_T, DE, GKFX
+                    self.apply_ef_to_original_data(incfiles, original_area, new_area, frac_sum, save_new_area_to_df)
+                    
+                    # Disaggregate AGKN
+                    temp = self.AGKN[self.AGKN.A.str.find(original_area) != -1].copy()
+                    temp['A'] = temp['A'].str.replace(original_area, new_area)
+                    
+                    incfiles['INDUSTRY_AGKN'].body_concat(temp) # perhaps make a IncFile.body.concat function..
             
-            # Sum fraction of emissions in the new area
-            frac_sum = IND.PS.loc[idx & (IND.PS.R == original_area), 'EmiFrac'].sum()
-            
-            IND.create_industry_data(incfiles, original_area, R, frac_sum, True)
-            
-            # AGKN
-            temp = IND.AGKN[IND.AGKN.A.str.find(original_area) != -1].copy()
-            temp['A'] = temp['A'].str.replace(original_area, R)
-            # incfiles['INDUSTRY_AGKN'].body = pd.concat((incfiles['INDUSTRY_AGKN'].body, temp)) # perhaps make a IncFile.body.concat function..
-            incfiles['INDUSTRY_AGKN'].body_concat(temp) # perhaps make a IncFile.body.concat function..
+            except ValueError:
+                print('No industry in %s'%new_area)
+                
+        return incfiles
+     
+    def plot_original_data(self, emission_scale: float = 5e5, 
+                           bounds: list[float, float, float, float] = [-12, 30, 33, 73]) -> tuple[matplotlib.figure.Figure, 
+                                                                                                matplotlib.axes._axes.Axes]:        
+        fig, ax = plt.subplots()
+        self.geo.plot(ax=ax, facecolor=[.85 for i in range(3)])
+        self.PS.plot(ax=ax, marker='o', color=[.3, .3, .3],
+                    markersize=self.PS['Emissions_ETS_2014']/emission_scale)
+        ax.set_title('Original Data')
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        ax.set_xlim([bounds[0], bounds[1]])
+        ax.set_ylim([bounds[2], bounds[3]])
+        fig.savefig('Output/Figures/IND_original.png', bbox_inches='tight')
+        fig.savefig('Output/Figures/IND_original.pdf', bbox_inches='tight')
+        
+        return fig, ax
     
-    except ValueError:
-        print('No industry in %s'%R)
+    def plot_aggregated_data(self, incfiles: dict, 
+                             areas: gpd.GeoDataFrame,
+                             indicator: str = 'DH') -> tuple[matplotlib.figure.Figure, 
+                                                            matplotlib.axes._axes.Axes]:
+    
+        # Generate industry data for a specific spatial resolution
 
-temp = incfiles['INDUSTRY_DH'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
-# temp = incfiles['INDUSTRY_DE'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
-# temp = incfiles['INDUSTRY_GKFX'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2020']
-areas['DH'] = temp.Value / 1e6
-areas.plot(ax=ax, zorder=2, column='DH', legend=True, cmap=cmap)
-areas.plot(ax=ax, zorder=1, facecolor=cmap(0))
+        # Plot
+        try:
+            if indicator == 'DH':
+                temp = incfiles['INDUSTRY_DH'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
+                areas['new_col'] = temp.Value / 1e6
+                ax.set_title('Industry Heat Demand (TWh)')
+            elif indicator == 'DE':        
+                temp = incfiles['INDUSTRY_DE'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
+                areas['new_col'] = temp.Value / 1e6
+                ax.set_title('Industry Electricity Demand (TWh)')
+            elif indicator == 'GKFX':
+                temp = incfiles['INDUSTRY_GKFX'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2020']
+                areas['new_col'] = temp.Value 
+                ax.set_title('Industry Generation Capacity (MW)')
+            
+            fig, ax = plt.subplots()
+            areas.plot(ax=ax, zorder=2, column='new_col', legend=True, cmap=cmap)
+            areas.plot(ax=ax, zorder=1, facecolor=cmap(0))
+        
+        except KeyError:
+            print('New area column not created in .inc file')
+            print('save_new_area_to_df was probably set to False in create_industry_data function')
+
+        return fig, ax
+    
+
+
 # Need to make incfiles:
 # INDUSTRY_AGKN
 # INDUSTRY_CCCRRRAAA
