@@ -153,12 +153,20 @@ IND.assign_emission_fractions() # The numbers in EmiFrac can be used directly on
 
 choice = 'NUTS3'
 the_index, areas, c = prepared_geofiles(choice)
-areas = areas[areas[the_index].str.find('DK') != -1]
+# areas = areas[areas[the_index].str.find('DK') != -1]
 
-#%%
 
-# Calculate 
 
+# Calculate demands in area
+fig, ax = plt.subplots()
+areas.plot(ax=ax)
+for R in areas.index:
+    idx = IND.PS.within(areas.geometry[R])
+    
+    try:
+        IND.PS[idx].plot(ax=ax)
+    except ValueError:
+        print('No industry in %s'%R)
 
 
 # Need to make incfiles:
