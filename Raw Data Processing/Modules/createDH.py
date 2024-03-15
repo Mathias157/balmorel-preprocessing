@@ -14,9 +14,11 @@ import geopandas as gpd
 try:
     import cmcrameri
     cmap = cmcrameri.cm.cmaps['roma_r']
+    colors = [cmap(i) for i in range(256)]
 except ModuleNotFoundError:
     print('cmrameri package not installed, using default colourmaps')
-    cmap = matplotlib.colormaps['virids']
+    cmap = matplotlib.colormaps['viridis']
+    colors = [cmap(i) for i in range(256)]
 
 style = 'report'
 
