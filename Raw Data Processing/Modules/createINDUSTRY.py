@@ -125,25 +125,34 @@ class Industry:
             self.PS.loc[idx, 'EmiFrac'] = self.PS.loc[idx, 'Emissions_ETS_2014'] / emisum.loc[R, 'Emissions_ETS_2014']  
 
 
-    def create_DH(self, incfiles: dict, original_area: str, 
+    def create_industry_data(self, incfiles: dict, original_area: str, 
                   new_area: str, frac_sum: str, include_new_area: bool = False):
         """Assign industry heat demand from original area to new area"""
-        
-        # Find original Balmorel data
-        temp = self.DH[self.DH.A.str.find(original_area) != -1]
-    
-        # Apply sum to Balmorel data
-        temp.loc[:, 'Value'] = temp['Value'] * frac_sum
-        
-        # Replace original area name with new area name
-        temp.loc[:, 'A'] = temp['A'].str.replace(original_area, new_area)
-        
-        if include_new_area:
-            temp.loc[:, 'new_area'] = new_area # If wanting to plot it
-        
-        # Store in incfile 
-        incfiles['INDUSTRY_DH'].body = pd.concat((incfiles['INDUSTRY_DH'].body, temp)) 
+
+        for attr in ['DH', 'DH_VAR_T', 'GKFX', 'DE']:
+            # Find original Balmorel data
+            if attr != 'DE':
+                temp = getattr(self, attr)[getattr(self, attr).A.str.find(original_area) != -1].copy()
+            else:
+                temp = getattr(self, attr)[getattr(self, attr).R == original_area].copy()
             
+            # Apply sum to Balmorel data
+            temp.loc[:, 'Value'] = temp['Value'] * frac_sum
+            
+            # Replace original area name with new area name
+            if attr != 'DE':
+                temp.loc[:, 'A'] = temp['A'].str.replace(original_area, new_area)
+            else:
+                temp.loc[:, 'R'] = temp['R'].str.replace(original_area, new_area)
+            
+            if include_new_area:
+                temp.loc[:, 'new_area'] = new_area # If wanting to plot it
+            
+            # Concatenate to body in incfile 
+            incfiles['INDUSTRY_' + attr].body_concat(temp) 
+    
+    def create_industry_agkn():
+        ...  
     
 # def find_containing_geometries(gdf: gpd.GeoDataFrame, 
 #                                geo: Union[Point, Polygon, LineString]) -> gpd.GeoDataFrame:
@@ -207,13 +216,20 @@ for R in areas.index:
             # Sum fraction of emissions in the new area
             frac_sum = IND.PS.loc[idx & (IND.PS.R == original_area), 'EmiFrac'].sum()
             
-            IND.create_DH(incfiles, original_area, R, frac_sum, True)
+            IND.create_industry_data(incfiles, original_area, R, frac_sum, True)
             
+            # AGKN
+            temp = IND.AGKN[IND.AGKN.A.str.find(original_area) != -1].copy()
+            temp['A'] = temp['A'].str.replace(original_area, R)
+            # incfiles['INDUSTRY_AGKN'].body = pd.concat((incfiles['INDUSTRY_AGKN'].body, temp)) # perhaps make a IncFile.body.concat function..
+            incfiles['INDUSTRY_AGKN'].body_concat(temp) # perhaps make a IncFile.body.concat function..
     
     except ValueError:
         print('No industry in %s'%R)
 
 temp = incfiles['INDUSTRY_DH'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
+# temp = incfiles['INDUSTRY_DE'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
+# temp = incfiles['INDUSTRY_GKFX'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2020']
 areas['DH'] = temp.Value / 1e6
 areas.plot(ax=ax, zorder=2, column='DH', legend=True, cmap=cmap)
 areas.plot(ax=ax, zorder=1, facecolor=cmap(0))
@@ -234,4 +250,5 @@ areas.plot(ax=ax, zorder=1, facecolor=cmap(0))
 # INDUSTRY_XHLOSS
 # INDUSTRY_XHCOST
 # INDUSTRY_XHINVCOST
+
 
