@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import geopandas as gpd
-from pybalmorel.functions import IncFile
+from pybalmorel.functions import IncFile, read_lines
 from Modules.geofiles import prepared_geofiles
 from shapely.geometry import Point, Polygon, LineString
 from typing import Union
@@ -160,11 +160,17 @@ class Industry:
         
         # Placeholder for incfiles
         incfiles = {}
-        incfilenames = pd.Series(os.listdir('Data/BalmorelData')).str.rstrip('.gzip') 
+        incfilenames = ['INDUSTRY_AGKN', 'INDUSTRY_DE', 'INDUSTRY_DH',
+                        'INDUSTRY_DH_VAR_T', 'INDUSTRY_GKFX', 'INDUSTRY_CCCRRRAAA',
+                        'INDUSTRY_RRRAAA', 'INDUSTRY_AAA'] 
         for name in incfilenames:
             incfiles[name] = IncFile(name=name,
                                     path='Output',
-                                    body=pd.DataFrame())
+                                    body=pd.DataFrame(),
+                                    prefix=read_lines(name+'_prefix.inc',
+                                                      file_path='Data/IncFilePreSuf'),
+                                    suffix=read_lines(name+'_suffix.inc',
+                                                      file_path='Data/IncFilePreSuf'))
             
         for new_area in areas.index:
             idx = self.PS.within(areas.geometry[new_area])

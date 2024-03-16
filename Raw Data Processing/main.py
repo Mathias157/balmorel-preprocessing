@@ -9,7 +9,8 @@ Created on 11.03.2024
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
+# Disable the limit on pandas display ranges
+pd.set_option('display.max_colwidth', None)
 from pybalmorel.functions import IncFile, read_lines
 from Modules.createDH import DistrictHeat
 from Modules.createINDUSTRY import Industry
@@ -86,9 +87,26 @@ def generate_industry_data(area):
     IND.assign_original_region()
 
     # Assign fraction of emissions in region
-    IND.assign_emission_fractions() # The numbers in EmiFrac can be used directly on
+    IND.assign_emission_fractions() 
 
     incfiles = IND.create_industry_data(areas, True)
+    
+    # Prepare inc-files
+    ind_areas = incfiles['INDUSTRY_DH'].body['A'].unique()
+    incfiles['INDUSTRY_CCCRRRAAA'].body = '\n'.join(list(ind_areas))
+    incfiles['INDUSTRY_RRRAAA'].body = '\n'.join(list("%s . %s"%(area.split('_')[0], area) for area in ind_areas))
+    incfiles['INDUSTRY_AAA'].body = '\n'.join(list(ind_areas))
+    incfiles['INDUSTRY_GKFX'].body_prepare(['A', 'G'], ['Y'])
+    incfiles['INDUSTRY_DH'].body_prepare(['DHUSER', 'A'], ['Y'])
+    incfiles['INDUSTRY_DH_VAR_T'].body_prepare(['S', 'T'], ['A', 'DHUSER'])
+    incfiles['INDUSTRY_DE'].body_prepare(['DEUSER', 'R'], ['Y'])
+    incfiles['INDUSTRY_AGKN'].body = '\n'.join([f"AGKN('{row['A']}', '{row['G']}') = YES;" for i,row in incfiles['INDUSTRY_AGKN'].body.iterrows()])
+    
+    
+    for file in ['INDUSTRY_GKFX', 'INDUSTRY_DH', 'INDUSTRY_DH_VAR_T',
+                 'INDUSTRY_DE', 'INDUSTRY_AGKN', 'INDUSTRY_CCCRRRAAA',
+                 'INDUSTRY_RRRAAA', 'INDUSTRY_AAA']: 
+        incfiles[file].save()
 
     return incfiles
 
