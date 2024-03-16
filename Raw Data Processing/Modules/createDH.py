@@ -124,8 +124,8 @@ class DistrictHeat:
         self.dfDH = df_DH
         
         # Finalise index
-        self.dfDH.index = 'RESH . ' + pd.Series(self.dfDH.index)
-        self.dfDH.index.name = ''
+        self.dfDH.index = 'RESH . ' + pd.Series(self.dfDH.index) + '_A'
+        self.dfDH.index.name = '' 
         
     def assign_DHT(self, areas: gpd.GeoDataFrame, df_intercepts: pd.DataFrame,
                   value_col: str = 'Value', agg_func: str = 'sum') -> None:
@@ -164,6 +164,8 @@ class DistrictHeat:
         # Finalise index
         self.dfDHT.index = pd.Series(self.dfDHT.index.get_level_values(0)) + ' . ' + pd.Series(self.dfDHT.index.get_level_values(1))
         self.dfDHT.index.name = ''
+        self.dfDHT.columns.name = ''
+        self.dfDHT.columns = pd.Series(self.dfDHT.columns) + '_A'
 
 
     def assign_DH_profile():
@@ -203,7 +205,7 @@ class DistrictHeat:
             fig, ax = plt.subplots(facecolor=fc)
             df = areas.copy()
             df2 = self.dfDH.copy()
-            df2.index = df2.index.str.replace('RESH . ', '')
+            df2.index = df2.index.str.replace('RESH . ', '').str.replace('_A', '')
             df = df.join(df2, how='inner')
             df = df.to_crs('EPSG:4328')
             if plot_density:

@@ -162,7 +162,7 @@ class Industry:
         incfiles = {}
         incfilenames = ['INDUSTRY_AGKN', 'INDUSTRY_DE', 'INDUSTRY_DH',
                         'INDUSTRY_DH_VAR_T', 'INDUSTRY_GKFX', 'INDUSTRY_CCCRRRAAA',
-                        'INDUSTRY_RRRAAA', 'INDUSTRY_AAA'] 
+                        'INDUSTRY_RRRAAA', 'INDUSTRY_AAA', 'INDUSTRY_DISLOSS_E_AG'] 
         for name in incfilenames:
             incfiles[name] = IncFile(name=name,
                                     path='Output',
@@ -171,6 +171,7 @@ class Industry:
                                                       file_path='Data/IncFilePreSuf'),
                                     suffix=read_lines(name+'_suffix.inc',
                                                       file_path='Data/IncFilePreSuf'))
+        incfiles['INDUSTRY_DISLOSS_E_AG'].body = ''
             
         for new_area in areas.index:
             idx = self.PS.within(areas.geometry[new_area])
@@ -197,6 +198,10 @@ class Industry:
                     
                     incfiles['INDUSTRY_AGKN'].body_concat(temp) # perhaps make a IncFile.body.concat function..
             
+                    # Create technology specific distribution loss
+                    for a in temp['A'].unique():
+                        incfiles['INDUSTRY_DISLOSS_E_AG'].body += f"DISLOSS_E_AG_IND('{a}',G)$((GDATA(G,'GDTYPE') EQ GETOH OR  GDATA(G,'GDTYPE') EQ GESTO OR GDATA(G,'GDTYPE') EQ GESTOS)  AND (SUM(Y,GKFX(Y,'{a}',G)) OR AGKN('{a}',G)))=SUM(IR$RRRAAA(IR,'{a}'),DISLOSS_E(IR));\n"
+
             except ValueError:
                 print('No industry in %s'%new_area)
                 

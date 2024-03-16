@@ -56,16 +56,16 @@ def generate_heat_data(areas):
 
     ### 1.2 Save .inc files
     incfiles = {}
+    bodies = {'DH' : DH.dfDH,
+              'DH_VAR_T' : DH.dfDHT}
     for file in ['DH', 'DH_VAR_T']:
         incfiles[file] = IncFile(prefix=read_lines(file+'_prefix.inc', 
                                                 file_path='Data/IncFilePreSuf'),
+                                body=bodies[file],
                                 suffix=read_lines(file+'_suffix.inc',
                                                 file_path='Data/IncFilePreSuf'),
                                 path='Output',
                                 name=file)
-        
-    incfiles['DH'].body = DH.dfDH.to_string()
-    incfiles['DH_VAR_T'].body = DH.dfDHT.to_string()
 
     for file in incfiles.keys():
         incfiles[file].save()
@@ -101,12 +101,18 @@ def generate_industry_data(area):
     incfiles['INDUSTRY_DH_VAR_T'].body_prepare(['S', 'T'], ['A', 'DHUSER'])
     incfiles['INDUSTRY_DE'].body_prepare(['DEUSER', 'R'], ['Y'])
     incfiles['INDUSTRY_AGKN'].body = '\n'.join([f"AGKN('{row['A']}', '{row['G']}') = YES;" for i,row in incfiles['INDUSTRY_AGKN'].body.iterrows()])
+    # INDUSTRY_INDUSTRY_AAA
+    incfiles['INDUSTRY_INDUSTRY_AAA'] = incfiles['INDUSTRY_AAA']
+    incfiles['INDUSTRY_INDUSTRY_AAA'].prefix = incfiles['INDUSTRY_INDUSTRY_AAA'].prefix.replace('SET AAA', 'SET INDUSTRY_AAA')
+    incfiles['INDUSTRY_INDUSTRY_AAA'].name = 'INDUSTRY_INDUSTRY_AAA'
     
     
     for file in ['INDUSTRY_GKFX', 'INDUSTRY_DH', 'INDUSTRY_DH_VAR_T',
                  'INDUSTRY_DE', 'INDUSTRY_AGKN', 'INDUSTRY_CCCRRRAAA',
-                 'INDUSTRY_RRRAAA', 'INDUSTRY_AAA']: 
+                 'INDUSTRY_RRRAAA', 'INDUSTRY_AAA', 'INDUSTRY_AAA',
+                 'INDUSTRY_DISLOSS_E_AG']: 
         incfiles[file].save()
+
 
     return incfiles
 
@@ -126,7 +132,6 @@ if __name__ == '__main__':
     areas = areas[areas[the_index].str.find('DK') != -1]
 
     ### X.2 Generate Data
-    # DH = generate_heat_data(areas)
+    DH = generate_heat_data(areas)
     
-    incfiles = generate_industry_data(areas)
-    
+    incfiles = generate_industry_data(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
