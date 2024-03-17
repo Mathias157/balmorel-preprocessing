@@ -11,6 +11,7 @@ See the following documentation, for understanding how this script works:
 
 """
 
+from typing import Union
 import pandas as pd
 import matplotlib.pyplot as plt
 import geopandas as gpd
@@ -248,7 +249,42 @@ def calculate_intersects(areas_inter1: gpd.GeoDataFrame,
 
 
 
+def assign_area_to_region(A: Union[gpd.GeoSeries, pd.Series],
+                          R: Union[gpd.GeoSeries, pd.Series] = gpd.GeoSeries(),
+                          A_suffix: str = '_A',
+                          R_suffix: str = '',
+                          method: str = '',
+                          splitstring: str = '_',
+                          splitint: int = 0):
+    """Assigns areas to regions. Defaults to assign the inserted series to itself, by putting 
+    an _A suffix on the A-series
 
+    Args:
+        A (Union[gpd.GeoSeries, pd.Series]): _description_
+        R (Union[gpd.GeoSeries, pd.Series], optional): _description_. Defaults to gpd.GeoDataFrame().
+        A_suffix (str, optional): _description_. Defaults to '_A'.
+        R_suffix (str, optional): _description_. Defaults to ''.
+        method (str, optional): 'splitstring' or geometries 'within'. Defaults to 'splitstring'.
+        splitstring (str, optional): _description_. Defaults to '_'.
+        splitint (int, optional): _description_. Defaults to 0.
+    """
+    
+    # If no R is input, just insert an _A suffix for the area list
+    if (len(R) == 0) & (method == ''):
+        R = A + R_suffix
+        A = A + A_suffix
+
+    # If choosing splitstring method
+    else:
+        R = A.str.split(splitstring, expand=True)[splitint] + R_suffix
+        A = A + A_suffix
+        
+    df = pd.DataFrame()
+    df['A'] = A
+    df['R'] = R
+    
+    return df
+    
 
 
 

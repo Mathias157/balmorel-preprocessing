@@ -235,32 +235,3 @@ def find_value(df: pd.DataFrame, element: any,
         print('%d %s values! Picked index %d'%(l, func, ind))
     return temp[ind]
      
-##Example
-
-if __name__ == '__main__':
-    
-    choice = 'DKMunicipalities'
-    the_index, areas, c = prepared_geofiles(choice)
-
-    DKareas = areas[areas[the_index].str.find('DK') != -1]
-    DH = DistrictHeat('Denmark')
-    DH.dfint = calculate_intersects(DKareas, DH.geo) # Find intersects between district heat areas and chosen areas
-    DH.assign_DH(DKareas, DH.dfint)
-    DH.assign_DHT(DKareas, DH.dfint)   
-    
-    # Check that the aggregation got all data:
-    # Annual DH
-    print('\nOriginal data, annual DH:')
-    print(DH.DH[DH.DH.A.str.find('DK') != -1].pivot_table(index='A', columns='Y').sum() / 1e6)
-    print('\nNew data, annual DH:')
-    print(DH.dfDH.sum() / 1e6)
-
-
-    ## Plot aggregated data
-    year = '2050'
-
-    fig, ax = DH.plot_original_data(year, DKareas, True)
-    fig.savefig('Output/Figures/DH_original.png', bbox_inches='tight')
-    fig.savefig('Output/Figures/DH_original.pdf', bbox_inches='tight')
-
-    DH.plot_aggregated_data(year, DKareas)

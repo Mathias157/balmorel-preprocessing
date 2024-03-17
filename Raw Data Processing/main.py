@@ -9,12 +9,10 @@ Created on 11.03.2024
 
 import matplotlib.pyplot as plt
 import pandas as pd
-# Disable the limit on pandas display ranges
-pd.set_option('display.max_colwidth', None)
 from pybalmorel.functions import IncFile, read_lines
 from Modules.createDH import DistrictHeat
 from Modules.createINDUSTRY import Industry
-from Modules.geofiles import prepared_geofiles, calculate_intersects
+from Modules.geofiles import prepared_geofiles, calculate_intersects, assign_area_to_region
 
 style = 'report'
 
@@ -31,7 +29,7 @@ elif style == 'ppt':
 ###     1. District Heating Data    ###
 ### ------------------------------- ###
 
-def generate_heat_data(areas):
+def generate_districtheat_files(areas):
     ### 1.0 Aggregate district heating data (only danish dataset for now)
     DKareas = areas[areas[the_index].str.find('DK') != -1]
     DH = DistrictHeat('Denmark')
@@ -70,17 +68,19 @@ def generate_heat_data(areas):
     for file in incfiles.keys():
         incfiles[file].save()
 
-    return DH
+    return incfiles
 
 #%% ------------------------------- ###
 ###          2. VRE Data            ###
 ### ------------------------------- ###
 
+# Run create_REdata.py
+
 #%% ------------------------------- ###
 ###          3. Industry            ###
 ### ------------------------------- ###
 
-def generate_industry_data(area):
+def generate_industry_files(area):
     IND = Industry()
 
     ### 1.2 Assign Original Region
@@ -94,25 +94,34 @@ def generate_industry_data(area):
     # Prepare inc-files
     ind_areas = incfiles['INDUSTRY_DH'].body['A'].unique()
     incfiles['INDUSTRY_CCCRRRAAA'].body = '\n'.join(list(ind_areas))
-    incfiles['INDUSTRY_RRRAAA'].body = '\n'.join(list("%s . %s"%(area.split('_')[0], area) for area in ind_areas))
+    incfiles['INDUSTRY_RRRAAA'].body = '\n'.join([row['R'] + ' . ' + row['A'] for i,row in assign_area_to_region(pd.Series(ind_areas), A_suffix='', method='splitstring').iterrows()])
     incfiles['INDUSTRY_AAA'].body = '\n'.join(list(ind_areas))
+
+    # GKFX requires long names
+    pd.set_option('display.max_colwidth', None)
     incfiles['INDUSTRY_GKFX'].body_prepare(['A', 'G'], ['Y'])
+    pd.set_option('display.max_colwidth', 30)
     incfiles['INDUSTRY_DH'].body_prepare(['DHUSER', 'A'], ['Y'])
     incfiles['INDUSTRY_DH_VAR_T'].body_prepare(['S', 'T'], ['A', 'DHUSER'])
     incfiles['INDUSTRY_DE'].body_prepare(['DEUSER', 'R'], ['Y'])
     incfiles['INDUSTRY_AGKN'].body = '\n'.join([f"AGKN('{row['A']}', '{row['G']}') = YES;" for i,row in incfiles['INDUSTRY_AGKN'].body.iterrows()])
-    # INDUSTRY_INDUSTRY_AAA
+    
+    # Make dedicated industry area set
     incfiles['INDUSTRY_INDUSTRY_AAA'] = incfiles['INDUSTRY_AAA']
     incfiles['INDUSTRY_INDUSTRY_AAA'].prefix = incfiles['INDUSTRY_INDUSTRY_AAA'].prefix.replace('SET AAA', 'SET INDUSTRY_AAA')
     incfiles['INDUSTRY_INDUSTRY_AAA'].name = 'INDUSTRY_INDUSTRY_AAA'
     
+    # Make investment option for LT areas that become infeasible otherwise
+    for A in pd.Series(incfiles['INDUSTRY_AAA'].body.split('\n')).unique():
+        # Add a woodchip investment option in LT areas
+        if 'IND-LT' in A:
+            incfiles['INDUSTRY_AGKN'].body += f"AGKN('{A}', 'GNR_IND-DF_WOODCHI_E-100_MS-10-MW_Y-2020') = YES;\n"
     
     for file in ['INDUSTRY_GKFX', 'INDUSTRY_DH', 'INDUSTRY_DH_VAR_T',
                  'INDUSTRY_DE', 'INDUSTRY_AGKN', 'INDUSTRY_CCCRRRAAA',
                  'INDUSTRY_RRRAAA', 'INDUSTRY_AAA', 'INDUSTRY_AAA',
                  'INDUSTRY_DISLOSS_E_AG']: 
         incfiles[file].save()
-
 
     return incfiles
 
@@ -121,7 +130,7 @@ def generate_industry_data(area):
 # IND.plot_aggregated_data(incfiles, areas, 'GKFX')
 
 #%% ------------------------------- ###
-###        X. Generate Data         ###
+###        X. Generate Files        ###
 ### ------------------------------- ###
 
 if __name__ == '__main__':
@@ -130,8 +139,19 @@ if __name__ == '__main__':
     choice = 'nuts3'
     the_index, areas, c = prepared_geofiles(choice)
     areas = areas[areas[the_index].str.find('DK') != -1]
+    hierarchical = False # Need to code something that can use another geofile as R-set (and improve the assign_area_to_region function to be able to find geometries related to A within geometries related to R)
+
 
     ### X.2 Generate Data
-    DH = generate_heat_data(areas)
+    DHinc = generate_districtheat_files(areas)
     
-    incfiles = generate_industry_data(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
+    INDinc = generate_industry_files(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
+        
+        
+    ### X.3 If hierarchical approach, change RRRAAA sets here
+    if hierarchical:
+        # Change RRRAAA sets
+        # the_index2, areas2, c2 = prepared_geofiles(choice2)
+        # RRRAAA
+        INDinc['INDUSTRY_RRRAAA']
+        
