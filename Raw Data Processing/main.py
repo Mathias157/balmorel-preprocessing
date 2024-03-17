@@ -12,6 +12,7 @@ import pandas as pd
 from pybalmorel.functions import IncFile, read_lines
 from Modules.createDH import DistrictHeat
 from Modules.createINDUSTRY import Industry
+from Modules.createHYDROGEN import Hydrogen
 from Modules.geofiles import prepared_geofiles, calculate_intersects, assign_area_to_region
 
 style = 'report'
@@ -80,7 +81,7 @@ def generate_districtheat_files(areas):
 ###          3. Industry            ###
 ### ------------------------------- ###
 
-def generate_industry_files(area):
+def generate_industry_files(areas):
     IND = Industry()
 
     ### 1.2 Assign Original Region
@@ -94,7 +95,8 @@ def generate_industry_files(area):
     # Prepare inc-files
     ind_areas = incfiles['INDUSTRY_DH'].body['A'].unique()
     incfiles['INDUSTRY_CCCRRRAAA'].body = '\n'.join(list(ind_areas))
-    incfiles['INDUSTRY_RRRAAA'].body = '\n'.join([row['R'] + ' . ' + row['A'] for i,row in assign_area_to_region(pd.Series(ind_areas), A_suffix='', method='splitstring').iterrows()])
+    incfiles['INDUSTRY_RRRAAA'].body = '\n'.join([row['R'] + ' . ' + row['A'] for i,row in assign_area_to_region(pd.Series(ind_areas), A_suffix='', 
+                                                                                                                 method='splitstring', splitstring='_IND').iterrows()])
     incfiles['INDUSTRY_AAA'].body = '\n'.join(list(ind_areas))
 
     # GKFX requires long names
@@ -107,9 +109,11 @@ def generate_industry_files(area):
     incfiles['INDUSTRY_AGKN'].body = '\n'.join([f"AGKN('{row['A']}', '{row['G']}') = YES;" for i,row in incfiles['INDUSTRY_AGKN'].body.iterrows()])
     
     # Make dedicated industry area set
-    incfiles['INDUSTRY_INDUSTRY_AAA'] = incfiles['INDUSTRY_AAA']
-    incfiles['INDUSTRY_INDUSTRY_AAA'].prefix = incfiles['INDUSTRY_INDUSTRY_AAA'].prefix.replace('SET AAA', 'SET INDUSTRY_AAA')
-    incfiles['INDUSTRY_INDUSTRY_AAA'].name = 'INDUSTRY_INDUSTRY_AAA'
+    incfiles['INDUSTRY_INDUSTRY_AAA'] = IncFile(prefix=incfiles['INDUSTRY_AAA'].prefix.replace('SET AAA', 'SET INDUSTRY_AAA'),
+                                                body=incfiles['INDUSTRY_AAA'].body,
+                                                suffix=incfiles['INDUSTRY_AAA'].suffix,
+                                                name='INDUSTRY_INDUSTRY_AAA',
+                                                path='Output')
     
     # Make investment option for LT areas that become infeasible otherwise
     for A in pd.Series(incfiles['INDUSTRY_AAA'].body.split('\n')).unique():
@@ -119,7 +123,7 @@ def generate_industry_files(area):
     
     for file in ['INDUSTRY_GKFX', 'INDUSTRY_DH', 'INDUSTRY_DH_VAR_T',
                  'INDUSTRY_DE', 'INDUSTRY_AGKN', 'INDUSTRY_CCCRRRAAA',
-                 'INDUSTRY_RRRAAA', 'INDUSTRY_AAA', 'INDUSTRY_AAA',
+                 'INDUSTRY_RRRAAA', 'INDUSTRY_AAA', 'INDUSTRY_INDUSTRY_AAA',
                  'INDUSTRY_DISLOSS_E_AG']: 
         incfiles[file].save()
 
@@ -130,13 +134,32 @@ def generate_industry_files(area):
 # IND.plot_aggregated_data(incfiles, areas, 'GKFX')
 
 #%% ------------------------------- ###
+###          4. Hydrogen            ###
+### ------------------------------- ###
+
+def generate_hydrogen_files(areas, choice, the_index):
+    
+    H2 = Hydrogen(choice)
+    
+    incfiles = H2.create_hydrogen_data(areas, the_index)
+    
+    # Prepare grid files
+    incfiles['HYDROGEN_XH2INVCOST'].body_prepare(['Y', 'RE'], ['RI'])
+    incfiles['HYDROGEN_XH2LOSS'].body_prepare(['RE'], ['RI'])
+    
+    for file in incfiles.keys():
+        incfiles[file].save()
+    
+    return incfiles
+
+#%% ------------------------------- ###
 ###        X. Generate Files        ###
 ### ------------------------------- ###
 
 if __name__ == '__main__':
 
     ### X.1 Load the desired spatial resolution
-    choice = 'nuts3'
+    choice = 'DKmunicipalities'
     the_index, areas, c = prepared_geofiles(choice)
     areas = areas[areas[the_index].str.find('DK') != -1]
     hierarchical = False # Need to code something that can use another geofile as R-set (and improve the assign_area_to_region function to be able to find geometries related to A within geometries related to R)
@@ -147,6 +170,7 @@ if __name__ == '__main__':
     
     INDinc = generate_industry_files(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
         
+    H2inc = generate_hydrogen_files(areas, choice, the_index)
         
     ### X.3 If hierarchical approach, change RRRAAA sets here
     if hierarchical:
