@@ -52,7 +52,7 @@ XHINVCOST = 396000  # €/MW
 
 
 class Industry:
-    """Class for district heating data
+    """Class for industry addon data
     
     Existing datasets:
         - Denmark

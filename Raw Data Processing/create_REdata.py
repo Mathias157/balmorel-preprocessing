@@ -1,4 +1,3 @@
-#%%# -*- coding: utf-8 -*-
 """
 Created on Sat Dec  3 15:33:10 2022
 
@@ -16,7 +15,7 @@ REQUIRED:
         url: https://cds.climate.copernicus.eu/api/v2
         key: UID:API  
 """
-
+#%%
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -556,7 +555,7 @@ with open('./Output/SUBTECHGROUPKPOT.inc', 'w') as f:
     f.write("\nSUBTECHGROUPKPOT(AAA,'WINDTURBINE_OFFSHORE',SUBTECH_GROUP)$(SUBTECHGROUPKPOT(AAA,'WINDTURBINE_OFFSHORE',SUBTECH_GROUP) = 0) = EPS;")
 
     
-#%% ------------------------------- ###
+ #%% ------------------------------- ###
 ###          4. Analysis            ###
 ### ------------------------------- ###
 
