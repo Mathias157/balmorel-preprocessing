@@ -111,30 +111,41 @@ wind_turbine = atlite.windturbines.Vestas_V66_1750kW
 # choice = 'NUTS1'
 # choice = 'NUTS2'
 # choice = 'NUTS3'
-choice = 'NordpoolReal'
+# choice = 'NordpoolReal'
+choice = 'Balmorel2024'
 # choice = 'BalmorelVREAreas'
 
 ## Cutouts
 # path = "Nicolas_2015_full.nc"
-path = "DK.nc"
+path = "DK+Surrounding2012.nc"
 # cutout_bounds_x = (11.015880, 13.078094) # Longitude
 # cutout_bounds_y = (43.239006, 45.207804) # Latitude
 # cutout_bounds_x = (11.7, 12.2) # Longitude
 # cutout_bounds_y = (43.85, 44.4) # Latitude
-cutout_bounds_x = (7.5, 16) # Longitude
-cutout_bounds_y = (54.4, 58) # Latitude
+cutout_bounds_x = (3, 33) # Longitude
+cutout_bounds_y = (47, 73) # Latitude
 
 
 ### 0.4 What time to load?
 # T = "2011-01-01"
-T = '2017'
+T = '2012'
 
-### 0.5 Overwrite cutout?
-OverW = True
+### 0.5 Overwrite cutout or load previous?
+OverW = False
 
 ### 0.6 Read Geodata
-the_index, areas, country_code = prepared_geofiles(choice)
-areas = areas.loc[['DK1', 'DK2']] # Testing DK and DE
+areas = gpd.read_file('Data/Shapefiles/2024 BalmorelMapWithOffshore.gpkg')
+areas.loc[areas.Type == 'Offshore', 'id'] = areas.loc[areas.Type == 'Offshore', 'Region']
+areas.index = areas.id
+the_index='id'
+areas = areas[(areas.NAME_0 == 'Denmark') | (areas.NAME_0 == 'Germany') |\
+              (areas.NAME_0 == 'Sweden') | (areas.NAME_0 == 'Norway') |\
+                  ((areas.Type == 'Offshore') & (areas.id.str.find('DK') != -1)) |\
+                  ((areas.Type == 'Offshore') & (areas.id.str.find('DE') != -1)) |\
+                  ((areas.Type == 'Offshore') & (areas.id.str.find('NO') != -1)) |\
+                  ((areas.Type == 'Offshore') & (areas.id.str.find('SE') != -1))]
+# the_index, areas, country_code = prepared_geofiles(choice)
+# areas = areas.loc[['DK1', 'DK2']] # Testing DK and DE
 areas.geometry = areas['geometry']
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
@@ -145,8 +156,8 @@ OFFWNDPOT = gpd.read_file(r'.\Data\RandomOffWindPot\DK.gpkg')
 fig, ax = plt.subplots()
 areas.plot(ax=ax)
 
-ax.set_xlim(-11,32)      
-ax.set_ylim(35,72)
+ax.set_xlim(cutout_bounds_x)      
+ax.set_ylim(cutout_bounds_y)
 ax.set_title(choice)
 # OFFWNDPOT.plot(ax=ax)
 
@@ -190,8 +201,8 @@ ax.add_geometries(areas.geometry, crs = crs,
                   facecolor=[.9, .9,.9], edgecolor='grey',
                   linewidth=.2)
 
-ax.set_xlim(areas.bounds[['minx']].values.min(), areas.bounds[['maxx']].values.max())
-ax.set_ylim(areas.bounds[['miny']].values.min(), areas.bounds[['maxy']].values.max())
+ax.set_xlim(cutout_bounds_x)
+ax.set_ylim(cutout_bounds_y)
 # ax.set_xlim(7.5,16)      
 # ax.set_ylim(54.4,58)  
 
@@ -216,7 +227,7 @@ cutout.prepare(overwrite=OverW)
 
 
 
-### 2.2 Load Map for RE Spatial Availabilities
+#%% 2.2 Load Map for RE Spatial Availabilities
 # CORINE = 'corine.tif'
 CORINE = r'Data\CORINE\u2018_clc2018_v2020_20u1_raster100m\u2018_clc2018_v2020_20u1_raster100m\DATA\U2018_CLC2018_V2020_20u1.tif'
 excluder = ExclusionContainer()

@@ -233,6 +233,8 @@ class Industry:
 
         # Plot
         try:
+            fig, ax = plt.subplots()
+            
             if indicator == 'DH':
                 temp = incfiles['INDUSTRY_DH'].body.pivot_table(index=['Y', 'new_area'], values=['Value'], aggfunc='sum').loc['2050']
                 areas['new_col'] = temp.Value / 1e6
@@ -246,7 +248,6 @@ class Industry:
                 areas['new_col'] = temp.Value 
                 ax.set_title('Industry Generation Capacity (MW)')
             
-            fig, ax = plt.subplots()
             areas.plot(ax=ax, zorder=2, column='new_col', legend=True, cmap=cmap)
             areas.plot(ax=ax, zorder=1, facecolor=cmap(0))
         

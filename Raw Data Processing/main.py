@@ -14,6 +14,7 @@ from Modules.createDH import DistrictHeat
 from Modules.createINDUSTRY import Industry
 from Modules.createHYDROGEN import Hydrogen
 from Modules.geofiles import prepared_geofiles, calculate_intersects, assign_area_to_region
+from runpy import run_module
 
 style = 'report'
 
@@ -50,7 +51,7 @@ def generate_districtheat_files(areas):
     ## Plot original vs aggregated data
     year = '2050'
     DH.plot_original_data(year, DKareas, plot_density=True)
-    DH.plot_aggregated_data(year, DKareas, True)
+    DH.plot_aggregated_data(year, DKareas, False)
 
 
     ### 1.2 Save .inc files
@@ -69,13 +70,14 @@ def generate_districtheat_files(areas):
     for file in incfiles.keys():
         incfiles[file].save()
 
-    return incfiles
+    return incfiles, DH
 
 #%% ------------------------------- ###
 ###          2. VRE Data            ###
 ### ------------------------------- ###
 
-# Run create_REdata.py
+# Run createVRE.py - takes a very long time!
+#run_module('Modules.createVRE')
 
 #%% ------------------------------- ###
 ###          3. Industry            ###
@@ -91,6 +93,9 @@ def generate_industry_files(areas):
     IND.assign_emission_fractions() 
 
     incfiles = IND.create_industry_data(areas, True)
+    
+    # Plot
+    IND.plot_aggregated_data(incfiles, areas, 'DH')
     
     # Prepare inc-files
     ind_areas = incfiles['INDUSTRY_DH'].body['A'].unique()
@@ -127,7 +132,7 @@ def generate_industry_files(areas):
                  'INDUSTRY_DISLOSS_E_AG']: 
         incfiles[file].save()
 
-    return incfiles
+    return incfiles, IND
 
 # Plot data
 # IND.plot_original_data()
@@ -150,7 +155,7 @@ def generate_hydrogen_files(areas, choice, the_index):
     for file in incfiles.keys():
         incfiles[file].save()
     
-    return incfiles
+    return incfiles, H2
 
 #%% ------------------------------- ###
 ###        X. Generate Files        ###
@@ -159,18 +164,18 @@ def generate_hydrogen_files(areas, choice, the_index):
 if __name__ == '__main__':
 
     ### X.1 Load the desired spatial resolution
-    choice = 'DKmunicipalities'
+    choice = 'DKMunicipalities'
     the_index, areas, c = prepared_geofiles(choice)
     areas = areas[areas[the_index].str.find('DK') != -1]
     hierarchical = False # Need to code something that can use another geofile as R-set (and improve the assign_area_to_region function to be able to find geometries related to A within geometries related to R)
 
 
     ### X.2 Generate Data
-    DHinc = generate_districtheat_files(areas)
+    DHinc, DH = generate_districtheat_files(areas)
     
-    INDinc = generate_industry_files(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
+    INDinc, IND = generate_industry_files(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
         
-    H2inc = generate_hydrogen_files(areas, choice, the_index)
+    H2inc, H2 = generate_hydrogen_files(areas, choice, the_index)
         
     ### X.3 If hierarchical approach, change RRRAAA sets here
     if hierarchical:
