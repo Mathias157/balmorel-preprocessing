@@ -158,26 +158,26 @@ def generate_hydrogen_files(areas, choice, the_index):
     return incfiles, H2
 
 #%% ------------------------------- ###
-###        X. Generate Files        ###
+###        5. Generate Files        ###
 ### ------------------------------- ###
 
 if __name__ == '__main__':
 
-    ### X.1 Load the desired spatial resolution
+    ### 5.1 Load the desired spatial resolution
     choice = 'DKMunicipalities'
     the_index, areas, c = prepared_geofiles(choice)
     areas = areas[areas[the_index].str.find('DK') != -1]
     hierarchical = False # Need to code something that can use another geofile as R-set (and improve the assign_area_to_region function to be able to find geometries related to A within geometries related to R)
 
 
-    ### X.2 Generate Data
+    ### 5.2 Generate Files
     DHinc, DH = generate_districtheat_files(areas)
     
     INDinc, IND = generate_industry_files(areas) # Note: No possiblity to meet demand in LT areas! (only storage investments allowed)
         
     H2inc, H2 = generate_hydrogen_files(areas, choice, the_index)
         
-    ### X.3 If hierarchical approach, change RRRAAA sets here
+    ### 5.3 If hierarchical approach, change RRRAAA sets here
     if hierarchical:
         # Change RRRAAA sets
         # the_index2, areas2, c2 = prepared_geofiles(choice2)

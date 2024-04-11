@@ -28,6 +28,13 @@ pip install pybalmorel
 See more here
 https://www.gams.com/latest/docs/API_PY_GETTING_STARTED.html
 
+## Raw Data Processing
+These scripts process raw data into Balmorel input. An application is illustrated below (check zenodo link below for a high-res pdf). For more info, read README in the Raw Data Processing folder.
+
+Data can be downloaded here, and should be placed in Raw Data Processing/
+https://zenodo.org/records/10960910/files/Poster.pdf?download=1
+
+
 ## Processing Existing .inc Files
 The idea behind the dataprocessing.py script in this folder is to run the part of Balmorel that does not include, 
   1) compiling the model
@@ -43,9 +50,3 @@ dataprocessing.py will copy+paste these files into the Balmorel/base/model folde
 It will then use the GAMS API to execute Balmorel_ReadData.gms and obtain the GDX database from it, from which all included data can be accessed as a pandas dataframe through the symbol_to_df function
 
 An example of converting a pandas dataframe into an .inc file using the IncFile class is also included, which can be used to alter data or create scenarios
-
-
-## Raw Data Processing
-Will create Balmorel data from raw data.
-
-Scripts are not finished, and raw data not (yet) included in this repository
