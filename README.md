@@ -33,7 +33,7 @@ These scripts process raw data into Balmorel input. An application presented at 
 ![Application example](https://github.com/Mathias157/balmorel-preprocessing/blob/master/Raw%20Data%20Processing/Conference%20Poster%20for%20Analysis%20of%20Spatial%20Resolutions%20for%20Modelling%20Sector-Coupled%20Energy%20Systems.png)
 
 Data can be downloaded in the Zenodo link below and should be placed in Raw Data Processing/
-https://zenodo.org/records/10960910/files/Poster.pdf?download=1
+https://zenodo.org/records/10960910
 
 
 ## Processing Existing .inc Files
@@ -42,7 +42,7 @@ The idea behind the dataprocessing.py script in this folder is to run the part o
   2) solving the model
   3) post-processing results
 
-I.e.: This will only load data (the inc-files)
+I.e.: This will only load data (the inc-files) into Python
 
 Balmorel_ReadData.gms and Balmorelbb4_ReadData.inc are, therefore, alterations to a recent (as of 1.3.2024) Balmorel version, where all code that relates to compiling, solving or post-processing has been deleted  
 
