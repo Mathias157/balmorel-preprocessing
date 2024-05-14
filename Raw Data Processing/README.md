@@ -3,11 +3,12 @@
 Last updates: 
 
 - main in 2024
-- create_GKFX_DK in 2022
-- create_SetFiles in 2022
-- create_Grids in 2022
-- create_TechData in 2022
+- Modules/* in 2024
 - create_Demands in 2022
+- create_GKFX_DK in 2022
+- create_Grids in 2022
+- create_SetFiles in 2022
+- create_TechData in 2022
 
 Run all python scripts in this folder to process data for a Danish Balmorel case study at various spatial resolution (main.py, create_XXXX...)
 
@@ -15,4 +16,4 @@ main.py is a new and more systematic way of processing data, using classes and f
 
 A further description of how each script works is found within each python file
 
-NB: No data is provided in this repo. Data link upcoming
+NB: No data is provided in this repo, download data from https://zenodo.org/records/10960910
