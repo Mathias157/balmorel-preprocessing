@@ -190,7 +190,7 @@ pp = pp[pp.type_of_plant != 'Erhvervsværk']
 
 ### 2.2 Set commissioning year
 # Get commissioning year
-dt = pp.commissioning.astype('datetime64')
+dt = pp.commissioning.astype('datetime64[ns]')
 dt_int = np.zeros(len(dt))
 # Round to nearest year
 idx = dt.dt.month >= 6

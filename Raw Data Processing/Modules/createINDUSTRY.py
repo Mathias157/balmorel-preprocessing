@@ -208,10 +208,15 @@ class Industry:
         return incfiles
      
     def plot_original_data(self, emission_scale: float = 5e5, 
-                           bounds: list[float, float, float, float] = [-12, 30, 33, 73]) -> tuple[matplotlib.figure.Figure, 
+                           bounds: list[float, float, float, float] = [-12, 30, 33, 73],
+                           fc: str = 'white',
+                            area_fc: Union[str, list] = [.85, .85, .85],
+                            ax: Union[matplotlib.axes._axes.Axes, str] = '') -> tuple[matplotlib.figure.Figure, 
                                                                                                 matplotlib.axes._axes.Axes]:        
-        fig, ax = plt.subplots()
-        self.geo.plot(ax=ax, facecolor=[.85 for i in range(3)])
+        if ax == '':
+            # Create plot if no ax was inserted
+            fig, ax = plt.subplots(facecolor=fc)
+        self.geo.plot(ax=ax, facecolor=area_fc)
         self.PS.plot(ax=ax, marker='o', color=[.3, .3, .3],
                     markersize=self.PS['Emissions_ETS_2014']/emission_scale)
         ax.set_title('Original Data')

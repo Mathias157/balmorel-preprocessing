@@ -7,6 +7,7 @@ Created on 11.03.2024
 ###        0. Script Settings       ###
 ### ------------------------------- ###
 
+from typing import Union
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,6 +15,7 @@ import geopandas as gpd
 try:
     import cmcrameri
     cmap = cmcrameri.cm.cmaps['roma_r']
+    cmap = cmcrameri.cm.cmaps['vik']
     colors = [cmap(i) for i in range(256)]
 except ModuleNotFoundError:
     print('cmrameri package not installed, using default colourmaps')
@@ -176,10 +178,14 @@ class DistrictHeat:
         self.geo = self.geo.join(df, **kwargs)
         
     def plot_original_data(self, year: str, areas: gpd.GeoDataFrame, 
-                  plot_density: bool = False) -> tuple[matplotlib.figure.Figure, 
+                  plot_density: bool = False, fc: str = 'white',
+                  area_fc: Union[str, list] = [.85, .85, .85],
+                  ax: Union[matplotlib.axes._axes.Axes, str] = '') -> tuple[matplotlib.figure.Figure, 
                                                        matplotlib.axes._axes.Axes]:        
-        fig, ax = plt.subplots(facecolor=fc)
-        areas.plot(ax=ax, facecolor=[.85, .85, .85], linewidth=.3)
+        if ax == '':
+            # Create plot if no ax was inserted
+            fig, ax = plt.subplots(facecolor=fc)
+        areas.plot(ax=ax, facecolor=area_fc, linewidth=.3)
         df = self.geo.copy()
         df = df.join(self.DH[self.DH.Y == year].pivot_table(index='A'), how='inner')
         df = df.to_crs('EPSG:4328')
