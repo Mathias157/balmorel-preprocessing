@@ -1,4 +1,11 @@
 """
+Creating Danish heat demand for Balmorel 
+
+Futuregas dataset default
+
+Aalborg dataset:
+https://vbn.aau.dk/da/datasets/kommunepakker-varmeplan-danmark-2021
+
 Created on 11.03.2024
 
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
@@ -39,14 +46,14 @@ class DistrictHeat:
     """Class for district heating data
     
     Existing datasets:
-        - Denmark
+        - Denmark_Futuregas
 
     Args:
         dataset (str, optional): _description_. Defaults to 'DK'.
     """
     
-    def __init__(self, dataset: str = 'Denmark') -> None:
-        if dataset.lower() == 'denmark': 
+    def __init__(self, dataset: str = 'Denmark_Futuregas') -> None:
+        if dataset.lower() == 'denmark_futuregas': 
             DH_shapes = 'Data/Shapefiles/Balmorel Areas/Balmorel_areas.shp'
             name_col = 'BalmorelAr'
             # Load data
@@ -93,7 +100,7 @@ class DistrictHeat:
             self.geo.crs = 'EPSG:4326'
         else:
             print("Dataset doesn't exist - this is an empty object\n")
-            print("Available datasets:\n- Denmark (default)")
+            print("Available datasets:\n- Denmark_Futuregas (default)")
 
     def assign_DH(self, areas: gpd.GeoDataFrame, df_intercepts: pd.DataFrame,
                   value_col: str = 'Value') -> None:

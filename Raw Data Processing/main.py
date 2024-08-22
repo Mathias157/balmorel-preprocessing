@@ -34,7 +34,7 @@ elif style == 'ppt':
 def generate_districtheat_files(areas):
     ### 1.0 Aggregate district heating data (only danish dataset for now)
     DKareas = areas[areas[the_index].str.find('DK') != -1]
-    DH = DistrictHeat('Denmark')
+    DH = DistrictHeat('Denmark_Futuregas')
     DH.dfint = calculate_intersects(DKareas, DH.geo) # Find intersects between district heat areas and chosen areas
     DH.assign_DH(DKareas, DH.dfint)
     DH.assign_DHT(DKareas, DH.dfint)
