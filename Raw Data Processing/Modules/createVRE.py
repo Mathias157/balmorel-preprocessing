@@ -117,7 +117,7 @@ choice = 'Balmorel2024'
 
 ## Cutouts
 # path = "Nicolas_2015_full.nc"
-path = "DK+Surrounding2012.nc"
+path = r"M:\Project\RQII\DK+Surrounding2012.nc"
 # cutout_bounds_x = (11.015880, 13.078094) # Longitude
 # cutout_bounds_y = (43.239006, 45.207804) # Latitude
 # cutout_bounds_x = (11.7, 12.2) # Longitude
@@ -134,19 +134,35 @@ T = '2012'
 OverW = False
 
 ### 0.6 Read Geodata
-areas = gpd.read_file('Data/Shapefiles/2024 BalmorelMapWithOffshore.gpkg')
+areas = gpd.read_file('Data/Shapefiles/2024_balmorelmapwithoffshoremunidk.gpkg')
+areas = areas[(areas.NAME_0 == 'Germany') | (areas.NAME_0 == 'Norway') |\
+    (areas.NAME_0 == 'Sweden') | ((areas.Type == 'Offshore') & ((areas.Country == 'DE') |\
+        (areas.Country == 'DK') | (areas.Country == 'NO') | (areas.Country == 'SE')))
+]
 areas.loc[areas.Type == 'Offshore', 'id'] = areas.loc[areas.Type == 'Offshore', 'Region']
-areas.index = areas.id
-the_index='id'
-areas = areas[(areas.NAME_0 == 'Denmark') | (areas.NAME_0 == 'Germany') |\
-              (areas.NAME_0 == 'Sweden') | (areas.NAME_0 == 'Norway') |\
-                  ((areas.Type == 'Offshore') & (areas.id.str.find('DK') != -1)) |\
-                  ((areas.Type == 'Offshore') & (areas.id.str.find('DE') != -1)) |\
-                  ((areas.Type == 'Offshore') & (areas.id.str.find('NO') != -1)) |\
-                  ((areas.Type == 'Offshore') & (areas.id.str.find('SE') != -1))]
-# the_index, areas, country_code = prepared_geofiles(choice)
+
+# areas.loc[areas.Type != 'Offshore', 'id'] = areas.loc[areas.Type != 'Offshore', 'Region']
+# areas = gpd.read_file('Data/Shapefiles/2024 BalmorelHighResolutionMapWithOffshore.gpkg')
+# areas.loc[areas.Type == 'Offshore', 'id'] = areas.loc[areas.Type == 'Offshore', 'Region']
+# areas.index = areas.id
+# the_index='id'
+# areas = areas[(areas.NAME_0 == 'Denmark') | (areas.NAME_0 == 'Germany') |\
+#               (areas.NAME_0 == 'Sweden') | (areas.NAME_0 == 'Norway') |\
+                #   ((areas.Type == 'Offshore') & (areas.id.str.find('DK') != -1)) |\
+                #   ((areas.Type == 'Offshore') & (areas.id.str.find('DE') != -1)) |\
+                #   ((areas.Type == 'Offshore') & (areas.id.str.find('NO') != -1)) |\
+                #   ((areas.Type == 'Offshore') & (areas.id.str.find('SE') != -1))]
+
+# MUNI DK with offshore filtering
+# areas = areas[(areas.Country == 'DK') & (areas.Type == 'Offshore')] # From BalmorelHighResolution
+the_index, areas2, country_code = prepared_geofiles('DKMunicipalities')
+areas2['id'] = areas2['NAME_2']
+areas2['muni_id'] = areas2['GID_2']
+areas = pd.concat((areas, areas2[['id', 'muni_id', 'geometry']]))
 # areas = areas.loc[['DK1', 'DK2']] # Testing DK and DE
 areas.geometry = areas['geometry']
+areas.index = areas.id
+the_index='id'
 # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
 # Read homemade offshore potentials for DK
@@ -156,8 +172,8 @@ OFFWNDPOT = gpd.read_file(r'.\Data\RandomOffWindPot\DK.gpkg')
 fig, ax = plt.subplots()
 areas.plot(ax=ax)
 
-ax.set_xlim(cutout_bounds_x)      
-ax.set_ylim(cutout_bounds_y)
+# ax.set_xlim(cutout_bounds_x)      
+# ax.set_ylim(cutout_bounds_y)
 ax.set_title(choice)
 # OFFWNDPOT.plot(ax=ax)
 
@@ -223,7 +239,6 @@ cutout = atlite.Cutout(path=path,
                        time=T
                        )
 cutout.prepare(overwrite=OverW)
-
 
 
 
@@ -320,6 +335,27 @@ ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
 
 # Getting a specific profile
 wind.loc[:, getattr(wind, the_index).values[0]]
+
+#%%
+# Plot data (done with mix municipality and 2024 balmorelhighres )
+# a2 = areas[areas.Type != 'Offshore']
+# a2 = areas
+# winddata = wind.to_pandas()
+
+# N_stop = 24
+# n = 0
+# for i,row in winddata.iterrows():
+#     if n > N_stop:
+#         break
+#     fig, ax = plt.subplots()
+#     a2['Wind'] = row.values/ winddata.max()
+#     a2.plot(column='Wind', ax=ax)
+#     ax.set_title(i) 
+#     ax.axes.axis('off')
+#     fig.savefig(('Output/Figures/VRE_time/wind_%s.png'%i).replace(':','').replace(' ','-'))
+#     plt.close(fig)
+#     n += 1
+# Make gif = C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Documents\Social\Friday Bar\createGIF.py
 
 #%% ------------------------------- ###
 ###     3. Create Balmorel Input    ###
