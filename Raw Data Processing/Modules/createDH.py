@@ -1,10 +1,14 @@
 """
 Creating Danish heat demand for Balmorel 
 
-Futuregas dataset default
+Futuregas dataset default. Can be used to get temporal profiles
 
-Aalborg dataset:
+Aalborg dataset, can be used to get individual and district heat gross supply:
 https://vbn.aau.dk/da/datasets/kommunepakker-varmeplan-danmark-2021
+- Note that heat demand should be combined wrt. the s1-s5 scenarios (sums to 53.95 TWh without heat efficiency investments)
+
+Python package requirements:
+- xlrd 
 
 Created on 11.03.2024
 
@@ -19,6 +23,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
+import os
 try:
     import cmcrameri
     cmap = cmcrameri.cm.cmaps['roma_r']
@@ -98,7 +103,13 @@ class DistrictHeat:
                 i += 1 
             self.geo.loc['DK_W_Rural'] = temp
             self.geo.crs = 'EPSG:4326'
-        else:
+        elif dataset.lower() == 'denmark_varmeplan2021':
+            files = os.listdir('Data/AAU Kommuneplan')
+            self.DH = pd.DataFrame()
+            for file in files:
+                f = pd.read_excel(f'Data/AAU Kommuneplan/{file}/{file}_opsummering.xls')
+                self.DH = pd.concat((self.DH, f))
+        else: 
             print("Dataset doesn't exist - this is an empty object\n")
             print("Available datasets:\n- Denmark_Futuregas (default)")
 
@@ -247,4 +258,4 @@ def find_value(df: pd.DataFrame, element: any,
     if l > 1:
         print('%d %s values! Picked index %d'%(l, func, ind))
     return temp[ind]
-     
+    
