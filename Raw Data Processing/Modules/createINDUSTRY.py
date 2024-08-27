@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import geopandas as gpd
-from pybalmorel.functions import IncFile, read_lines
+from pybalmorel import IncFile
+from pybalmorel.functions import read_lines
 from Modules.geofiles import prepared_geofiles
 from shapely.geometry import Point, Polygon, LineString
 from typing import Union
