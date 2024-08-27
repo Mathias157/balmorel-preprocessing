@@ -23,6 +23,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
+from Modules.Submodules.aauvarmeplan2021 import read_aau_dataset 
+import xarray as xr
+import numpy as np
 import os
 try:
     import cmcrameri
@@ -106,9 +109,17 @@ class DistrictHeat:
         elif dataset.lower() == 'denmark_varmeplan2021':
             files = os.listdir('Data/AAU Kommuneplan')
             self.DH = pd.DataFrame()
+            muni_geofile = gpd.read_file(r'Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
+            self.geo = muni_geofile
+            
+            # Read municipal data
             for file in files:
                 f = pd.read_excel(f'Data/AAU Kommuneplan/{file}/{file}_opsummering.xls')
+                # Put Municipality in index as multiindex
+                f.index = pd.MultiIndex.from_product([[file], np.arange(len(f))],
+                                                     names=['Municipality', 'Original'])
                 self.DH = pd.concat((self.DH, f))
+            
         else: 
             print("Dataset doesn't exist - this is an empty object\n")
             print("Available datasets:\n- Denmark_Futuregas (default)")
