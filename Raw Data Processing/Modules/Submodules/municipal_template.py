@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import xarray as xr
+from sklearn.cluster import KMeans
 
 style = 'report'
 
@@ -60,3 +61,21 @@ class DataContainer():
         return gpd.GeoDataFrame(geometry=getattr(self, resolution).Polygons.data,
                                 crs=getattr(self, resolution).Polygons.crs)
         
+
+x = DataContainer()
+
+#%%
+
+# Coordinates for clustering
+X = np.vstack((
+    x.muni.coords['lon'].data,
+    x.muni.coords['lat'].data
+)).T
+
+# K-Means Clustering
+n_clusters = 3
+est = KMeans(n_clusters=n_clusters)
+est.fit(X)
+
+labels = est.labels_
+plt.scatter(X[:, 0].T, X[:, 1].T, c=labels, edgecolor="k")
