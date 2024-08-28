@@ -32,7 +32,7 @@ elif style == 'ppt':
     fc = 'none'
 
 #%% ------------------------------- ###
-###        1. 
+###        1. Varmeplan 2021        ###
 ### ------------------------------- ###
 
 class VPDK21:
@@ -70,8 +70,11 @@ class VPDK21:
                 .astype('category')
             )
             
+            # Store year of data collected
+            f['Year'] = 2019
+            
             # Sum to scenario
-            f = f.pivot_table(index=['Municipality', 'User'], values=scenario, 
+            f = f.pivot_table(index=['Year', 'Municipality', 'User'], values=scenario, 
                               aggfunc='sum')
             
             self.DH = pd.concat((self.DH, f))
@@ -97,5 +100,3 @@ if __name__ == '__main__':
                     cmap='coolwarm',  # Add the cmap parameter here
                     legend=True  # Add the legend parameter here
                 ).set_title(user + ' Heat Demand (GWh)')
-
-
