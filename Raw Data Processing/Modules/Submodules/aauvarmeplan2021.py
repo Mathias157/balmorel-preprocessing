@@ -20,6 +20,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import os
+from Modules.Submodules.municipal_template import DataContainer
 
 style = 'report'
 
@@ -45,7 +46,7 @@ class VPDK21:
                          'HøjeTaastrup' : 'Høje Taastrup',
                          'Vesthimmerlands' : 'Vesthimmerland'}
         
-        # Read municipal data
+        # Read varmeplan data
         for file in files:
             f = pd.read_excel(f'Data/AAU Kommuneplan/{file}/{file}_opsummering.xls')
 
@@ -79,33 +80,22 @@ class VPDK21:
         self.DH = self.DH.to_xarray()
         self.DH = self.DH.rename({scenario : 'Heat_Demand_GWh'})
         
-        
-        # Assign to shapefile
-        muni_geofile = gpd.read_file(r'Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
-        temp = (
-            muni_geofile.set_index('NAME_2')
-            .copy()
-            ['geometry']
-        )
-        temp.index.name = 'Municipality'
-        
-        self.DH['Polygons'] = temp 
-        self.DH['Polygons'] = self.DH.Polygons.assign_attrs({'crs' : muni_geofile.crs})
+       
 
+if __name__ == '__main__':
+    data = DataContainer()
+    VP = VPDK21()
+    data.muni = data.muni.merge(VP.DH)
 
-
-VP = VPDK21()
-VP.DH
-
-# Getting the geometry:
-for user in VP.DH.User.data:
-    gpd.GeoDataFrame(
-        geometry=VP.DH.Polygons.data, 
-        crs=VP.DH.Polygons.crs
-        ).plot(
-                column=VP.DH.Heat_Demand_GWh.sel(User=user).data,
-                cmap='coolwarm',  # Add the cmap parameter here
-                legend=True  # Add the legend parameter here
-            ).set_title(user + ' Heat Demand (GWh)')
+    # Getting the geometry:
+    for user in data.muni.User.data:
+        gpd.GeoDataFrame(
+            geometry=data.muni.Polygons.data, 
+            crs=data.muni.Polygons.crs
+            ).plot(
+                    column=data.muni.Heat_Demand_GWh.sel(User=user).data,
+                    cmap='coolwarm',  # Add the cmap parameter here
+                    legend=True  # Add the legend parameter here
+                ).set_title(user + ' Heat Demand (GWh)')
 
 
