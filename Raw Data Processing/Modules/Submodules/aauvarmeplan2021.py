@@ -43,7 +43,7 @@ class VPDK21:
         # Correcting Municipal Names
         correct_names = {'Aarhus' : 'Århus',
                          'HøjeTaastrup' : 'Høje Taastrup',
-                         'Vesthimmerland' : 'Vesthimmerlands'}
+                         'Vesthimmerlands' : 'Vesthimmerland'}
         
         # Read municipal data
         for file in files:
@@ -57,33 +57,55 @@ class VPDK21:
                                                     names=['Municipality', 'Original'])
             
             # Categorise District Heating and Individual Heating
-            f.Forsyning = f.Forsyning.str.replace('Andet', 'Individuel').replace('Biomasse', 'Individuel').replace('Elvarme', 'Individuel').replace('Naturgas', 'Individuel').replace('Olie', 'Individuel').replace('Varmepumpe', 'Individuel')
+            f['User'] = (
+                f.Forsyning.str
+                .replace('Andet', 'Individual')
+                .replace('Biomasse', 'Individual')
+                .replace('Elvarme', 'Individual')
+                .replace('Naturgas', 'Individual')
+                .replace('Olie', 'Individual')
+                .replace('Varmepumpe', 'Individual')
+                .replace('Fjernvarme', 'District Heating')
+                .astype('category')
+            )
             
             # Sum to scenario
-            f = f.pivot_table(index=['Municipality', 'Forsyning'], values=scenario, 
+            f = f.pivot_table(index=['Municipality', 'User'], values=scenario, 
                               aggfunc='sum')
             
             self.DH = pd.concat((self.DH, f))
-        
-        
+                
         # Convert to xarray
         self.DH = self.DH.to_xarray()
+        self.DH = self.DH.rename({scenario : 'Heat_Demand_GWh'})
         
         
         # Assign to shapefile
         muni_geofile = gpd.read_file(r'Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
-        muni_geofile = muni_geofile[muni_geofile.NAME_2 != 'Christiansø']
-        temp = muni_geofile[['geometry']]
-        temp.index = muni_geofile.NAME_2
-        # temp.index = muni_geofile.NAME_2
+        temp = (
+            muni_geofile.set_index('NAME_2')
+            .copy()
+            ['geometry']
+        )
         temp.index.name = 'Municipality'
         
-        self.ind = temp
-        self.DH['geo'] = temp 
+        self.DH['Polygons'] = temp 
+        self.DH['Polygons'] = self.DH.Polygons.assign_attrs({'crs' : muni_geofile.crs})
 
 
 
 VP = VPDK21()
+VP.DH
 
-# VP = VP.DH
+# Getting the geometry:
+for user in VP.DH.User.data:
+    gpd.GeoDataFrame(
+        geometry=VP.DH.Polygons.data, 
+        crs=VP.DH.Polygons.crs
+        ).plot(
+                column=VP.DH.Heat_Demand_GWh.sel(User=user).data,
+                cmap='coolwarm',  # Add the cmap parameter here
+                legend=True  # Add the legend parameter here
+            ).set_title(user + ' Heat Demand (GWh)')
+
 
