@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import xarray as xr
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 
 style = 'report'
 
@@ -64,18 +64,49 @@ class DataContainer():
 
 x = DataContainer()
 
-#%%
 
-# Coordinates for clustering
+# Clustering
+## Coordinates for clustering
 X = np.vstack((
     x.muni.coords['lon'].data,
     x.muni.coords['lat'].data
 )).T
 
-# K-Means Clustering
-n_clusters = 3
+## K-Means Clustering
+n_clusters = 30
 est = KMeans(n_clusters=n_clusters)
 est.fit(X)
 
-labels = est.labels_
-plt.scatter(X[:, 0].T, X[:, 1].T, c=labels, edgecolor="k")
+## Agglomorative clustering
+linkage = 'ward'
+# X = StandardScaler().fit_transform(X) # could be necessary
+agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
+agg.fit(X)
+    
+# Plot the different clustering techniques
+geos = x.get_geodata('muni')
+for name, labelling in [('K-Means', est.labels_), 
+                        (linkage, agg.labels_)]:
+    fig, ax = plt.subplots()
+    geos[name] = labelling
+    geos.plot(column=name, ax=ax)
+    ax.set_title(name + ' - clusters: %d'%n_clusters)
+    
+    
+# Merge cluster to dataset
+clustered_data = xr.Dataset(
+    {
+        "Cluster" : (
+            # ('Municipality', 'lon', 'lat'),
+            'Municipality',
+            # np.vstack([labels]*3)
+            labelling
+        )
+    },
+    # coords={coord : x.muni.coords[coord].data for coord in x.muni.coords}
+    coords={'Municipality' : x.muni.coords['Municipality']}
+)
+
+# Merge clustering to xarray
+x.muni = x.muni.merge(clustered_data)
+
