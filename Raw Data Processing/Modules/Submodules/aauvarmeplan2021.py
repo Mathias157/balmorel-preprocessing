@@ -26,9 +26,11 @@ GJ_60_80C     12.1648 %       2393.687324 TJ
 GJ_under_6    70.7135 %       13914.38463 TJ
 ..doesn't really fit - maybe the assumption that surplus heat above 80C comes from high, 60-80C from mid and below 60C from low is good enough?
 for that to be true:
-- 45% is low => 25.71% left from GJ under 60C
-- 15% is mid => 10.71% left from GJ under 60C
-- 40% is high => 10.71% of < 60C, 12.1648% of GJ_60_80C and 17.1217%
+- 17.1217 + 12.1648 = 29.2865
+- 40 - 29.2865 = 10.7135
+- 10.7135 / 0.7 = 15.305% of GJ_under_6 is high, plus 100% of GJ_60_80C and 100% of GJ_over_80
+- 15% / 0.7 = 21.42857142857143 of GJ_under_6 is mid
+- 45% / 0.7 = 64.28571428571429 of GJ_under_6 is low
 
 Python package requirements:
 - xlrd 
@@ -107,6 +109,13 @@ class VPDK21:
             ).T
             f2.index = [file]
             f2.index.name = 'municipality'
+            
+            ### Distribute heat types
+            f2['industry_phl'] = 0.6428571428571429*f2.GJ_under_6 
+            f2['industry_phm'] = 0.2142857142857143*f2.GJ_under_6
+            f2['industry_phh'] = (0.15305*f2.GJ_under_6 + f2.GJ_60_80C + f2.GJ_over_80) 
+            f2 = f2.drop(columns=['GJ_over_80', 'GJ_60_80C', 'GJ_under_6'])
+    
             self.IND = pd.concat((self.IND, f2))
 
             
@@ -120,12 +129,8 @@ class VPDK21:
             self.DH = pd.concat((self.DH, f))
                 
         # Assign heat temperatures, based on surplus heat (read assumption in script description)
-        self.IND['industry_phl'] = 0.45*self.IND.GJ_under_6 
-        self.IND['industry_phm'] = 0.15*self.IND.GJ_under_6
-        self.IND['industry_phh'] = (0.1071*self.IND.GJ_under_6 + self.IND.GJ_60_80C + self.IND.GJ_over_80) 
-        
+
         ## Normalise to total surplus heat
-        self.IND = self.IND.drop(columns=['GJ_over_80', 'GJ_60_80C', 'GJ_under_6'])
         total_surplus_heat = self.IND.sum().sum()
         self.IND['industry_phl'] = self.IND['industry_phl'] /  total_surplus_heat
         self.IND['industry_phm'] = self.IND['industry_phm'] /  total_surplus_heat
