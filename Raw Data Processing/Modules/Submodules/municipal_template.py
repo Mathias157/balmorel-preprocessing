@@ -50,14 +50,14 @@ class DataContainer():
             .copy()
             .geometry
         )
-        temp.index.name = 'Municipality'
+        temp.index.name = 'municipality'
         temp.index = temp.index.astype('category')
         
         # Assign to xarray
-        self.muni['Polygons'] = temp 
-        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'crs' : muni_geofile.crs})
-        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'geo_crs' : muni_geofile.crs})
-        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'pro_crs' : 'EPSG:4093'})
+        self.muni['polygons'] = temp 
+        self.muni['polygons'] = self.muni.polygons.assign_attrs({'crs' : muni_geofile.crs})
+        self.muni['polygons'] = self.muni.polygons.assign_attrs({'geo_crs' : muni_geofile.crs})
+        self.muni['polygons'] = self.muni.polygons.assign_attrs({'pro_crs' : 'EPSG:4093'})
 
         # Get lat and long of centroids as well
         centroids = self.get_polygons(coord_system='projected').centroid
@@ -66,11 +66,11 @@ class DataContainer():
         
     def get_polygons(self, resolution: str = 'muni',
                     coord_system: str = 'geographic'):
-        geo = gpd.GeoDataFrame(geometry=getattr(self, resolution).Polygons.data,
-                                crs=getattr(self, resolution).Polygons.geo_crs)
+        geo = gpd.GeoDataFrame(geometry=getattr(self, resolution).polygons.data,
+                                crs=getattr(self, resolution).polygons.geo_crs)
         
         if coord_system != 'geographic':
-            geo = geo.to_crs(getattr(self, resolution).Polygons.pro_crs)
+            geo = geo.to_crs(getattr(self, resolution).polygons.pro_crs)
         
         return geo
         
@@ -125,14 +125,14 @@ for name, labelling in [('K-Means', est.labels_),
 clustered_data = xr.Dataset(
     {
         "Cluster" : (
-            # ('Municipality', 'lon', 'lat'),
-            'Municipality',
+            # ('municipality', 'lon', 'lat'),
+            'municipality',
             # np.vstack([labels]*3)
             labelling
         )
     },
     # coords={coord : x.muni.coords[coord].data for coord in x.muni.coords}
-    coords={'Municipality' : x.muni.coords['Municipality']}
+    coords={'municipality' : x.muni.coords['municipality']}
 )
 
 # Merge clustering to xarray

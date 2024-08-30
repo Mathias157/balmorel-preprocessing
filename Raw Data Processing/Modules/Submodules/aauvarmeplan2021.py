@@ -55,33 +55,33 @@ class VPDK21:
             
             # Put municipality in index as multiindex
             f.index = pd.MultiIndex.from_product([[file], np.arange(len(f))],
-                                                    names=['Municipality', 'Original'])
+                                                    names=['municipality', 'original'])
             
             # Categorise District Heating and Individual Heating
-            f['User'] = (
+            f['user'] = (
                 f.Forsyning.str
-                .replace('Andet', 'Individual')
-                .replace('Biomasse', 'Individual')
-                .replace('Elvarme', 'Individual')
-                .replace('Naturgas', 'Individual')
-                .replace('Olie', 'Individual')
-                .replace('Varmepumpe', 'Individual')
-                .replace('Fjernvarme', 'District Heating')
+                .replace('Andet', 'individual')
+                .replace('Biomasse', 'individual')
+                .replace('Elvarme', 'individual')
+                .replace('Naturgas', 'individual')
+                .replace('Olie', 'individual')
+                .replace('Varmepumpe', 'individual')
+                .replace('Fjernvarme', 'district_heating')
                 .astype('category')
             )
             
             # Store year of data collected
-            f['Year'] = 2019
+            f['year'] = 2019
             
             # Sum to scenario
-            f = f.pivot_table(index=['Year', 'Municipality', 'User'], values=scenario, 
+            f = f.pivot_table(index=['year', 'municipality', 'user'], values=scenario, 
                               aggfunc='sum')
             
             self.DH = pd.concat((self.DH, f))
                 
         # Convert to xarray
         self.DH = self.DH.to_xarray()
-        self.DH = self.DH.rename({scenario : 'Heat_Demand_GWh'})
+        self.DH = self.DH.rename({scenario : 'heat_demand_gwh'})
         
        
 
@@ -92,9 +92,9 @@ if __name__ == '__main__':
 
     # Plotting geometry
     geo = data.get_polygons('muni')
-    for user in data.muni.User.data:
-        geo[user] = data.muni.Heat_Demand_GWh.sel(User=user,
-                                                  Year=2019).data
+    for user in data.muni.user.data:
+        geo[user] = data.muni.heat_demand_gwh.sel(user=user,
+                                                  year=2019).data
         geo.plot(
                     column=user,
                     cmap='coolwarm',  # Add the cmap parameter here
