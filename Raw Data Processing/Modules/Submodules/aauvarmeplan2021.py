@@ -75,13 +75,13 @@ class VPDK21:
             
             # Sum to scenario
             f = f.pivot_table(index=['year', 'municipality', 'user'], values=scenario, 
-                              aggfunc='sum')
+                              aggfunc=lambda x: np.sum(x)*1e3) # To MWh
             
             self.DH = pd.concat((self.DH, f))
                 
         # Convert to xarray
         self.DH = self.DH.to_xarray()
-        self.DH = self.DH.rename({scenario : 'heat_demand_gwh'})
+        self.DH = self.DH.rename({scenario : 'heat_demand_mwh'})
         
        
 
@@ -93,10 +93,10 @@ if __name__ == '__main__':
     # Plotting geometry
     geo = data.get_polygons('muni')
     for user in data.muni.user.data:
-        geo[user] = data.muni.heat_demand_gwh.sel(user=user,
+        geo[user] = data.muni.heat_demand_mwh.sel(user=user,
                                                   year=2019).data
         geo.plot(
                     column=user,
                     cmap='coolwarm',  # Add the cmap parameter here
                     legend=True  # Add the legend parameter here
-                ).set_title(user + ' Heat Demand (GWh)')
+                ).set_title(user + ' Heat Demand (MWh)')

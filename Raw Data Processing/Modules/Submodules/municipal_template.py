@@ -74,67 +74,64 @@ class DataContainer():
         
         return geo
         
+if __name__ == '__main__':
+    x = DataContainer()
 
-x = DataContainer()
+    # Clustering
+    ## Coordinates for clustering
+    X = np.vstack((
+        x.muni.coords['lat'].data,
+        x.muni.coords['lon'].data,
+    )).T
 
+    ## K-Means Clustering
+    n_clusters = 4
+    est = KMeans(n_clusters=n_clusters)
+    est.fit(X)
 
-# Clustering
-## Coordinates for clustering
-X = np.vstack((
-    x.muni.coords['lat'].data,
-    x.muni.coords['lon'].data,
-)).T
+    ## Agglomorative clustering
+    linkage = 'ward'
 
-## K-Means Clustering
-n_clusters = 4
-est = KMeans(n_clusters=n_clusters)
-est.fit(X)
+    X = StandardScaler().fit_transform(X) # Normalise dataset
 
-## Agglomorative clustering
-linkage = 'ward'
+    ## Connectivity
+    # ### Using knegihbours_graph
+    # knn_graph = kneighbors_graph(X, 4, include_self=False)
+    knn_graph = None
+    # ### Using predefined x investments
+    # ws = gams.GamsWorkspace()
+    # db = ws.add_database_from_gdx(os.path.abspath('all_endofmodel.gdx'))
+    # connect = symbol_to_df(db, 'XINVCOST', ['Y', 'RE', 'RI', 'Value'])
+    # connect = connect.query('Y == "2050"').pivot_table(index='RE', columns='RI', 
+    #                                        values='Value',
+    #                                        aggfunc='count') # have to sort so its only municipalities
 
-X = StandardScaler().fit_transform(X) # Normalise dataset
+    agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward',
+                                connectivity=knn_graph)
+    agg.fit(X)
+        
+    # Plot the different clustering techniques
+    geos = x.get_polygons('muni')
+    for name, labelling in [('K-Means', est.labels_), 
+                            (linkage, agg.labels_)]:
+        fig, ax = plt.subplots()
+        geos[name] = labelling
+        geos.plot(column=name, ax=ax)
+        ax.set_title(name + ' - clusters: %d'%n_clusters)
+        
+        
+    # Merge cluster to dataset
+    clustered_data = xr.Dataset(
+        {
+            "cluster" : (
+                'municipality',
+                labelling
+            )
+        },
+        # coords={coord : x.muni.coords[coord].data for coord in x.muni.coords}
+        coords={'municipality' : x.muni.coords['municipality']}
+    )
 
-## Connectivity
-# ### Using knegihbours_graph
-# knn_graph = kneighbors_graph(X, 4, include_self=False)
-knn_graph = None
-# ### Using predefined x investments
-# ws = gams.GamsWorkspace()
-# db = ws.add_database_from_gdx(os.path.abspath('all_endofmodel.gdx'))
-# connect = symbol_to_df(db, 'XINVCOST', ['Y', 'RE', 'RI', 'Value'])
-# connect = connect.query('Y == "2050"').pivot_table(index='RE', columns='RI', 
-#                                        values='Value',
-#                                        aggfunc='count') # have to sort so its only municipalities
-
-agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward',
-                              connectivity=knn_graph)
-agg.fit(X)
-    
-# Plot the different clustering techniques
-geos = x.get_polygons('muni')
-for name, labelling in [('K-Means', est.labels_), 
-                        (linkage, agg.labels_)]:
-    fig, ax = plt.subplots()
-    geos[name] = labelling
-    geos.plot(column=name, ax=ax)
-    ax.set_title(name + ' - clusters: %d'%n_clusters)
-    
-    
-# Merge cluster to dataset
-clustered_data = xr.Dataset(
-    {
-        "Cluster" : (
-            # ('municipality', 'lon', 'lat'),
-            'municipality',
-            # np.vstack([labels]*3)
-            labelling
-        )
-    },
-    # coords={coord : x.muni.coords[coord].data for coord in x.muni.coords}
-    coords={'municipality' : x.muni.coords['municipality']}
-)
-
-# Merge clustering to xarray
-x.muni = x.muni.merge(clustered_data)
+    ## Merge clustering to xarray
+    x.muni = x.muni.merge(clustered_data)
 
