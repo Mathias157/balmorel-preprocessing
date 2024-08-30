@@ -16,6 +16,7 @@ import numpy as np
 import geopandas as gpd
 import xarray as xr
 from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.preprocessing import StandardScaler
 
 style = 'report'
 
@@ -50,16 +51,23 @@ class DataContainer():
         
         # Assign to xarray
         self.muni['Polygons'] = temp 
-        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'crs' : muni_geofile.crs})
+        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'geo_crs' : muni_geofile.crs})
+        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'pro_crs' : 'EPSG:4093'})
 
         # Get lat and long of centroids as well
-        centroids = self.get_geodata().centroid
+        centroids = self.get_polygons(coord_system='projected').centroid
         self.muni.coords['lon'] = centroids.x
         self.muni.coords['lat'] = centroids.y
         
-    def get_geodata(self, resolution: str = 'muni'):
-        return gpd.GeoDataFrame(geometry=getattr(self, resolution).Polygons.data,
-                                crs=getattr(self, resolution).Polygons.crs)
+    def get_polygons(self, resolution: str = 'muni',
+                    coord_system: str = 'geographic'):
+        geo = gpd.GeoDataFrame(geometry=getattr(self, resolution).Polygons.data,
+                                crs=getattr(self, resolution).Polygons.geo_crs)
+        
+        if coord_system != 'geographic':
+            geo = geo.to_crs(getattr(self, resolution).Polygons.pro_crs)
+        
+        return geo
         
 
 x = DataContainer()
@@ -79,12 +87,13 @@ est.fit(X)
 
 ## Agglomorative clustering
 linkage = 'ward'
-# X = StandardScaler().fit_transform(X) # could be necessary
+
+X = StandardScaler().fit_transform(X) # Normalise dataset
 agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
 agg.fit(X)
     
 # Plot the different clustering techniques
-geos = x.get_geodata('muni')
+geos = x.get_polygons('muni')
 for name, labelling in [('K-Means', est.labels_), 
                         (linkage, agg.labels_)]:
     fig, ax = plt.subplots()
