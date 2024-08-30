@@ -90,13 +90,13 @@ if __name__ == '__main__':
     VP = VPDK21()
     data.muni = data.muni.merge(VP.DH)
 
-    # Getting the geometry:
+    # Plotting geometry
+    geo = data.get_polygons('muni')
     for user in data.muni.User.data:
-        gpd.GeoDataFrame(
-            geometry=data.muni.Polygons.data, 
-            crs=data.muni.Polygons.crs
-            ).plot(
-                    column=data.muni.Heat_Demand_GWh.sel(User=user).data,
+        geo[user] = data.muni.Heat_Demand_GWh.sel(User=user,
+                                                  Year=2019).data
+        geo.plot(
+                    column=user,
                     cmap='coolwarm',  # Add the cmap parameter here
                     legend=True  # Add the legend parameter here
                 ).set_title(user + ' Heat Demand (GWh)')
