@@ -17,6 +17,10 @@ import geopandas as gpd
 import xarray as xr
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import kneighbors_graph
+from pybalmorel.utils import symbol_to_df
+import gams
+import os
 
 style = 'report'
 
@@ -51,6 +55,7 @@ class DataContainer():
         
         # Assign to xarray
         self.muni['Polygons'] = temp 
+        self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'crs' : muni_geofile.crs})
         self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'geo_crs' : muni_geofile.crs})
         self.muni['Polygons'] = self.muni.Polygons.assign_attrs({'pro_crs' : 'EPSG:4093'})
 
@@ -76,12 +81,12 @@ x = DataContainer()
 # Clustering
 ## Coordinates for clustering
 X = np.vstack((
+    x.muni.coords['lat'].data,
     x.muni.coords['lon'].data,
-    x.muni.coords['lat'].data
 )).T
 
 ## K-Means Clustering
-n_clusters = 30
+n_clusters = 4
 est = KMeans(n_clusters=n_clusters)
 est.fit(X)
 
@@ -89,7 +94,21 @@ est.fit(X)
 linkage = 'ward'
 
 X = StandardScaler().fit_transform(X) # Normalise dataset
-agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
+
+## Connectivity
+# ### Using knegihbours_graph
+# knn_graph = kneighbors_graph(X, 4, include_self=False)
+knn_graph = None
+# ### Using predefined x investments
+# ws = gams.GamsWorkspace()
+# db = ws.add_database_from_gdx(os.path.abspath('all_endofmodel.gdx'))
+# connect = symbol_to_df(db, 'XINVCOST', ['Y', 'RE', 'RI', 'Value'])
+# connect = connect.query('Y == "2050"').pivot_table(index='RE', columns='RI', 
+#                                        values='Value',
+#                                        aggfunc='count') # have to sort so its only municipalities
+
+agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward',
+                              connectivity=knn_graph)
 agg.fit(X)
     
 # Plot the different clustering techniques
