@@ -115,7 +115,13 @@ class VPDK21:
             f2['industry_phm'] = 0.2142857142857143*f2.GJ_under_6
             f2['industry_phh'] = (0.15305*f2.GJ_under_6 + f2.GJ_60_80C + f2.GJ_over_80) 
             f2 = f2.drop(columns=['GJ_over_80', 'GJ_60_80C', 'GJ_under_6'])
-    
+            print(f2)
+            ## Normalise to total surplus heat
+            total_surplus_heat = f2.sum().sum()
+            print(total_surplus_heat)
+            f2['industry_phl'] = f2['industry_phl'] /  total_surplus_heat
+            f2['industry_phm'] = f2['industry_phm'] /  total_surplus_heat
+            f2['industry_phh'] = f2['industry_phh'] /  total_surplus_heat
             self.IND = pd.concat((self.IND, f2))
 
             
@@ -127,14 +133,8 @@ class VPDK21:
                               aggfunc=lambda x: np.sum(x)*1e3) # To MWh
             
             self.DH = pd.concat((self.DH, f))
-                
-        # Assign heat temperatures, based on surplus heat (read assumption in script description)
-
-        ## Normalise to total surplus heat
-        total_surplus_heat = self.IND.sum().sum()
-        self.IND['industry_phl'] = self.IND['industry_phl'] /  total_surplus_heat
-        self.IND['industry_phm'] = self.IND['industry_phm'] /  total_surplus_heat
-        self.IND['industry_phh'] = self.IND['industry_phh'] /  total_surplus_heat
+        
+        ## Store industry demand
         temp = pd.DataFrame(index=pd.MultiIndex.from_product(([2019], self.IND.index, ['industry_phl',
                                                                               'industry_phm',
                                                                               'industry_phh'])))
