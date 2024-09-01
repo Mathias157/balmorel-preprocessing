@@ -9,7 +9,8 @@ Created on 11.03.2024
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from pybalmorel.functions import IncFile, read_lines
+from pybalmorel.utils import read_lines
+from pybalmorel import IncFile
 from Modules.createDH import DistrictHeat
 from Modules.createINDUSTRY import Industry
 from Modules.createHYDROGEN import Hydrogen
