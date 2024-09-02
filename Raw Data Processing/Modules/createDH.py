@@ -23,7 +23,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
-from Modules.Submodules.aauvarmeplan2021 import read_aau_dataset 
+from Modules.Submodules.aauvarmeplan2021 import VPDK21 
+from Modules.Submodules.danmarks_statistik import DKSTAT 
+from Modules.Submodules.municipal_template import DataContainer
 import xarray as xr
 import numpy as np
 import os
@@ -47,7 +49,7 @@ elif style == 'ppt':
     fc = 'none'
     
 #%% ------------------------------- ###
-###        1. 
+###    1. FutureGas District Heat   ###
 ### ------------------------------- ###
 
 class DistrictHeat:
@@ -106,20 +108,7 @@ class DistrictHeat:
                 i += 1 
             self.geo.loc['DK_W_Rural'] = temp
             self.geo.crs = 'EPSG:4326'
-        elif dataset.lower() == 'denmark_varmeplan2021':
-            files = os.listdir('Data/AAU Kommuneplan')
-            self.DH = pd.DataFrame()
-            muni_geofile = gpd.read_file(r'Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
-            self.geo = muni_geofile
-            
-            # Read municipal data
-            for file in files:
-                f = pd.read_excel(f'Data/AAU Kommuneplan/{file}/{file}_opsummering.xls')
-                # Put Municipality in index as multiindex
-                f.index = pd.MultiIndex.from_product([[file], np.arange(len(f))],
-                                                     names=['Municipality', 'Original'])
-                self.DH = pd.concat((self.DH, f))
-            
+  
         else: 
             print("Dataset doesn't exist - this is an empty object\n")
             print("Available datasets:\n- Denmark_Futuregas (default)")
@@ -270,3 +259,68 @@ def find_value(df: pd.DataFrame, element: any,
         print('%d %s values! Picked index %d'%(l, func, ind))
     return temp[ind]
     
+
+#%% ------------------------------- ###
+###     2. VPDK21 District Heat     ###
+### ------------------------------- ###
+
+class DistrictHeatAAU:
+    def __init__(self) -> None:
+        f1 = VPDK21()
+        f2 = DKSTAT()
+        self.f1 = f1
+        self.f2 = f2
+
+if __name__ == '__main__':
+    X = DistrictHeatAAU()
+
+    #%%
+    data = DataContainer()
+    data.muni = data.muni.merge(X.f1.DH)
+    data.muni = data.muni.merge(X.f1.IND)
+    data.muni = data.muni.merge(X.f2.IND)
+
+
+    ## Get industry demands per municipality, per heat type 
+    data.muni = data.muni.merge(xr.Dataset(
+        {'energy_demand_mwh' : (('year', 'user', 'municipality'), 
+                                np.expand_dims(
+                                    np.vstack((
+        data.muni.heat_demand_normalised.sel(year=2019, user='industry_phh') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018),
+        data.muni.heat_demand_normalised.sel(year=2019, user='industry_phm') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018),
+        data.muni.heat_demand_normalised.sel(year=2019, user='industry_phl') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018),
+        # data.energy_demand_type_mwh.sel(year=2018, user='district_heating') / data.energy_demand_type_mwh.sel(year=2018).sum() * data.energy_demand_mun_mwh.sel(year=2018),
+        data.muni.energy_demand_type_mwh.sel(year=2018, user='electricity') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018)
+        )),
+                                    axis=0)
+                                )},
+        coords={
+            'year' : [2019],
+            'user' : [
+                    'industry_phh',
+                    'industry_phm',
+                    'industry_phl',
+                    #   'district_heating',
+                    'electricity'
+                    ],
+            'municipality' : data.muni.coords['municipality']
+        }
+    ))
+
+    ## Drop year 2018, user electricity and other
+    data.muni = data.muni.drop_vars(['energy_demand_mun_mwh',
+                    'energy_demand_type_mwh',
+                    'heat_demand_normalised'])
+    data.muni = data.muni.sel(year=[2019], user=['district_heating', 'individual',
+                                 'industry_phl', 'industry_phm', 'industry_phh'])
+
+    temp = data.muni.heat_demand_mwh.sel(year=2019, user='district_heating').data
+    temp += data.muni.heat_demand_mwh.sel(year=2019, user='individual').data
+    temp += data.muni.energy_demand_mwh.sel(year=2019, user='industry_phl').data.astype(float)
+    temp += data.muni.energy_demand_mwh.sel(year=2019, user='industry_phm').data.astype(float)
+    temp += data.muni.energy_demand_mwh.sel(year=2019, user='industry_phh').data.astype(float)
+
+    fig, ax = plt.subplots()
+    data.get_polygons().plot(ax=ax,
+                            column=temp,
+                            legend=True)
