@@ -28,11 +28,11 @@ elif style == 'ppt':
     fc = 'none'
 
 #%% ------------------------------- ###
-###        1. 
+###       1. Danmarks Statistik     ###
 ### ------------------------------- ###
 
 
-class IndustryDemand():
+class DKSTAT():
     
     def __init__(self) -> None:
         # Energy per Type
@@ -54,7 +54,7 @@ class IndustryDemand():
         f2.index.name = 'user'
         f2 = f2.groupby('user').sum()
         
-        self.data = xr.Dataset(
+        self.IND = xr.Dataset(
             {
                 "energy_consumption_type_mwh" : (
                     ('year', 'user'),
@@ -78,10 +78,10 @@ class IndustryDemand():
             coords={'year' : [2018],
                     'municipality' : f1.index}
         )
-        self.data = self.data.merge(f1)
+        self.IND = self.IND.merge(f1)
         
 
         
 if __name__ == '__main__':
-    ind = IndustryDemand()
-    ind.data
+    ind = DKSTAT()
+    ind.IND

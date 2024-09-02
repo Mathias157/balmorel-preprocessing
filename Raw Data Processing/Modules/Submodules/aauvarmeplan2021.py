@@ -115,10 +115,9 @@ class VPDK21:
             f2['industry_phm'] = 0.2142857142857143*f2.GJ_under_6
             f2['industry_phh'] = (0.15305*f2.GJ_under_6 + f2.GJ_60_80C + f2.GJ_over_80) 
             f2 = f2.drop(columns=['GJ_over_80', 'GJ_60_80C', 'GJ_under_6'])
-            print(f2)
+            
             ## Normalise to total surplus heat
             total_surplus_heat = f2.sum().sum()
-            print(total_surplus_heat)
             f2['industry_phl'] = f2['industry_phl'] /  total_surplus_heat
             f2['industry_phm'] = f2['industry_phm'] /  total_surplus_heat
             f2['industry_phh'] = f2['industry_phh'] /  total_surplus_heat
