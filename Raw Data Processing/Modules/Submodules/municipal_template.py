@@ -60,7 +60,7 @@ class DataContainer():
         self.muni['polygons'] = self.muni.polygons.assign_attrs({'pro_crs' : 'EPSG:4093'})
 
         # Get lat and long of centroids as well
-        centroids = self.get_polygons(coord_system='projected').centroid
+        centroids = self.get_polygons(coord_system='geographic').centroid
         self.muni.coords['lon'] = centroids.x
         self.muni.coords['lat'] = centroids.y
         
