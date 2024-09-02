@@ -304,3 +304,13 @@ if __name__ == '__main__':
     data.get_polygons().plot(ax=ax,
                             column=temp,
                             legend=True)
+    
+    #%%
+    
+    for user in ['district_heating', 'individual', 'industry_phl',
+                 'industry_phm', 'industry_phh']:
+        fig, ax = plt.subplots()
+        data.get_polygons().plot(ax=ax,
+                                column=data.muni.heat_demand_mwh.sel(year=2019, user=user).data,
+                                legend=True).set_title(user)
+    

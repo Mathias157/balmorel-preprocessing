@@ -41,6 +41,12 @@ class DataContainer():
         # Load municipal shapefiles
         muni_geofile = gpd.read_file(r'Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
         
+        # Correcting Municipal Names
+        correct_names = {'Århus' : 'Aarhus',
+                         'Høje Taastrup' : 'Høje-Taastrup',
+                         'Vesthimmerland' : 'Vesthimmerlands'}
+        muni_geofile['NAME_2'] = muni_geofile['NAME_2'].replace(correct_names)
+        
         # Make xarray
         self.muni = xr.Dataset()
         

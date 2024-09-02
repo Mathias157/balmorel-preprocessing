@@ -70,9 +70,7 @@ class VPDK21:
         self.IND = pd.DataFrame()
         
         # Correcting Municipal Names
-        correct_names = {'Aarhus' : 'Århus',
-                         'Høje_Taastrup' : 'Høje Taastrup',
-                         'Vesthimmerlands' : 'Vesthimmerland'}
+        correct_names = {'Høje_Taastrup' : 'Høje-Taastrup'}
         
         # Loop through varmeplan data
         for file in files:
