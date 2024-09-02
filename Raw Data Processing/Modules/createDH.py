@@ -274,7 +274,7 @@ class DistrictHeatAAU:
 if __name__ == '__main__':
     X = DistrictHeatAAU()
 
-    #%%
+    #%% Merge collected data
     data = DataContainer()
     data.muni = data.muni.merge(X.f1.DH)
     data.muni = data.muni.merge(X.f1.IND)
@@ -282,43 +282,23 @@ if __name__ == '__main__':
 
 
     ## Get industry demands per municipality, per heat type 
-    data.muni = data.muni.merge(xr.Dataset(
-        {'energy_demand_mwh' : (('year', 'user', 'municipality'), 
-                                np.expand_dims(
-                                    np.vstack((
-        data.muni.heat_demand_normalised.sel(year=2019, user='industry_phh') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018),
-        data.muni.heat_demand_normalised.sel(year=2019, user='industry_phm') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018),
-        data.muni.heat_demand_normalised.sel(year=2019, user='industry_phl') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018),
-        # data.energy_demand_type_mwh.sel(year=2018, user='district_heating') / data.energy_demand_type_mwh.sel(year=2018).sum() * data.energy_demand_mun_mwh.sel(year=2018),
-        data.muni.energy_demand_type_mwh.sel(year=2018, user='electricity') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018)
-        )),
-                                    axis=0)
-                                )},
-        coords={
-            'year' : [2019],
-            'user' : [
-                    'industry_phh',
-                    'industry_phm',
-                    'industry_phl',
-                    #   'district_heating',
-                    'electricity'
-                    ],
-            'municipality' : data.muni.coords['municipality']
-        }
-    ))
+    data.muni.heat_demand_mwh.loc[{'user': 'industry_phl'}] = data.muni.heat_demand_normalised.sel(year=2019, user='industry_phl') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018)
+    data.muni.heat_demand_mwh.loc[{'user': 'industry_phm'}] = data.muni.heat_demand_normalised.sel(year=2019, user='industry_phm') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018)
+    data.muni.heat_demand_mwh.loc[{'user': 'industry_phh'}] = data.muni.heat_demand_normalised.sel(year=2019, user='industry_phh') * data.muni.energy_demand_type_mwh.sel(year=2018, user='other') / data.muni.energy_demand_type_mwh.sel(year=2018).sum() * data.muni.energy_demand_mun_mwh.sel(year=2018)
 
-    ## Drop year 2018, user electricity and other
+    ## Drop year 2018, user electricity, other and district heat from industry data
     data.muni = data.muni.drop_vars(['energy_demand_mun_mwh',
                     'energy_demand_type_mwh',
                     'heat_demand_normalised'])
     data.muni = data.muni.sel(year=[2019], user=['district_heating', 'individual',
                                  'industry_phl', 'industry_phm', 'industry_phh'])
 
+    # Plot it
     temp = data.muni.heat_demand_mwh.sel(year=2019, user='district_heating').data
     temp += data.muni.heat_demand_mwh.sel(year=2019, user='individual').data
-    temp += data.muni.energy_demand_mwh.sel(year=2019, user='industry_phl').data.astype(float)
-    temp += data.muni.energy_demand_mwh.sel(year=2019, user='industry_phm').data.astype(float)
-    temp += data.muni.energy_demand_mwh.sel(year=2019, user='industry_phh').data.astype(float)
+    temp += data.muni.heat_demand_mwh.sel(year=2019, user='industry_phl').data.astype(float)
+    temp += data.muni.heat_demand_mwh.sel(year=2019, user='industry_phm').data.astype(float)
+    temp += data.muni.heat_demand_mwh.sel(year=2019, user='industry_phh').data.astype(float)
 
     fig, ax = plt.subplots()
     data.get_polygons().plot(ax=ax,
