@@ -56,7 +56,7 @@ class DKSTAT():
         
         self.IND = xr.Dataset(
             {
-                "energy_consumption_type_mwh" : (
+                "energy_demand_type_mwh" : (
                     ('year', 'user'),
                     f2.T * 277.77777777777777
                 )
@@ -68,9 +68,19 @@ class DKSTAT():
         # Energy per Municipality
         f1 = pd.read_excel(r'Data\Danmarks Statistik\Industriforbrug Kommuner.xlsx',
                              skiprows=2, index_col=0)
+        
+        
+        ## Correcting Municipal Names
+        correct_names = {'Aarhus' : 'Århus',
+                         'Høje-Taastrup' : 'Høje Taastrup',
+                         'Vesthimmerlands' : 'Vesthimmerland'}
+        for error_name in correct_names.keys():
+            f1.index = f1.index.str.replace(error_name, correct_names[error_name])
+            
+        ## Conver to xarray
         f1 = xr.Dataset(
             {
-                "energy_consumption_mun_mwh" : (
+                "energy_demand_mun_mwh" : (
                     ('year', 'municipality'),
                     f1.T * 277.77777777777777
                 ) 
