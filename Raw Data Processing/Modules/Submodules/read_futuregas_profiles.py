@@ -13,8 +13,10 @@ Created on 10.09.2024
 from pybalmorel import Balmorel
 from pybalmorel.utils import symbol_to_df
 from Modules.geofiles import prepared_geofiles
+from Modules.Submodules.municipal_template import DataContainer
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 #%% ------------------------------- ###
 ###        1. Read .inc Files       ###
@@ -78,9 +80,54 @@ DK_profiles = pd.concat((
 # Convert to correct column names
 DK_profiles.columns = ['municipality', 'user', 'week', 'hour', 'heat_demand_profile']
 
-# Pivot
+# Convert to correct coordinate names
+DK_profiles['week'] = (
+    DK_profiles['week']
+    .str.replace('S0', '')
+    .str.replace('S', '')
+    .astype(int)
+)
+DK_profiles['hour'] = (
+    DK_profiles['hour']
+    .str.replace('T00', '')
+    .str.replace('T0', '')
+    .str.replace('T', '')
+    .astype(int)
+)
+
+# Pivot and convert to xarray
 DK_profiles = DK_profiles.pivot_table(index=['municipality', 'user', 'week', 'hour'],
                                       values='heat_demand_profile').to_xarray()
 
 #%% Save
 DK_profiles.to_netcdf('Data/Timeseries/DK_heat_profile_futuregas.nc')
+
+#%% Combine with polygon data
+X = DataContainer()
+X.muni = X.muni.merge(DK_profiles)
+
+#%% Get maximum values 
+max_vals = X.muni.heat_demand_profile.max(('week', 'hour', 'user'))
+
+#%% Plot the timevariation
+for i in range(1):
+    for j in range(24):
+        fig, ax = plt.subplots()
+        X.get_polygons().plot(
+            ax=ax,
+            column=(
+                X
+                .muni
+                .heat_demand_profile
+                .sel(user='RESH')
+                .isel(week=i, hour=j)
+                .data
+            )/max_vals.data,
+            legend=True,
+            vmin=0,
+            vmax=1
+        )
+        ax.axes.axis('off')
+        # fig.savefig()
+        # plt.close(fig)
+# Make gif = C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Documents\Social\Friday Bar\createGIF.py
