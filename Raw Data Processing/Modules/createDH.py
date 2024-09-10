@@ -303,14 +303,26 @@ if __name__ == '__main__':
     fig, ax = plt.subplots()
     data.get_polygons().plot(ax=ax,
                             column=temp,
-                            legend=True)
+                            cmap=cmap,
+                            vmin=0,
+                            vmax=6e6,
+                            legend=True).set_title('sum')
+    fig.savefig(f'Output/Figures/Heat/total_heatdemand.png',
+                transparent=True,
+                bbox_inches='tight')
     
     #%%
     
     for user in ['district_heating', 'individual', 'industry_phl',
                  'industry_phm', 'industry_phh']:
         fig, ax = plt.subplots()
-        data.get_polygons().plot(ax=ax,
-                                column=data.muni.heat_demand_mwh.sel(year=2019, user=user).data,
-                                legend=True).set_title(user)
-    
+        a = data.get_polygons().plot(ax=ax,
+                                     cmap=cmap,
+                                     vmin=0,
+                                     vmax=6e6,
+                                     column=data.muni.heat_demand_mwh.sel(year=2019, user=user).data,
+                                     legend=True).set_title(user)
+        fig.savefig(f'Output/Figures/Heat/{user}_heatdemand.png',
+                    transparent=True,
+                    bbox_inches='tight')
+

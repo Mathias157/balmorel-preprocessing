@@ -76,11 +76,11 @@ f2 = f.rename(columns={
     'Branche' : 'user',
     'ConsumptionkWh' : 'electricity_demand_mwh'
 }).pivot_table(index=['municipality', 'user', 'year', 'week', 'hour'],
-                  values='electricity_demand_mwh')
+                  values='electricity_demand_mwh') 
 
 # Convert to xarray
 energinet_el = f2.to_xarray()
-
+energinet_el.electricity_demand_mwh.data = energinet_el.electricity_demand_mwh.data / 1e3 # to MWh
 
 
 if __name__ == '__main__':
