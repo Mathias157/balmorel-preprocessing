@@ -15,12 +15,14 @@ import os
 import pandas as pd
 import numpy as np
 from pybalmorel import IncFile
-from pybalmorel.functions import read_lines
+from pybalmorel.utils import read_lines
 from Modules.geofiles import prepared_geofiles
-
+from Modules.Submodules.municipal_template import DataContainer
+from Modules.Submodules.danmarks_statistik import load_transport_demand
+import matplotlib.pyplot as plt
 
 #%% ------------------------------- ###
-###        1. 
+###        1. Temporal Profile      ###
 ### ------------------------------- ###
 
 class FlexDem():
@@ -136,3 +138,67 @@ FD = FlexDem()
 FD.load_traffic_data()
 FD.create_general_demand()
 FD.create_charging_profile()
+
+
+#%% ------------------------------- ###
+###        2. Spatial Spread        ###
+### ------------------------------- ###
+
+# 2.1 Vehicle Counts on Roads from Ioannis' source 
+f = gpd.read_file('Data/Gas, Transport and Industry Data/gdf_all_ETISplus.geojson')
+
+fig, ax = plt.subplots()
+geo = gpd.GeoDataFrame(x.muni.polygons.to_pandas())
+geo = geo.set_geometry(col=0, crs=x.muni.polygons.crs)
+geo.plot(ax=ax)
+geo['traffic_count'] = 0
+for i, row in f.iterrows():
+    idx = row.geometry.intersects(geo.geometry)
+    muni = geo.loc[idx]
+    if len(muni) != 0:
+        for mun in muni.index:
+            geo.loc[mun, 'traffic_count'] += row.vehicles / len(muni.index)
+        # print('%d intersects %d'%(i, muni.index))
+
+#%%
+# 2.2 National Transport Fuel Demand
+f = load_transport_demand(include_bunkering=False)
+
+## Plot yearly tendencies
+# fig, ax = plt.subplots()
+# f.T.plot(ax=ax)
+# ax.set_ylabel('Dansk Brændstofforbrug (TWh)')
+# ax.legend(loc='center', bbox_to_anchor=(.5, 1.15))
+
+## I choose road demand from 2019 since it seems in the average (assuming no change in mobility demand, avoiding too many electric vehicles)
+road_demand_twh = f.loc[['Motorbenzin, blyfri (fra 2016 inkl. farvet benzin)',
+                     'Diesel til vejtransport'], '2019'].sum()
+
+## Distribute
+geo['flex_electricity_demand_twh'] = (
+    geo.traffic_count
+    .div(geo.traffic_count.sum())
+    .mul(road_demand_twh)
+    # Convert from ICE efficiency to mobility demand
+    .mul(0.36)
+    # Convert from mobility demand to electric demand
+    .div(0.9)
+)
+geo.plot(column='flex_electricity_demand_twh', legend=True)
+road_demand = geo['flex_electricity_demand_twh'].to_xarray()
+
+#%% 
+# 2.3 Merging to other data
+if __name__ == '__main__':
+    x = DataContainer()
+    x.muni = x.muni.merge(road_demand)
+    temp = x.get_polygons()
+
+    fig, ax = plt.subplots()
+    temp.plot(ax=ax)
+    xlims = ax.get_xlim()
+    ylims = ax.get_ylim()
+
+    f.plot(color='r', ax=ax, linewidth=f['vehicles']/1e4)
+    ax.set_ylim(ylims)
+    ax.set_xlim(xlims)
