@@ -72,8 +72,8 @@ class DataContainer():
         
     def get_polygons(self, resolution: str = 'muni',
                     coord_system: str = 'geographic'):
-        geo = gpd.GeoDataFrame(geometry=getattr(self, resolution).polygons.data,
-                                crs=getattr(self, resolution).polygons.geo_crs)
+        geo = gpd.GeoDataFrame(geometry=getattr(self, resolution).polygons.to_pandas())
+        geo = geo.set_crs(getattr(self, resolution).polygons.geo_crs)
         
         if coord_system != 'geographic':
             geo = geo.to_crs(getattr(self, resolution).polygons.pro_crs)
