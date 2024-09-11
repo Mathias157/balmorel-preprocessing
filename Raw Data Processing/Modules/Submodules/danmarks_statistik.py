@@ -84,6 +84,31 @@ class DKSTAT():
         self.IND = self.IND.merge(f1)
         
 
+def load_transport_demand(include_bunkering: bool = False):
+    """Loads Danish transport fuel demand in TWh
+
+    Args:
+        include_bunkering (bool, optional): Include bunkering demand or not. Defaults to False.
+
+    Returns:
+        pd.DataFrame: Most important fuel demands from 2000 to 2023
+    """
+    f = pd.read_excel('Data/Danmarks Statistik/Transportforbrug Type.xlsx', skiprows=2).iloc[:9,1:]
+    f = (
+        f
+        .rename(columns={'Unnamed: 1': 'Fuel'})
+        .pivot_table(index='Fuel')
+        .pipe(lambda df: df.query('Fuel != "Fuelolie, bunkring af dansk opererede skibe i udlandet"\
+                and Fuel != "Jetpetroleum, bunkring af dansk opererede fly i udlandet"\
+                and Fuel != "Diesel, bunkring af danske opererede køretøjer i udlandet"') if not include_bunkering else df)
+        # Remove negligible demand
+        .query('Fuel != "Motorbenzin, farvet (ophørt fra 2016)"\
+            and Fuel != "Motorbenzin, blyholdig"')
+        # Convert to TWh
+        .div(1e6)
+        .mul(0.277777777)
+    )
+    return f
         
 if __name__ == '__main__':
     ind = DKSTAT()
