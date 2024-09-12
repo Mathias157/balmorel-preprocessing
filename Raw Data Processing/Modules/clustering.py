@@ -11,6 +11,7 @@ Created on 11.09.2024
 ### ------------------------------- ###
 
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcol
 import geopandas as gpd
 import pandas as pd
 import numpy as np
@@ -26,8 +27,22 @@ from Modules.Submodules.energinet_electricity import energinet_el
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import kneighbors_graph
+try:
+    import cmcrameri
+    cmap = cmcrameri.cm.cmaps['batlowK']
+    colors = [cmap(i) for i in range(256)]
+except ModuleNotFoundError:
+    print('cmrameri package not installed, using default colourmaps')
+    cmap = matplotlib.colormaps['viridis']
+    colors = [cmap(i) for i in range(256)]
 
-style = 'report'
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    new_cmap = mcol.LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
+    
+style = 'ppt'
 
 if style == 'report':
     plt.style.use('default')
@@ -180,8 +195,13 @@ if __name__ == '__main__':
     connectivity = xr.load_dataset(r'Data\Power Grid\municipal_connectivity.nc')
     #### Make manual adjustments here
     # knn_graph.connection.loc['Kolding', 'Haderslev'] = 0
-    connectivity.connection.loc['Bornholm', 'Dragør'] = 1 # Connect Bornholm, so it is not clustered with Jylland
-    connectivity.connection.loc['Dragør', 'Bornholm'] = 1 # Connect Bornholm, so it is not clustered with Jylland
+    ##### Making sure islands are connected to something
+    connectivity.connection.loc['Bornholm', 'Christiansø'] = 1 
+    connectivity.connection.loc['Christiansø', 'Bornholm'] = 1 
+    connectivity.connection.loc['Bornholm', 'Dragør'] = 1 
+    connectivity.connection.loc['Dragør', 'Bornholm'] = 1 
+    connectivity.connection.loc['Esbjerg', 'Fanø'] = 1 
+    connectivity.connection.loc['Fanø', 'Esbjerg'] = 1 
     # knn_graph.connection.loc['Bornholm', 'København'] = 1
     # knn_graph.connection.loc['København', 'Bornholm'] = 1
     ####
@@ -200,10 +220,13 @@ if __name__ == '__main__':
     for name, labelling in [(linkage, agg.labels_)]:
         fig, ax = plt.subplots()
         geos[name] = labelling
-        geos.plot(column=name, ax=ax, legend=True)
+        geos.plot(column=name, 
+                  ax=ax, 
+                #   legend=True,
+                  cmap=truncate_colormap(cmap, 0.2, 1))
         ax.set_title(name + ' - clusters: %d'%n_clusters)
-        # ax.annotate(xy=np.vstack((geos.centroid.x, geos.centroid.y)).T, text='"' + geos.ward.astype(str) + '"')
-    
+        
+    # ax.
     ### Label municipalities
     # geos.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
     
@@ -214,3 +237,7 @@ if __name__ == '__main__':
     ## Nordjylland region - Nær Læsø
     # ax.set_xlim([10, 11.3])
     # ax.set_ylim([57.0, 57.5])
+    ## Vestjylland region - Nær Fanø
+    # ax.set_xlim([8.2, 9])
+    # ax.set_ylim([55.2, 55.7])
+    

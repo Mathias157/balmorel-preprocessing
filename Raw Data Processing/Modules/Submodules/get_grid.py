@@ -64,6 +64,14 @@ y = y.rename({'municipality' : 'municipality_from',
           'municipality_to' : 'municipality'})
 y = x.muni.merge(y)
 y = y.rename({'municipality' : 'municipality_to'}).fillna(0)
+y.connection.data = y.connection.data.astype(int)
+
+
+## Check for islands with no connections
+for i,row in y.connection.to_pandas().iterrows():
+    if np.all(row == 0):
+        print('No connections to %s'%i)
+
 
 ## Save
-# y.to_netcdf('Data/Power Grid/municipal_connectivity.nc')
+y.connection.to_netcdf('Data/Power Grid/municipal_connectivity.nc')
