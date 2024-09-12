@@ -16,6 +16,8 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 from Modules.geofiles import prepared_geofiles
+from pybalmorel import Balmorel
+from pybalmorel.utils import symbol_to_df
 from scipy.sparse import csr_matrix
 from Modules.Submodules.municipal_template import DataContainer
 from Modules.createFLEXDEM import distribute_road_flex_electricity_demand
@@ -129,6 +131,10 @@ if __name__ == '__main__':
         .merge(winddata, join='left')
         .merge(solardata, join='left')
     )
+    
+    ### We set Frederiksberg to same CF as København as it otherwise drives the clustering hard
+    con.muni.wind_cf.loc['Frederiksberg'] = con.muni.wind_cf.loc['København']
+    con.muni.solar_cf.loc['Frederiksberg'] = con.muni.solar_cf.loc['København']
 
     #%% Plot CF
     fig, ax = plt.subplots()
@@ -145,16 +151,16 @@ if __name__ == '__main__':
     # Clustering
     ## Coordinates for clustering
     X = np.vstack((
-        # con.muni.coords['lat'].data,
-        # con.muni.coords['lon'].data,
-        con.muni.electricity_demand_mwh.sum(dim=['year', 'user']),
-        con.muni.heat_demand_mwh.sum(dim=['year', 'user']),
-        # con.muni.wind_cf.data,
+        con.muni.coords['lat'].data,
+        con.muni.coords['lon'].data,
+        # con.muni.electricity_demand_mwh.sum(dim=['year', 'user']),
+        # con.muni.heat_demand_mwh.sum(dim=['year', 'user']),
+        con.muni.wind_cf.data,
         # con.muni.solar_cf.data,
     )).T
     
     ## General cluster parameters
-    n_clusters = 4
+    n_clusters = 5
 
     ## K-Means Clustering
     # est = KMeans(n_clusters=n_clusters)
@@ -164,25 +170,24 @@ if __name__ == '__main__':
     linkage = 'ward'
 
     X = StandardScaler().fit_transform(X) # Normalise dataset
-    ## Make higher weighting of coordinates
+    ## Make higher weighting of coordinates..?
     # X[:,0] = X[:,0]*10000
     # X[:,1] = X[:,1]*10000
 
 
-    ## Connectivity
-    # ### Using knegihbours_graph
-    # knn_graph = kneighbors_graph(X, 4, include_self=True)
-    knn_graph = None
-    knn_graph = pd.DataFrame(index=x.get_polygons().index,
-             columns=x.get_polygons().index)
-    knn_graph.loc[:] = 1
-    ### Disallow connection between Favrskov and Aarhus
-    knn_graph.loc['Favrskov', 'Aarhus'] = 0
-    knn_graph.loc['Aarhus', 'Favrskov'] = 0
-
-    ### Make it symmetric
-    knn_graph = np.array(knn_graph).astype(int)
-    # knn_graph = csr_matrix((knn_graph + knn_graph.T)/2)
+    ### Connectivity
+    #### Use connectivity from Balmorel (Submodules/get_grid.py)
+    connectivity = xr.load_dataset(r'Data\Power Grid\municipal_connectivity.nc')
+    #### Make manual adjustments here
+    # knn_graph.connection.loc['Kolding', 'Haderslev'] = 0
+    connectivity.connection.loc['Bornholm', 'Dragør'] = 1 # Connect Bornholm, so it is not clustered with Jylland
+    connectivity.connection.loc['Dragør', 'Bornholm'] = 1 # Connect Bornholm, so it is not clustered with Jylland
+    # knn_graph.connection.loc['Bornholm', 'København'] = 1
+    # knn_graph.connection.loc['København', 'Bornholm'] = 1
+    ####
+    knn_graph = connectivity.connection.data # get numpy array
+    knn_graph = csr_matrix(knn_graph) # make dense format
+    # knn_graph = None # don't apply connectivity constraints
 
 
     agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage,
@@ -195,6 +200,17 @@ if __name__ == '__main__':
     for name, labelling in [(linkage, agg.labels_)]:
         fig, ax = plt.subplots()
         geos[name] = labelling
-        geos.plot(column=name, ax=ax)
+        geos.plot(column=name, ax=ax, legend=True)
         ax.set_title(name + ' - clusters: %d'%n_clusters)
-        
+        # ax.annotate(xy=np.vstack((geos.centroid.x, geos.centroid.y)).T, text='"' + geos.ward.astype(str) + '"')
+    
+    ### Label municipalities
+    # geos.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
+    
+    # ### Look at specific coordinates    
+    # ## København region - Frederiksberg have 0 in both wind and solar cf, which may drive the clustering weirdly 
+    # ax.set_xlim([12.3, 12.8])
+    # ax.set_ylim([55.5, 55.8])
+    ## Nordjylland region - Nær Læsø
+    # ax.set_xlim([10, 11.3])
+    # ax.set_ylim([57.0, 57.5])
