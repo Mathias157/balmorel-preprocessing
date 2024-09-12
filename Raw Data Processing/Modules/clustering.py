@@ -11,9 +11,11 @@ Created on 11.09.2024
 ### ------------------------------- ###
 
 import matplotlib.pyplot as plt
+import geopandas as gpd
 import pandas as pd
 import numpy as np
 import xarray as xr
+from Modules.geofiles import prepared_geofiles
 from scipy.sparse import csr_matrix
 from Modules.Submodules.municipal_template import DataContainer
 from Modules.createFLEXDEM import distribute_road_flex_electricity_demand
@@ -69,6 +71,25 @@ def correct_VRE_data(path_to_file, generation_name: str):
     
     return vredata
     
+def convert_municipal_code_to_name(to_be_converted: pd.DataFrame,
+                                    column_to_convert: (str, int),
+                                    pivot_table: bool = False,
+                                    exclude_regions: list = ['Herlev', 'Christiansø'],
+                                    muni_geofile_path: str = r'C:\Users\mberos\gitRepos\balmorel-preprocessing\Raw Data Processing\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp'):
+
+    index, muni_geofile, country = prepared_geofiles('DK Municipalities')
+
+    # Some data was missing for Herlev, DK_1_19_1 and Christiansø, DK_1_6_1 
+    areas2 = muni_geofile.query("NAME_2 not in @exclude_regions")
+    
+    converter = dict(areas2.NAME_2)
+    # print(converter)
+    # Convert to municipality names
+    if pivot_table:
+        to_be_converted = to_be_converted.reset_index()
+    to_be_converted[column_to_convert] = to_be_converted[column_to_convert].replace(converter)
+
+    return to_be_converted
 
 #%%
 if __name__ == '__main__':
