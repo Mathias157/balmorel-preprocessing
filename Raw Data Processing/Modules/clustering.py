@@ -168,21 +168,26 @@ if __name__ == '__main__':
     X = np.vstack((
         con.muni.coords['lat'].data,
         con.muni.coords['lon'].data,
-        # con.muni.electricity_demand_mwh.sum(dim=['year', 'user']),
-        # con.muni.heat_demand_mwh.sum(dim=['year', 'user']),
+        con.muni.electricity_demand_mwh.sum(dim=['year', 'user']),
+        con.muni.heat_demand_mwh.sum(dim=['year', 'user']),
         con.muni.wind_cf.data,
-        # con.muni.solar_cf.data,
+        con.muni.solar_cf.data,
     )).T
+    # data_remark = 'ann. elec demand'
+    data_remark = 'wind cf'
+    data_remark = 'solar cf'
+    data_remark = 'ann. heat demand'
+    data_remark = 'all combined + xy coords'
     
     ## General cluster parameters
-    n_clusters = 5
+    n_clusters = 6
 
     ## K-Means Clustering
-    # est = KMeans(n_clusters=n_clusters)
-    # est.fit(X)
+    est = KMeans(n_clusters=n_clusters)
+    est.fit(X)
 
     ## Agglomorative clustering
-    linkage = 'ward'
+    linkage = 'Ward'
 
     X = StandardScaler().fit_transform(X) # Normalise dataset
     ## Make higher weighting of coordinates..?
@@ -202,42 +207,74 @@ if __name__ == '__main__':
     connectivity.connection.loc['Dragør', 'Bornholm'] = 1 
     connectivity.connection.loc['Esbjerg', 'Fanø'] = 1 
     connectivity.connection.loc['Fanø', 'Esbjerg'] = 1 
-    # knn_graph.connection.loc['Bornholm', 'København'] = 1
-    # knn_graph.connection.loc['København', 'Bornholm'] = 1
+    ##### Artificial Connections
+    ###### Frederiksberg is inside Copenhagen, but should probably be clustered with the rest of Zealand - so we 'cheat'
+    connectivity.connection.loc['Rødovre', 'Frederiksberg'] = 1
+    connectivity.connection.loc['Frederiksberg', 'Rødovre'] = 1
+    ###### We don't want clusters across large oceans
+    connectivity.connection.loc['Slagelse', 'Nyborg'] = 0
+    connectivity.connection.loc['Nyborg', 'Slagelse'] = 0
+    connectivity.connection.loc['Samsø', 'Kalundborg'] = 0
+    connectivity.connection.loc['Kalundborg', 'Samsø'] = 0
+    # connectivity.connection.loc['Lolland', 'Langeland'] = 0
+    # connectivity.connection.loc['Langeland', 'Lolland'] = 0
     ####
     knn_graph = connectivity.connection.data # get numpy array
     knn_graph = csr_matrix(knn_graph) # make dense format
     # knn_graph = None # don't apply connectivity constraints
 
 
-    agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage,
+    agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage.lower(),
                                 connectivity=knn_graph)
     agg.fit(X)
     
     
     # Plot the different clustering techniques
-    geos = con.get_polygons()
+    clustering = con.get_polygons()
     for name, labelling in [(linkage, agg.labels_)]:
+                            # ('K-Means', est.labels_)]:
         fig, ax = plt.subplots()
-        geos[name] = labelling
-        geos.plot(column=name, 
+        clustering[name] = labelling
+        clustering.plot(column=name, 
                   ax=ax, 
                 #   legend=True,
                   cmap=truncate_colormap(cmap, 0.2, 1))
-        ax.set_title(name + ' - clusters: %d'%n_clusters)
         
-    # ax.
-    ### Label municipalities
-    # geos.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
-    
-    # ### Look at specific coordinates    
-    # ## København region - Frederiksberg have 0 in both wind and solar cf, which may drive the clustering weirdly 
-    # ax.set_xlim([12.3, 12.8])
-    # ax.set_ylim([55.5, 55.8])
-    ## Nordjylland region - Nær Læsø
-    # ax.set_xlim([10, 11.3])
-    # ax.set_ylim([57.0, 57.5])
-    ## Vestjylland region - Nær Fanø
-    # ax.set_xlim([8.2, 9])
-    # ax.set_ylim([55.2, 55.7])
+        if knn_graph == None:
+            connection_remark = 'no connectivity'
+        else:
+            connection_remark = 'connec. included + artifical'
+
+        plot_title = '%s, %d clusters, %s\ndata: %s'%(name, 
+                                                    n_clusters,
+                                                    connection_remark,
+                                                    data_remark) 
+        ax.set_title(plot_title)
+        # ax.set_title('%d clusters, %s linkage, %s'%(n_clusters, name, connection_remark))    
+        
+        ax.axes.axis('off')
+        
+        fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
+                    transparent=True,
+                    bbox_inches='tight')
+        
+        ### Label municipalities
+        # clustering.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
+        
+        ### Look at specific coordinates    
+        ## København region - Frederiksberg have 0 in both wind and solar cf, which may drive the clustering weirdly 
+        # ax.set_xlim([12.3, 12.8])
+        # ax.set_ylim([55.5, 55.8])
+        ## Nordjylland region - Nær Læsø
+        # ax.set_xlim([10, 11.3])
+        # ax.set_ylim([57.0, 57.5])
+        ## Vestjylland region - Nær Fanø
+        # ax.set_xlim([8.2, 9])
+        # ax.set_ylim([55.2, 55.7])
+        ## Storebælt
+        # ax.set_xlim([10.3, 11.6])
+        # ax.set_ylim([55.0, 55.6])
+        ## Samsø
+        # ax.set_xlim([10, 11.5])
+        # ax.set_ylim([55.4, 56.1])
     
