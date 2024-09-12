@@ -83,11 +83,20 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         #                       'geometry' : [hovedstaden]})))
         area_names = 'GID_2'
         
+        # Correcting Municipal Names
+        correct_names = {'Århus' : 'Aarhus',
+                         'Høje Taastrup' : 'Høje-Taastrup',
+                         'Vesthimmerland' : 'Vesthimmerlands'}
+        areas['NAME_2'] = areas['NAME_2'].replace(correct_names)
+        
         # Change DNK to DK
         areas.loc[:, area_names] = areas.loc[:, area_names].str.replace('DNK', 'DK')
         
         # Change . to _
         areas.loc[:, area_names] = areas.loc[:, area_names].str.replace('.', '_')
+        
+        
+        
 
         
     # NUTS3 (Also contains NUTS2, and NUTS1)
