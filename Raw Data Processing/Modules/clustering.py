@@ -226,10 +226,13 @@ def cluster(con: DataContainer,
     # Plot the different clustering techniques
     clustering = con.get_polygons()
     for name, labelling in [(linkage, agg.labels_)]:
-                            # ('K-Means', est.labels_)]:
+        
+        # Set labels
+        clustering['cluster_group'] = labelling
+
+        # Plot clustering
         fig, ax = plt.subplots()
-        clustering[name] = labelling
-        clustering.plot(column=name, 
+        clustering.plot(column='cluster_group', 
                   ax=ax, 
                 #   legend=True,
                   cmap=truncate_colormap(cmap, 0.2, 1))
@@ -270,8 +273,8 @@ def cluster(con: DataContainer,
         # ax.set_xlim([10, 11.5])
         # ax.set_ylim([55.4, 56.1])
     
-    return clustering
+    return fig, ax, clustering
 
 if __name__ == '__main__':
     collected = collect_clusterdata(energinet_el)
-    clustering = cluster(collected, 20)
+    fig, ax, clustering = cluster(collected, 20)
