@@ -75,7 +75,12 @@ f2 = f.rename(columns={
     'LAU NAME NATIONAL' : 'municipality',
     'Branche' : 'user',
     'ConsumptionkWh' : 'electricity_demand_mwh'
-}).pivot_table(index=['municipality', 'user', 'year', 'week', 'hour'],
+})
+
+f2['user'] = f2.user.replace({'Erhverv' : 'industry',
+            'Offentligt' : 'public',
+            'Privat' : 'residential'})
+f2 = f2.pivot_table(index=['municipality', 'user', 'year', 'week', 'hour'],
                   values='electricity_demand_mwh') 
 
 # Convert to xarray
