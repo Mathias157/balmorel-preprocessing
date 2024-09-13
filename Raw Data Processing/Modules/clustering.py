@@ -108,10 +108,10 @@ def convert_municipal_code_to_name(to_be_converted: pd.DataFrame,
 
     return to_be_converted
 
-#%%
-if __name__ == '__main__':
 
-    # 1.1 Collect Data
+def collect_clusterdata(energinet_el: pd.DataFrame,
+                        plot_cf: bool = False):
+
     con = DataContainer()
     
     ## Annual Heat Demand
@@ -151,20 +151,35 @@ if __name__ == '__main__':
     con.muni.wind_cf.loc['Frederiksberg'] = con.muni.wind_cf.loc['København']
     con.muni.solar_cf.loc['Frederiksberg'] = con.muni.solar_cf.loc['København']
 
-    #%% Plot CF
-    fig, ax = plt.subplots()
-    con.get_polygons().plot(
-        ax=ax,
-        column=con.muni.solar_cf.data,
-        legend=True,
-        vmin=0,
-        vmax=0.175
-    )
+    ### Plot CF
+    if plot_cf:
+        fig, ax = plt.subplots()
+        con.get_polygons().plot(
+            ax=ax,
+            column=con.muni.solar_cf.data,
+            legend=True,
+            vmin=0,
+            vmax=0.175
+        )
 
-    #%% 1.2 Cluster
+    return con
 
-    # Clustering
-    ## Coordinates for clustering
+
+def cluster(con: DataContainer,
+            n_clusters: int,
+            use_connectivity: bool = True,
+            manual_corrections: list = [
+                ['Bornholm', 'Christiansø', 1],
+                ['Bornholm', 'Dragør', 1],
+                ['Esbjerg', 'Fanø', 1],
+                ['Rødovre', 'Frederiksberg', 1],
+                ['Slagelse', 'Nyborg', 0],
+                ['Samsø', 'Kalundborg', 0]
+            ],
+            connection_remark: str = 'connec. included + artifical',
+            data_remark: str = 'all combined + xy coords'):
+    
+    # Stack data for clustering
     X = np.vstack((
         con.muni.coords['lat'].data,
         con.muni.coords['lon'].data,
@@ -173,20 +188,12 @@ if __name__ == '__main__':
         con.muni.wind_cf.data,
         con.muni.solar_cf.data,
     )).T
-    # data_remark = 'ann. elec demand'
-    data_remark = 'wind cf'
-    data_remark = 'solar cf'
-    data_remark = 'ann. heat demand'
-    data_remark = 'all combined + xy coords'
-    
-    ## General cluster parameters
-    n_clusters = 6
 
-    ## K-Means Clustering
-    est = KMeans(n_clusters=n_clusters)
-    est.fit(X)
+    # K-Means Clustering
+    # est = KMeans(n_clusters=n_clusters)
+    # est.fit(X)
 
-    ## Agglomorative clustering
+    # Agglomorative clustering
     linkage = 'Ward'
 
     X = StandardScaler().fit_transform(X) # Normalise dataset
@@ -195,35 +202,22 @@ if __name__ == '__main__':
     # X[:,1] = X[:,1]*10000
 
 
-    ### Connectivity
-    #### Use connectivity from Balmorel (Submodules/get_grid.py)
-    connectivity = xr.load_dataset(r'Data\Power Grid\municipal_connectivity.nc')
-    #### Make manual adjustments here
-    # knn_graph.connection.loc['Kolding', 'Haderslev'] = 0
-    ##### Making sure islands are connected to something
-    connectivity.connection.loc['Bornholm', 'Christiansø'] = 1 
-    connectivity.connection.loc['Christiansø', 'Bornholm'] = 1 
-    connectivity.connection.loc['Bornholm', 'Dragør'] = 1 
-    connectivity.connection.loc['Dragør', 'Bornholm'] = 1 
-    connectivity.connection.loc['Esbjerg', 'Fanø'] = 1 
-    connectivity.connection.loc['Fanø', 'Esbjerg'] = 1 
-    ##### Artificial Connections
-    ###### Frederiksberg is inside Copenhagen, but should probably be clustered with the rest of Zealand - so we 'cheat'
-    connectivity.connection.loc['Rødovre', 'Frederiksberg'] = 1
-    connectivity.connection.loc['Frederiksberg', 'Rødovre'] = 1
-    ###### We don't want clusters across large oceans
-    connectivity.connection.loc['Slagelse', 'Nyborg'] = 0
-    connectivity.connection.loc['Nyborg', 'Slagelse'] = 0
-    connectivity.connection.loc['Samsø', 'Kalundborg'] = 0
-    connectivity.connection.loc['Kalundborg', 'Samsø'] = 0
-    # connectivity.connection.loc['Lolland', 'Langeland'] = 0
-    # connectivity.connection.loc['Langeland', 'Lolland'] = 0
-    ####
-    knn_graph = connectivity.connection.data # get numpy array
-    knn_graph = csr_matrix(knn_graph) # make dense format
-    # knn_graph = None # don't apply connectivity constraints
+    # Connectivity
+    if use_connectivity:
+        ## Use connectivity from Balmorel (Submodules/get_grid.py)
+        connectivity = xr.load_dataset(r'Data\Power Grid\municipal_connectivity.nc')
 
+        ## Manual Corrections
+        for manual_connection in manual_corrections:
+            connectivity.connection.loc[manual_connection[0], manual_connection[1]] = manual_connection[2]
+            connectivity.connection.loc[manual_connection[1], manual_connection[0]] = manual_connection[2]
+            
+        knn_graph = connectivity.connection.data # get numpy array
+        knn_graph = csr_matrix(knn_graph) # make dense format
+    else:
+        knn_graph = None # don't apply connectivity constraints
 
+    # Perform Clustering
     agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage.lower(),
                                 connectivity=knn_graph)
     agg.fit(X)
@@ -242,8 +236,6 @@ if __name__ == '__main__':
         
         if knn_graph == None:
             connection_remark = 'no connectivity'
-        else:
-            connection_remark = 'connec. included + artifical'
 
         plot_title = '%s, %d clusters, %s\ndata: %s'%(name, 
                                                     n_clusters,
@@ -254,9 +246,9 @@ if __name__ == '__main__':
         
         ax.axes.axis('off')
         
-        fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
-                    transparent=True,
-                    bbox_inches='tight')
+        # fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
+        #             transparent=True,
+        #             bbox_inches='tight')
         
         ### Label municipalities
         # clustering.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
@@ -278,3 +270,8 @@ if __name__ == '__main__':
         # ax.set_xlim([10, 11.5])
         # ax.set_ylim([55.4, 56.1])
     
+    return clustering
+
+if __name__ == '__main__':
+    collected = collect_clusterdata(energinet_el)
+    clustering = cluster(collected, 20)
