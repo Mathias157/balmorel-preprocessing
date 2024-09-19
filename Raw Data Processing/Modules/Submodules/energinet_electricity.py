@@ -15,6 +15,7 @@ Created on 22.08.2024
 ###        0. Script Settings       ###
 ### ------------------------------- ###
 
+from pybalmorel import IncFile
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -32,7 +33,7 @@ elif style == 'ppt':
     fc = 'none'
 
 #%% ------------------------------- ###
-###        1. 
+### 1. Load & Format Energinet Data ###
 ### ------------------------------- ###
 
 # Read municipality timeseries
@@ -102,3 +103,46 @@ if __name__ == '__main__':
             ax=ax
         ).set_title(str(user.data))
 
+#%% Conversion Function
+
+def convert_dataset_to_inc(dataset: (xr.Dataset, pd.DataFrame),
+                          data_name: str,
+                          dimension_map: dict,
+                          element_map: dict,
+                          ):
+    
+    # Get a pandas df
+    if type(dataset) == type(xr.Dataset):
+        df = dataset.to_dataframe().reset_index()
+    
+    print('Before: \n', dataset, '\n\n')
+    # Change coordinate names
+    dataset = dataset.rename(dimension_map)
+    
+    # Change coordinate element names
+    for coord_name in dimension_map.keys():
+        new_coord_name = dimension_map[coord_name]
+        if coord_name in element_map:
+            old_elements = pd.Series(
+                dataset.coords[new_coord_name].data
+            )
+            for old_element in element_map[coord_name].keys():
+                old_elements = old_elements.str.replace(old_element,
+                                                        element_map[coord_name][old_element])
+            # print(new_elements)
+            ## old_elements now contain the new ones
+            dataset = dataset.assign_coords(
+                coord_name=old_elements
+            )
+            print('After: \n', dataset, '\n\n')
+
+convert_dataset_to_inc(energinet_el,
+                      'electricity_demand_mwh',
+                      {'municipality' : 'R',
+                        'user' : 'DEUSER',
+                        'year' : 'Y',
+                       'week' : 'S',
+                       'hour' : 'T'},
+                      {'user' : {'industry' : 'PLL',
+                                 'public' : 'PUB',
+                                 'residential' : 'RESE'}})
