@@ -40,7 +40,7 @@ def convert_coordname_elements(dataset: (xr.Dataset, pd.DataFrame),
                 dataset.coords[new_coord_name].data
             )
             for old_element in element_map[coord_name].keys():
-                old_elements = old_elements.str.replace(old_element,
+                old_elements = old_elements.astype(str).str.replace(old_element,
                                                         element_map[coord_name][old_element])
             
             ## old_elements now contain the new ones
@@ -52,3 +52,4 @@ def convert_coordname_elements(dataset: (xr.Dataset, pd.DataFrame),
         print('After: \n', dataset, '\n\n')
 
     return dataset
+

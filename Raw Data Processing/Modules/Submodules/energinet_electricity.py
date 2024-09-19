@@ -112,6 +112,6 @@ if __name__ == '__main__':
                             'year' : 'Y',
                         'week' : 'S',
                         'hour' : 'T'},
-                        {'user' : {'industry' : 'PLL',
-                                    'public' : 'PUB',
+                        {'user' : {'industry' : 'PII',
+                                    'public' : 'OTHER',
                                     'residential' : 'RESE'}})
