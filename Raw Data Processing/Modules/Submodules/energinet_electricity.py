@@ -22,6 +22,7 @@ import numpy as np
 import xarray as xr
 from pytz import timezone
 from Modules.Submodules.municipal_template import DataContainer
+from Modules.Submodules.utils import convert_coordname_elements
 
 style = 'report'
 
@@ -103,40 +104,8 @@ if __name__ == '__main__':
             ax=ax
         ).set_title(str(user.data))
 
-#%% Conversion Function
 
-def convert_dataset_to_inc(dataset: (xr.Dataset, pd.DataFrame),
-                          data_name: str,
-                          dimension_map: dict,
-                          element_map: dict,
-                          ):
-    
-    # Get a pandas df
-    if type(dataset) == type(xr.Dataset):
-        df = dataset.to_dataframe().reset_index()
-    
-    print('Before: \n', dataset, '\n\n')
-    # Change coordinate names
-    dataset = dataset.rename(dimension_map)
-    
-    # Change coordinate element names
-    for coord_name in dimension_map.keys():
-        new_coord_name = dimension_map[coord_name]
-        if coord_name in element_map:
-            old_elements = pd.Series(
-                dataset.coords[new_coord_name].data
-            )
-            for old_element in element_map[coord_name].keys():
-                old_elements = old_elements.str.replace(old_element,
-                                                        element_map[coord_name][old_element])
-            # print(new_elements)
-            ## old_elements now contain the new ones
-            dataset = dataset.assign_coords(
-                coord_name=old_elements
-            )
-            print('After: \n', dataset, '\n\n')
-
-convert_dataset_to_inc(energinet_el,
+dataset = convert_coordname_elements(energinet_el,
                       'electricity_demand_mwh',
                       {'municipality' : 'R',
                         'user' : 'DEUSER',
