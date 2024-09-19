@@ -1,6 +1,10 @@
 # Load the config file at the top
 # configfile: "config.yaml"
 
+rule all:
+    shell:
+        "echo finished"
+
 rule create_conversion_dictionaries:
     output:
         "Modules/Submodules/conversion_dictionaries.pkl"
@@ -9,15 +13,38 @@ rule create_conversion_dictionaries:
         python Modules/Submodules/create_name_conversion_dict.py
         """
 
-# rule convert_to_balm_names:
-#     input:
-#         ""
-#     output:
-#         "message.txt"
-#     params:
-#         message=config["message"]  # Get message from config file
-#     shell:
-#         """
-#         python scripts/message.py --message "{params.message}" 
-#         """
+rule format_energinet_electricity_data_to_xarray:
+    output:
+        "Data/Timeseries/energinet_eldem.nc"
+    shell:
+        """
+        python Modules/energinet_electricity.py
+        """
 
+rule electricity_demands:
+    input:
+        ["Modules/Submodules/conversion_dictionaries.pkl", "Data/Timeseries/energinet_eldem.nc"]
+    output:
+        ["Output/DE.inc", "Output/DE_VAR_T.inc", 
+        "Output/INDUSTRY_DE.inc", "Output/INDUSTRY_DE_VAR_T.inc", 
+        "Output/INDIVUSERS_DE.inc", "Output/INDIVUSERS_DE_VAR_T.inc"]
+    shell:
+        """
+        python Modules/createDE.py --conversion-file={input[0]} --el-dataset={input[1]}
+        """
+
+rule get_grid_from_Balmorel:
+    output:
+        "Data/Power Grid/municipal_connectivity.nc"
+    shell:
+        """
+        python Modules/Submodules/get_grid.py
+        """
+
+rule do_clustering:
+    input:
+        "Data/Power Grid/municipal_connectivity.nc"
+    shell:
+        """
+        python Modules/clustering.py
+        """

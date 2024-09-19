@@ -18,10 +18,12 @@ Created on 22.08.2024
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import click
+import pickle
 import xarray as xr
 from pytz import timezone
-from Modules.Submodules.municipal_template import DataContainer
-from Modules.Submodules.energinet_electricity import energinet_el
+from Submodules.municipal_template import DataContainer
+from Submodules.utils import convert_coordname_elements
 import matplotlib
 try:
     import cmcrameri
@@ -44,30 +46,24 @@ elif style == 'ppt':
     fc = 'none'
 
 #%% ------------------------------- ###
-###   1. Merge Electricity Demand   ###
+###      1. Make .inc Files         ###
 ### ------------------------------- ###
 
-x = DataContainer()
-x.muni = x.muni.merge(energinet_el)
-for user in x.muni.electricity_demand_mwh.coords['user']:
-    fig, ax = plt.subplots()
-    x.get_polygons().plot(
-        column=x.muni.electricity_demand_mwh.sum(dim=['year', 'week', 'hour']).sel(user=user).data,
-        legend=True,
-        ax=ax
-    ).set_title(str(user.data))
+@click.command()
+@click.option("--conversion-file", type=str, required=True, help="The conversion dictionary")
+@click.option("--el-dataset", type=str, required=True, help="The xarray electricity dataset")
+def convert_names(conversion_file, el_dataset):
+    # Load dataset
+    dataset = xr.load_dataset(el_dataset)
+    
+    # Load conversion dictionaries
+    with open(conversion_file, 'rb') as f:
+        converter = pickle.load(f)
+        
+    return convert_coordname_elements(dataset, 'electricity_demand_mwh',
+                               converter['coord_names'], converter['coord_element_names'])   
 
-# The sum
-fig, ax = plt.subplots()
-summed = x.muni.electricity_demand_mwh.sum(dim=['user', 'week', 'hour'])
-x.get_polygons().plot(
-    column=summed.sel(year=2023).data,
-    legend=True,
-    ax=ax,
-    cmap=cmap,
-    vmin=0,
-    vmax=6e6
-)
-fig.savefig('Output/Figures/Electricity/total_elecdemand.png',
-            transparent=True,
-            bbox_inches='tight')
+
+
+if __name__ == '__main__':
+    convert_names()

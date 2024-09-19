@@ -21,8 +21,8 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 from pytz import timezone
-from Modules.Submodules.municipal_template import DataContainer
-from Modules.Submodules.utils import convert_coordname_elements
+from Submodules.municipal_template import DataContainer
+from Submodules.utils import convert_coordname_elements
 
 style = 'report'
 
@@ -88,7 +88,7 @@ f2 = f2.pivot_table(index=['municipality', 'user', 'year', 'week', 'hour'],
 # Convert to xarray
 energinet_el = f2.to_xarray()
 energinet_el.electricity_demand_mwh.data = energinet_el.electricity_demand_mwh.data / 1e3 # to MWh
-
+energinet_el.to_netcdf('Data/Timeseries/energinet_eldem.nc')
 
 if __name__ == '__main__':
     # Example on merging with other data

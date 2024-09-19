@@ -4,7 +4,7 @@ channels:
   - bioconda
 dependencies:
   - Cartopy=0.22.0
-  - geopandas=0.14.1
+  - geopandas=1.0.1
   - matplotlib=3.7.2
   - nbformat=5.9.2
   - numpy=1.26.2
@@ -16,6 +16,7 @@ dependencies:
   - scipy=1.11.2
   - shapely=2.0.2
   - atlite=0.2.12
+  - xarray=2024.2.0
   - click
   - snakemake-minimal
   - pip
