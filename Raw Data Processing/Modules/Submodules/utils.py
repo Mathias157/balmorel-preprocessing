@@ -45,7 +45,7 @@ def convert_coordname_elements(dataset: (xr.Dataset, pd.DataFrame),
             
             ## old_elements now contain the new ones
             dataset = dataset.assign_coords(
-                coord_name=old_elements
+                {new_coord_name : old_elements}
             )
     
     if print_before_and_after:
