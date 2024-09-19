@@ -105,13 +105,13 @@ if __name__ == '__main__':
         ).set_title(str(user.data))
 
 
-dataset = convert_coordname_elements(energinet_el,
-                      'electricity_demand_mwh',
-                      {'municipality' : 'R',
-                        'user' : 'DEUSER',
-                        'year' : 'Y',
-                       'week' : 'S',
-                       'hour' : 'T'},
-                      {'user' : {'industry' : 'PLL',
-                                 'public' : 'PUB',
-                                 'residential' : 'RESE'}})
+    dataset = convert_coordname_elements(energinet_el,
+                        'electricity_demand_mwh',
+                        {'municipality' : 'R',
+                            'user' : 'DEUSER',
+                            'year' : 'Y',
+                        'week' : 'S',
+                        'hour' : 'T'},
+                        {'user' : {'industry' : 'PLL',
+                                    'public' : 'PUB',
+                                    'residential' : 'RESE'}})
