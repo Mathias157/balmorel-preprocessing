@@ -1,21 +1,26 @@
 # Load the config file at the top
 # configfile: "config.yaml"
 
+out_path     = "Output/"
+data_path    = "Data/"
+modules_path = "Modules/"
+submod_path  = "Modules/Submodules/"
+
 rule all:
-    shell:
-        "echo finished"
+    input:
+        [f'{out_path}DE.inc', f'{data_path}Power Grid/municipal_connectivity.nc']
 
 rule create_conversion_dictionaries:
     output:
-        "Modules/Submodules/conversion_dictionaries.pkl"
+        f"{submod_path}conversion_dictionaries.pkl"
     shell:
-        """
-        python Modules/Submodules/create_name_conversion_dict.py
+        f"""
+        python {submod_path}create_name_conversion_dict.py
         """
 
 rule format_energinet_electricity_data_to_xarray:
     output:
-        "Data/Timeseries/energinet_eldem.nc"
+        f"{data_path}Timeseries/energinet_eldem.nc"
     shell:
         """
         python Modules/energinet_electricity.py
@@ -23,11 +28,11 @@ rule format_energinet_electricity_data_to_xarray:
 
 rule electricity_demands:
     input:
-        ["Modules/Submodules/conversion_dictionaries.pkl", "Data/Timeseries/energinet_eldem.nc"]
+        [f"{modules_path}Submodules/conversion_dictionaries.pkl", f"{data_path}Timeseries/energinet_eldem.nc"]
     output:
-        ["Output/DE.inc", "Output/DE_VAR_T.inc", 
-        "Output/INDUSTRY_DE.inc", "Output/INDUSTRY_DE_VAR_T.inc", 
-        "Output/INDIVUSERS_DE.inc", "Output/INDIVUSERS_DE_VAR_T.inc"]
+        [f"{out_path}DE.inc", f"{out_path}DE_VAR_T.inc", 
+        f"{out_path}INDUSTRY_DE.inc", f"{out_path}INDUSTRY_DE_VAR_T.inc", 
+        f"{out_path}INDIVUSERS_DE.inc", f"{out_path}INDIVUSERS_DE_VAR_T.inc"]
     shell:
         """
         python Modules/createDE.py --conversion-file={input[0]} --el-dataset={input[1]}
@@ -35,7 +40,7 @@ rule electricity_demands:
 
 rule get_grid_from_Balmorel:
     output:
-        "Data/Power Grid/municipal_connectivity.nc"
+        f"{data_path}Power Grid/municipal_connectivity.nc"
     shell:
         """
         python Modules/Submodules/get_grid.py
@@ -43,7 +48,7 @@ rule get_grid_from_Balmorel:
 
 rule do_clustering:
     input:
-        "Data/Power Grid/municipal_connectivity.nc"
+        f"{data_path}Power Grid/municipal_connectivity.nc"
     shell:
         """
         python Modules/clustering.py

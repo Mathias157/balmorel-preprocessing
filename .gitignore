@@ -8,3 +8,7 @@ __pycache__
 .new_env/*
 prebalm
 *.pyc
+snakemake_dag
+snakemake_dag.*
+!snakemake_dag.pdf
+gurobi.log
