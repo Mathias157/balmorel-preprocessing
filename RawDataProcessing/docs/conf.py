@@ -17,7 +17,7 @@ extensions = [
 ]
 
 # search this directory for Python files
-autoapi_dirs = ["RawDataProcessing"]
+autoapi_dirs = ["../"]
 
 # ignore this file when generating API documentation
 autoapi_ignore = ["*/conf.py"]
