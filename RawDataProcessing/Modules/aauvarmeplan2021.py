@@ -149,7 +149,7 @@ class VPDK21:
 def main():
     # 1.1 Get formatted Varmeplan2021 Data
     data_format = VPDK21()
-    data_format.DH.to_netcdf('Data/AAU Kommuneplan/residential_exo_heatdem.nc')
+    data_format.DH.to_netcdf('Data/AAU Kommuneplan/districtheat_exo_heatdem.nc')
     data_format.IND.to_netcdf('Data/AAU Kommuneplan/industry_exo_heatdem.nc')
 
 if __name__ == '__main__':
