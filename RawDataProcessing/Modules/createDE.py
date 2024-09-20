@@ -17,6 +17,7 @@ Created on 22.08.2024
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import textwrap
 import numpy as np
 import click
 import pickle
@@ -51,6 +52,15 @@ elif style == 'ppt':
 ### ------------------------------- ###
 
 def convert_names(conversion_file: str, el_dataset: str):
+    """_summary_
+
+    Args:
+        conversion_file (str): _description_
+        el_dataset (str): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # Load dataset
     dataset = xr.load_dataset(el_dataset)
     
@@ -78,7 +88,7 @@ def convert_names(conversion_file: str, el_dataset: str):
         
     return dataset, new_dataset
 
-def make_inc_file(xarray: xr.Dataset,
+def transform_xrdata(xarray: xr.Dataset,
                   data_variable: str,
                   selection: Tuple[dict, None] = None,
                   sets_to_sum: Tuple[str, list, None] = None):
@@ -94,7 +104,7 @@ def make_inc_file(xarray: xr.Dataset,
     if selection != None:
         output = output.sel(selection)
     
-    print(output)
+    return output
 
 # Main function
 @click.command()
@@ -124,10 +134,52 @@ def main(conversion_file: str,
         print('After: \n', new_dataset, '\n\n')
         
     # 1.2 Make .inc-files
+    out_path = 'Output'
     ## 1.2.1 DE
-    make_inc_file(new_dataset,
-                  'electricity_demand_mwh',
-                  sets_to_sum=['S', 'T'])
+    DE = IncFile(name='DE',
+        prefix=textwrap.dedent("""* Data from Energinet Dataservice 2023
+        TABLE   DE1(RRR,DEUSER,YYY)   'Annual electricity consumption (MWh)' 
+        """),
+        suffix=textwrap.dedent(""";
+        DE(YYY,RRR,DEUSER)=DE1(RRR,DEUSER,YYY);
+        DE('2050',RRR,DEUSER) = DE('2023', RRR, DEUSER);
+        """),
+        path=out_path
+    )
+    ### Sum to annual electricity demands
+    DE.body = (
+        transform_xrdata(new_dataset,
+                        'electricity_demand_mwh',
+                        sets_to_sum=['S', 'T'])
+        .to_dataframe()
+    ) 
+    DE.body_prepare(['R', 'DEUSER'],
+                    'Y',
+                    values='electricity_demand_mwh')
+    DE.save()
+    
+    ## 1.2.2 DE_VAR_T
+    DE_VAR_T = IncFile(name='DE_VAR_T',
+                       prefix=textwrap.dedent("""
+                                              * Data from Energinet Dataservice 2023
+                                              TABLE DE_VAR_T1(DEUSER,SSS,TTT,RRR) "Variation in electricity demand"
+                                              """),
+                       suffix=textwrap.dedent("""
+                                              ;
+                                              PARAMETER DE_VAR_T(RRR,DEUSER,SSS,TTT) "Variation in electricity demand";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+                                              DE_VAR_T(RRR,DEUSER,SSS,TTT) =  DE_VAR_T1(DEUSER,SSS,TTT,RRR); 
+                                              """),
+                       path=out_path)
+    DE_VAR_T.body = (
+        transform_xrdata(new_dataset,
+                         'electricity_demand_mwh')
+        .to_dataframe()
+    )
+    DE_VAR_T.body_prepare(['DEUSER', 'S', 'T'],
+                          'R',
+                          values='electricity_demand_mwh')
+    DE_VAR_T.save()
+    
 
 if __name__ == '__main__':
     main()

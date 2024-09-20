@@ -1,5 +1,8 @@
-
+"""Is used to convert the easy-to-read-for-non-balmorel-user sets and elements to Balmorel input
+"""
 import pickle
+
+
 
 conversion_dictionaries = {
     
@@ -12,7 +15,14 @@ conversion_dictionaries = {
 
     'coord_element_names' : {'user' : {'industry' : 'PII',
                             'public' : 'OTHER',
-                            'residential' : 'RESE'}},
+                            'residential' : 'RESE'},
+                             'municipality' : {'æ' : 'ae',
+                                               'ø' : 'oe',
+                                               'å' : 'aa',
+                                               'Æ' : 'Ae',
+                                               'Ø' : 'Oe',
+                                               'Å' : 'Aa'
+                                 }},
 
     'week_to_seasons' : ['S0%d'%i for i in range(1, 10)] +\
                         ['S%d'%i for i in range(10, 53)],
