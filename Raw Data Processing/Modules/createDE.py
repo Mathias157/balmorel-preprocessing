@@ -64,8 +64,10 @@ def convert_names(conversion_file, el_dataset):
     new_dataset = dataset.assign_coords(week=converter['week_to_seasons'])
     new_dataset = new_dataset.assign_coords(hour=converter['hour_to_terms'])
         
-    assert np.all(new_dataset.electricity_demand_mwh.data == dataset.electricity_demand_mwh.data), 'Values are not the same after conversion!'
-        
+    # Test that we did not mess something up
+    before = np.nan_to_num(dataset.electricity_demand_mwh.data)
+    after = np.nan_to_num(new_dataset.electricity_demand_mwh.data)
+    assert np.all(after == before), 'Values are not the same after conversion!'
         
     return convert_coordname_elements(new_dataset, 'electricity_demand_mwh',
                                converter['coord_names'], converter['coord_element_names'],
