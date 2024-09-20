@@ -91,27 +91,29 @@ energinet_el.electricity_demand_mwh.data = energinet_el.electricity_demand_mwh.d
 energinet_el.to_netcdf('Data/Timeseries/energinet_eldem.nc')
 
 if __name__ == '__main__':
-    # Example on merging with other data
-    x = DataContainer()
-    x.muni = x.muni.merge(energinet_el)
+    merge_example = False
+    if merge_example:
+        # Example on merging with other data
+        x = DataContainer()
+        x.muni = x.muni.merge(energinet_el)
 
 
-    for user in x.muni.electricity_demand_mwh.coords['user']:
-        fig, ax = plt.subplots()
-        x.get_polygons().plot(
-            column=x.muni.electricity_demand_mwh.sum(dim=['year', 'week', 'hour']).sel(user=user).data,
-            legend=True,
-            ax=ax
-        ).set_title(str(user.data))
+        for user in x.muni.electricity_demand_mwh.coords['user']:
+            fig, ax = plt.subplots()
+            x.get_polygons().plot(
+                column=x.muni.electricity_demand_mwh.sum(dim=['year', 'week', 'hour']).sel(user=user).data,
+                legend=True,
+                ax=ax
+            ).set_title(str(user.data))
 
 
-    dataset = convert_coordname_elements(energinet_el,
-                        'electricity_demand_mwh',
-                        {'municipality' : 'R',
-                            'user' : 'DEUSER',
-                            'year' : 'Y',
-                        'week' : 'S',
-                        'hour' : 'T'},
-                        {'user' : {'industry' : 'PII',
-                                    'public' : 'OTHER',
-                                    'residential' : 'RESE'}})
+        dataset = convert_coordname_elements(energinet_el,
+                            'electricity_demand_mwh',
+                            {'municipality' : 'R',
+                                'user' : 'DEUSER',
+                                'year' : 'Y',
+                            'week' : 'S',
+                            'hour' : 'T'},
+                            {'user' : {'industry' : 'PII',
+                                        'public' : 'OTHER',
+                                        'residential' : 'RESE'}})
