@@ -5,7 +5,7 @@ release = "0.0.1"
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv", ".venv/**"]
 
-conf_py_path = "Raw Data Processing/docs/"  # with leading and trailing slash
+conf_py_path = "RawDataProcessing/docs/"  # with leading and trailing slash
 
 html_static_path = ["css"]
 
@@ -17,7 +17,7 @@ extensions = [
 ]
 
 # search this directory for Python files
-autoapi_dirs = ["Raw Data Processing"]
+autoapi_dirs = ["RawDataProcessing"]
 
 # ignore this file when generating API documentation
 autoapi_ignore = ["*/conf.py"]

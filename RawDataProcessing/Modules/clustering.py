@@ -92,7 +92,7 @@ def convert_municipal_code_to_name(to_be_converted: pd.DataFrame,
                                     column_to_convert: (str, int),
                                     pivot_table: bool = False,
                                     exclude_regions: list = ['Herlev', 'Christiansø'],
-                                    muni_geofile_path: str = r'C:\Users\mberos\gitRepos\balmorel-preprocessing\Raw Data Processing\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp'):
+                                    muni_geofile_path: str = r'C:\Users\mberos\gitRepos\balmorel-preprocessing\RawDataProcessing\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp'):
 
     index, muni_geofile, country = prepared_geofiles('DK Municipalities')
 

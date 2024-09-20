@@ -1,7 +1,7 @@
-Raw Data Processing/Data/*
-Raw Data Processing/Output/*
-!Raw Data Processing/Data/IncFilePreSuf/README.md
-!Raw Data Processing/Output/Figures/.keepoutfolder
+RawDataProcessing/Data/*
+RawDataProcessing/Output/*
+!RawDataProcessing/Data/IncFilePreSuf/README.md
+!RawDataProcessing/Output/Figures/.keepoutfolder
 conversion_dictionaries.pkl
 .snakemake
 __pycache__
