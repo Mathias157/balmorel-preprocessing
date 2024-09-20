@@ -21,7 +21,7 @@ autoapi_dirs = ["../"]
 
 # ignore these file when generating API documentation
 autoapi_ignore = ["*/conf.py",
-                  "Modules/createVRE.py"]
+                  "*/createVRE.py"]
 
 myst_enable_extensions = [
     "colon_fence",  # ::: can be used instead of ``` for better rendering    
