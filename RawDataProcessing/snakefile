@@ -19,6 +19,8 @@ rule create_conversion_dictionaries:
         """
 
 rule format_energinet_electricity_data_to_xarray:
+    input:
+        f"{data_path}Timeseries/ElConsumptionEnerginet2023.csv"
     output:
         f"{data_path}Timeseries/energinet_eldem.nc"
     shell:
@@ -26,7 +28,7 @@ rule format_energinet_electricity_data_to_xarray:
         python Modules/energinet_electricity.py
         """
 
-rule electricity_demands:
+rule exo_electricity_demand:
     input:
         [f"{modules_path}Submodules/conversion_dictionaries.pkl", f"{data_path}Timeseries/energinet_eldem.nc"]
     output:

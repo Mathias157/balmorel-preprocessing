@@ -18,6 +18,8 @@ dependencies:
   - shapely=2.0.2
   - atlite=0.2.12
   - xarray=2024.2.0
+  - graphviz
+  - python-graphviz
   - click
   - snakemake-minimal
   - pip
