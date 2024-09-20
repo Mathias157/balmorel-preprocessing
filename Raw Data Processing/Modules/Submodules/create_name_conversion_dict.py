@@ -12,12 +12,14 @@ conversion_dictionaries = {
 
     'coord_element_names' : {'user' : {'industry' : 'PII',
                             'public' : 'OTHER',
-                            'residential' : 'RESE'}} |\
-                        {'week' : {str(i) : 'S0%d'%i for i in range(1, 10)} |\
-                                    {str(i) : 'S%d'%i for i in range(10, 53)}} |\
-                        {'hour' : {str(i) : 'T00%d'%i for i in range(1, 10)} |\
-                                    {str(i) : 'T0%d'%i for i in range(10, 100)} |\
-                                    {str(i) : 'T%d'%i for i in range(100, 169)}}
+                            'residential' : 'RESE'}},
+
+    'week_to_seasons' : ['S0%d'%i for i in range(1, 10)] +\
+                        ['S%d'%i for i in range(10, 53)],
+                        
+    'hour_to_terms'  : ['T00%d'%i for i in range(1, 10)] +\
+                       ['T0%d'%i for i in range(10, 100)] +\
+                       ['T%d'%i for i in range(100, 169)]
 
 }
 
