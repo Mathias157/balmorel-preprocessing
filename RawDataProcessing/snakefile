@@ -85,7 +85,8 @@ rule exo_heat_demand:
     input:
         [f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
         f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc",
-        f"{data_path}Danmarks Statistik/industry_demand.nc"]
+        f"{data_path}Danmarks Statistik/industry_demand.nc",
+        f"{data_path}Timeseries/energinet_eldem.nc"]
     output:
         [f'{out_path}DH.inc', f'{out_path}DH_VAR_T.inc',
         f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
