@@ -49,10 +49,7 @@ elif style == 'ppt':
 ###      1. Make .inc Files         ###
 ### ------------------------------- ###
 
-@click.command()
-@click.option("--conversion-file", type=str, required=True, help="The conversion dictionary")
-@click.option("--el-dataset", type=str, required=True, help="The xarray electricity dataset")
-def convert_names(conversion_file, el_dataset):
+def convert_names(conversion_file: str, el_dataset: str):
     # Load dataset
     dataset = xr.load_dataset(el_dataset)
     
@@ -60,20 +57,38 @@ def convert_names(conversion_file, el_dataset):
     with open(conversion_file, 'rb') as f:
         converter = pickle.load(f)
         
+    # Convert
+    new_dataset = convert_coordname_elements(dataset, 
+                                             converter['coord_names'], 
+                                             converter['coord_element_names'],
+                                            False)   
+        
     # Convert weeks and hours
-    new_dataset = dataset.assign_coords(week=converter['week_to_seasons'])
-    new_dataset = new_dataset.assign_coords(hour=converter['hour_to_terms'])
+    new_dataset = (
+        new_dataset
+        .assign_coords(S=converter['week_to_seasons'])
+        .assign_coords(T=converter['hour_to_terms'])
+    )
         
     # Test that we did not mess something up
     before = np.nan_to_num(dataset.electricity_demand_mwh.data)
     after = np.nan_to_num(new_dataset.electricity_demand_mwh.data)
     assert np.all(after == before), 'Values are not the same after conversion!'
         
-    return convert_coordname_elements(new_dataset, 'electricity_demand_mwh',
-                               converter['coord_names'], converter['coord_element_names'],
-                               True)   
+    return dataset, new_dataset
 
+
+# Main function
+@click.command()
+@click.option("--conversion-file", type=str, required=True, help="The conversion dictionary")
+@click.option("--el-dataset", type=str, required=True, help="The xarray electricity dataset")
+@click.option("--show-difference", type=bool, required=False, help="Show dataset before and after conversion")
+def main(conversion_file: str, el_dataset: str, show_difference: bool = False):
+    dataset, new_dataset = convert_names(conversion_file, el_dataset)
+    
+    if show_difference:
+        print('Before: \n', dataset, '\n\n')
+        print('After: \n', new_dataset, '\n\n')
 
 if __name__ == '__main__':
-    dataset = convert_names()
-    print(dataset)
+    main()

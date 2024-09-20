@@ -35,7 +35,7 @@ rule electricity_demands:
         f"{out_path}INDIVUSERS_DE.inc", f"{out_path}INDIVUSERS_DE_VAR_T.inc"]
     shell:
         """
-        python Modules/createDE.py --conversion-file={input[0]} --el-dataset={input[1]}
+        python Modules/createDE.py --conversion-file={input[0]} --el-dataset={input[1]} --show-difference=False
         """
 
 rule get_grid_from_Balmorel:
