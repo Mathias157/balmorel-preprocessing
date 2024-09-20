@@ -21,7 +21,8 @@ import numpy as np
 import click
 import pickle
 import xarray as xr
-from pytz import timezone
+from typing import Tuple
+from pybalmorel import IncFile
 from Submodules.municipal_template import DataContainer
 from Submodules.utils import convert_coordname_elements
 import matplotlib
@@ -77,6 +78,23 @@ def convert_names(conversion_file: str, el_dataset: str):
         
     return dataset, new_dataset
 
+def make_inc_file(xarray: xr.Dataset,
+                  data_variable: str,
+                  selection: Tuple[dict, None] = None,
+                  sets_to_sum: Tuple[str, list, None] = None):
+
+    output = xarray
+    if sets_to_sum != None:
+        output = (
+            output
+            .get(data_variable)
+            .sum(sets_to_sum)
+        )
+
+    if selection != None:
+        output = output.sel(selection)
+    
+    print(output)
 
 # Main function
 @click.command()
@@ -84,11 +102,19 @@ def convert_names(conversion_file: str, el_dataset: str):
 @click.option("--el-dataset", type=str, required=True, help="The xarray electricity dataset")
 @click.option("--show-difference", type=bool, required=False, help="Show dataset before and after conversion")
 def main(conversion_file: str, el_dataset: str, show_difference: bool = False):
+    
+    # 1.1 Format Dataset
     dataset, new_dataset = convert_names(conversion_file, el_dataset)
     
     if show_difference:
         print('Before: \n', dataset, '\n\n')
         print('After: \n', new_dataset, '\n\n')
+        
+    # 1.2 Make .inc-files
+    ## 1.2.1 DE
+    make_inc_file(new_dataset,
+                  'electricity_demand_mwh',
+                  sets_to_sum=['S', 'T'])
 
 if __name__ == '__main__':
     main()
