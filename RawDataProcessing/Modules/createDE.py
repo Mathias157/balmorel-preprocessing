@@ -101,7 +101,20 @@ def make_inc_file(xarray: xr.Dataset,
 @click.option("--conversion-file", type=str, required=True, help="The conversion dictionary")
 @click.option("--el-dataset", type=str, required=True, help="The xarray electricity dataset")
 @click.option("--show-difference", type=bool, required=False, help="Show dataset before and after conversion")
-def main(conversion_file: str, el_dataset: str, show_difference: bool = False):
+def main(conversion_file: str, 
+         el_dataset: str, 
+         show_difference: bool = False):
+    """
+        Main function to process and convert dataset names, and create .inc files.
+    Args:
+        conversion_file (str): Path to the file containing conversion mappings.
+        el_dataset (str): Path to the dataset file to be processed.
+        show_difference (bool, optional): Flag to indicate whether to print the 
+                                            dataset before and after conversion. 
+                                            Defaults to False.
+    Returns:
+        None
+    """
     
     # 1.1 Format Dataset
     dataset, new_dataset = convert_names(conversion_file, el_dataset)
