@@ -6,9 +6,12 @@ data_path    = "Data/"
 modules_path = "Modules/"
 submod_path  = "Modules/Submodules/"
 
+# 1. General Purpose
 rule all:
     input:
-        [f'{out_path}DE.inc', f'{data_path}Power Grid/municipal_connectivity.nc']
+        [f'{out_path}DE.inc', 
+        f"{data_path}AAU Kommuneplan/residential_exo_heatdem.nc",
+        f'{data_path}Power Grid/municipal_connectivity.nc']
 
 rule create_conversion_dictionaries:
     output:
@@ -18,6 +21,23 @@ rule create_conversion_dictionaries:
         python {submod_path}create_name_conversion_dict.py
         """
 
+rule get_grid_from_Balmorel:
+    output:
+        f"{data_path}Power Grid/municipal_connectivity.nc"
+    shell:
+        """
+        python Modules/Submodules/get_grid.py
+        """
+
+rule do_clustering:
+    input:
+        f"{data_path}Power Grid/municipal_connectivity.nc"
+    shell:
+        """
+        python Modules/clustering.py
+        """
+
+# 2. Exogenous Electricity Demands
 rule format_energinet_electricity_data_to_xarray:
     input:
         f"{data_path}Timeseries/ElConsumptionEnerginet2023.csv"
@@ -40,18 +60,14 @@ rule exo_electricity_demand:
         python Modules/createDE.py --conversion-file={input[0]} --el-dataset={input[1]} --show-difference=False
         """
 
-rule get_grid_from_Balmorel:
-    output:
-        f"{data_path}Power Grid/municipal_connectivity.nc"
-    shell:
-        """
-        python Modules/Submodules/get_grid.py
-        """
-
-rule do_clustering:
+# 3. Exogenous Heat Demands
+rule format_vpdk21_data_to_xarray:
     input:
-        f"{data_path}Power Grid/municipal_connectivity.nc"
+        directory(f"{data_path}AAU Kommuneplan")
+    output:
+        [f"{data_path}AAU Kommuneplan/residential_exo_heatdem.nc", 
+        f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc"]
     shell:
         """
-        python Modules/clustering.py
+        python Modules/aauvarmeplan2021.py
         """

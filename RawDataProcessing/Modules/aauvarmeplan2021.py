@@ -47,7 +47,7 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 import os
-from Modules.Submodules.municipal_template import DataContainer
+from Submodules.municipal_template import DataContainer
 
 style = 'report'
 
@@ -146,26 +146,36 @@ class VPDK21:
         self.IND = temp.to_xarray()
        
 
-if __name__ == '__main__':
-    data = DataContainer()
-    VP = VPDK21()
-    data.muni = data.muni.merge(VP.DH)
-    data.muni = data.muni.merge(VP.IND)
+def main():
+    # 1.1 Get formatted Varmeplan2021 Data
+    data_format = VPDK21()
+    data_format.DH.to_netcdf('Data/AAU Kommuneplan/residential_exo_heatdem.nc')
+    data_format.IND.to_netcdf('Data/AAU Kommuneplan/industry_exo_heatdem.nc')
 
-    # Plotting geometry
-    geo = data.get_polygons('muni')
-    for user in data.muni.user.data:
-        if user == 'district_heating' or user == 'individual':
-            geo[user] = data.muni.heat_demand_mwh.sel(user=user,
-                                                    year=2019).data
-            unit = 'MWh'
-        else:
-            geo[user] = data.muni.heat_demand_normalised.sel(user=user,
-                                                    year=2019).data
-            unit = 'normalised'
-        
-        geo.plot(
-                    column=user,
-                    cmap='coolwarm',  # Add the cmap parameter here
-                    legend=True       # Add the legend parameter here
-                ).set_title(user + f' Heat Demand ({unit})')
+if __name__ == '__main__':
+    main()    
+    
+    merge_example = False
+    if merge_example:
+        data = DataContainer()
+        VP = VPDK21()
+        data.muni = data.muni.merge(VP.DH)
+        data.muni = data.muni.merge(VP.IND)
+
+        # Plotting geometry
+        geo = data.get_polygons('muni')
+        for user in data.muni.user.data:
+            if user == 'district_heating' or user == 'individual':
+                geo[user] = data.muni.heat_demand_mwh.sel(user=user,
+                                                        year=2019).data
+                unit = 'MWh'
+            else:
+                geo[user] = data.muni.heat_demand_normalised.sel(user=user,
+                                                        year=2019).data
+                unit = 'normalised'
+            
+            geo.plot(
+                        column=user,
+                        cmap='coolwarm',  # Add the cmap parameter here
+                        legend=True       # Add the legend parameter here
+                    ).set_title(user + f' Heat Demand ({unit})')
