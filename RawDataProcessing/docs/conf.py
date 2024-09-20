@@ -1,3 +1,16 @@
+# Handle backslashes in paths
+import os
+import sys
+
+# If needed, add the module paths you want to document
+sys.path.insert(0, os.path.abspath('.'))
+
+# Configure Sphinx to handle path-related issues:
+rst_prolog = """
+.. |os_sep| unicode:: 0xA0  # no-break space
+   :trim:
+"""
+
 project = "Balmorel Pre-Processing Framework"
 copyright = "2024, Mathias Berg Rosendal"
 author = "Mathias Berg Rosendal"
