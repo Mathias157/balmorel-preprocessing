@@ -16,7 +16,8 @@ rule all:
 
 rule create_conversion_dictionaries:
     output:
-        f"{submod_path}conversion_dictionaries.pkl"
+        [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl",
+        f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl"]
     shell:
         f"""
         python {submod_path}create_name_conversion_dict.py
@@ -51,7 +52,7 @@ rule format_energinet_electricity_data:
 
 rule exo_electricity_demand:
     input:
-        [f"{modules_path}Submodules/conversion_dictionaries.pkl", f"{data_path}Timeseries/energinet_eldem.nc"]
+        [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl", f"{data_path}Timeseries/energinet_eldem.nc"]
     output:
         [f"{out_path}DE.inc", f"{out_path}DE_VAR_T.inc"]
     shell:
@@ -83,7 +84,8 @@ rule format_dkstat_industry_data:
 
 rule exo_heat_demand:
     input:
-        [f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
+        [f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
+        f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
         f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc",
         f"{data_path}Danmarks Statistik/industry_demand.nc",
         f"{data_path}Timeseries/energinet_eldem.nc"]

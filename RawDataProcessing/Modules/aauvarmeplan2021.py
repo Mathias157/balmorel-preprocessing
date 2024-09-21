@@ -127,7 +127,7 @@ class VPDK21:
             
             ## Sum to scenario
             f = f.pivot_table(index=['year', 'municipality', 'user'], values=scenario, 
-                              aggfunc=lambda x: np.sum(x)*1e3) # To MWh
+                              aggfunc=lambda x: np.sum(x)*1e3, observed=False) # To MWh
             
             self.DH = pd.concat((self.DH, f))
         
