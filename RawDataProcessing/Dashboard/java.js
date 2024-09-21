@@ -1,5 +1,6 @@
 // Initial values
 var output_type = ['countries', 'regions', 'areas'];
+var consoleOutput = document.getElementById('consoleOutput');
 window.to_be_connected = [];
 updateDisplay()
 
@@ -49,9 +50,24 @@ function click() {
         window.to_be_connected = [];
     } else {
         // Check if connection is valid
-        let firstId = document.getElementById(window.to_be_connected[0])
-        firstId.style.backgroundColor = 'rgb(185, 185, 185)';
-        console.log(`Connection made between ${window.to_be_connected[1]} and ${this.parentNode.id}`)
-        window.to_be_connected = [];
+        let firstId = document.getElementById(window.to_be_connected[0]);
+        let firstType = window.to_be_connected[1];
+        let thisType = this.parentNode.id;
+        if (firstType === thisType) {
+            firstId.style.backgroundColor = 'rgb(185, 185, 185)';
+            consoleOutput.innerHTML = `<br>Can't make connections between ${firstType} and ${thisType}<br>`;
+            consoleOutput.style.color = 'red';
+            window.to_be_connected = [];
+        } else if ((firstType === 'countries' & thisType === 'areas') | (firstType === 'areas' & thisType === 'countries')) {
+            firstId.style.backgroundColor = 'rgb(185, 185, 185)';
+            consoleOutput.innerHTML = `<br>Can't make connections between countries and areas<br>`;
+            consoleOutput.style.color = 'red';
+            window.to_be_connected = [];
+        } else {
+            firstId.style.backgroundColor = 'rgb(185, 185, 185)';
+            consoleOutput.innerHTML = `<br>Connection made!<br>`;
+            consoleOutput.style.color = 'green';
+            window.to_be_connected = [];
+        }
     }
 }
