@@ -6,11 +6,12 @@
     <title>Comma-separated Text Input</title>
     <style>
         .output {
+            display: flex;
+            justify-content: center;
             margin-top: 20px;
         }
         .output-item {
-            display: flex;
-            justify-content: center;
+            display: inline-block;
             margin-right: 10px;
             padding: 5px;
             background-color: #f0f0f0;
@@ -31,7 +32,9 @@
     <button onclick="updateDisplay()">Update Display</button>
 
     <!-- Section for Displaying the Text -->
-    <div class="output" id="outputSection"></div>
+    <div class="output" id="outputSection1"></div>
+    <div class="output" id="outputSection2"></div>
+    <div class="output" id="outputSection3"></div>
 
     <script src="java.js"></script>
 </body>
