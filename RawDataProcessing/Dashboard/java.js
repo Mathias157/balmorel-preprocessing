@@ -9,7 +9,11 @@ updateDisplay();
 function updateDisplay() {
     // Clear
     document.querySelectorAll('.connection-line').forEach(line => line.remove());
-    window.connected_lines = {}
+    window.connected_lines = {
+        'countries' : {},
+        'regions' : {},
+        'areas' : {}
+    }
     for (let i = 1; i <= 3; i++) {
         // Get input value
         let input = document.getElementById(`input${i}`).value;
@@ -37,20 +41,20 @@ function updateDisplay() {
                 div.addEventListener('click', click)
                 
                 // Store
-                window.connected_lines[div.id] = [];
+                window.connected_lines[output_type[i-1]][div.id] = [];
             }
         });
-    }
-
-    // Create connections    
-    for (let node1 in window.connected_lines) {
-        if (window.connections.hasOwnProperty(node1)) {
-            let node1_array = window.connections[node1];
-            node1_array.forEach(node2 => {
-                console.log(`Connection from ${node1} to ${node2}`);
-                window.connected_lines[node1].push(node2);
-                drawConnection(node1, node2);
-            })
+        
+        // Create connections    
+        for (let node1 in window.connected_lines[output_type[i-1]]) {
+            if (window.connections.hasOwnProperty(node1)) {
+                let node1_array = window.connections[node1];
+                node1_array.forEach(node2 => {
+                    console.log(`Connection from ${node1} to ${node2}`);
+                    window.connected_lines[output_type[i-1]][node1].push(node2);
+                    drawConnection(node1, node2);
+                })
+            }
         }
     }
     codeSnippet.innerHTML = JSON.stringify(window.connected_lines, null, 2);
