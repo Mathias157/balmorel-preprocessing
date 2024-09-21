@@ -1,11 +1,13 @@
 // Initial values
-var output_type = ['countries', 'regions', 'areas'];
-var consoleOutput = document.getElementById('consoleOutput');
+let output_type = ['countries', 'regions', 'areas'];
+let consoleOutput = document.getElementById('consoleOutput');
+let codeSnippet = document.getElementById('codeSnippet')
 window.to_be_connected = [];
 updateDisplay()
 
 function updateDisplay() {
 
+    window.connected_lines = {}
     for (let i = 1; i <= 3; i++) {
         // Get input value
         let input = document.getElementById(`input${i}`).value;
@@ -28,9 +30,13 @@ function updateDisplay() {
                 div.textContent = element.trim().replace(/\s+/g, '_');
                 outputSection.appendChild(div);
                 div.style.backgroundColor = 'rgb(185, 185, 185)';
-
+                
                 // Add function
                 div.addEventListener('click', click)
+                
+                // Store
+                window.connected_lines[div.id.toString()] = {};
+                codeSnippet.innerHTML = JSON.stringify(window.connected_lines, null, 2);
             }
         });
     }
@@ -70,14 +76,14 @@ function click() {
             consoleOutput.innerHTML = `<br>Connection made!<br>`;
             consoleOutput.style.color = 'green';
             
-            createLine(firstId, this);
+            createConnection(firstId, this);
 
             window.to_be_connected = [];
         }
     }
 }
 
-function createLine(firstDiv, secondDiv) {
+function createConnection(firstDiv, secondDiv) {
     // Insert a line between the two divs
     const line = document.createElement('div');
     line.className = 'connection-line';
