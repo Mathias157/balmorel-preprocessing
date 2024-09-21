@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comma-separated Text Input</title>
+    <style>
+        .output {
+            margin-top: 20px;
+        }
+        .output-item {
+            display: flex;
+            justify-content: center;
+            margin-right: 10px;
+            padding: 5px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Enter Comma-Separated Text</h2>
+    
+    <!-- Text Inputs -->
+    <div class="inputs">
+        <input type="text" id="input1" placeholder="Enter text here">
+        <input type="text" id="input2" placeholder="Enter text here">
+        <input type="text" id="input3" placeholder="Enter text here">
+    </div>
+    
+    <button onclick="updateDisplay()">Update Display</button>
+
+    <!-- Section for Displaying the Text -->
+    <div class="output" id="outputSection"></div>
+
+    <script src="java.js"></script>
+</body>
+</html>
