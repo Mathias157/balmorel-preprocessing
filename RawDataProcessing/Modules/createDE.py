@@ -21,6 +21,7 @@ import textwrap
 import numpy as np
 import click
 import pickle
+from Submodules.utils import convert_names, transform_xrdata 
 import xarray as xr
 from typing import Tuple
 from pybalmorel import IncFile
@@ -51,61 +52,6 @@ elif style == 'ppt':
 ###      1. Make .inc Files         ###
 ### ------------------------------- ###
 
-def convert_names(conversion_file: str, el_dataset: str):
-    """_summary_
-
-    Args:
-        conversion_file (str): _description_
-        el_dataset (str): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    # Load dataset
-    dataset = xr.load_dataset(el_dataset)
-    
-    # Load conversion dictionaries
-    with open(conversion_file, 'rb') as f:
-        converter = pickle.load(f)
-        
-    # Convert
-    new_dataset = convert_coordname_elements(dataset, 
-                                             converter['coord_names'], 
-                                             converter['coord_element_names'],
-                                            False)   
-        
-    # Convert weeks and hours
-    new_dataset = (
-        new_dataset
-        .assign_coords(S=converter['week_to_seasons'])
-        .assign_coords(T=converter['hour_to_terms'])
-    )
-        
-    # Test that we did not mess something up
-    before = np.nan_to_num(dataset.electricity_demand_mwh.data)
-    after = np.nan_to_num(new_dataset.electricity_demand_mwh.data)
-    assert np.all(after == before), 'Values are not the same after conversion!'
-        
-    return dataset, new_dataset
-
-def transform_xrdata(xarray: xr.Dataset,
-                  data_variable: str,
-                  selection: Tuple[dict, None] = None,
-                  sets_to_sum: Tuple[str, list, None] = None):
-
-    output = xarray
-    if sets_to_sum != None:
-        output = (
-            output
-            .get(data_variable)
-            .sum(sets_to_sum)
-        )
-
-    if selection != None:
-        output = output.sel(selection)
-    
-    return output
-
 # Main function
 @click.command()
 @click.option("--conversion-file", type=str, required=True, help="The conversion dictionary")
@@ -126,8 +72,11 @@ def main(conversion_file: str,
         None
     """
     
-    # 1.1 Format Dataset
-    dataset, new_dataset = convert_names(conversion_file, el_dataset)
+    # 1.1 Format Dataset    
+    ## Load dataset
+    el_dataset = xr.load_dataset(el_dataset) # converts from string path to xr.Dataset
+    dataset, new_dataset = convert_names(conversion_file, el_dataset, 
+                                         'electricity_demand_mwh', convert_seasons_and_terms=True)
     
     if show_difference:
         print('Before: \n', dataset, '\n\n')
@@ -143,6 +92,7 @@ def main(conversion_file: str,
         suffix=textwrap.dedent(""";
         DE(YYY,RRR,DEUSER)=DE1(RRR,DEUSER,YYY);
         DE('2050',RRR,DEUSER) = DE('2023', RRR, DEUSER);
+        DE1(RRR,DEUSER,YYY) = 0;
         """),
         path=out_path
     )
