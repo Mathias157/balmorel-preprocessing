@@ -3,10 +3,12 @@ let output_type = ['countries', 'regions', 'areas'];
 let consoleOutput = document.getElementById('consoleOutput');
 let codeSnippet = document.getElementById('codeSnippet');
 window.to_be_connected = [];
+window.connections = {};
 updateDisplay();
 
 function updateDisplay() {
-
+    // Clear
+    document.querySelectorAll('.connection-line').forEach(line => line.remove());
     window.connected_lines = {}
     for (let i = 1; i <= 3; i++) {
         // Get input value
@@ -35,11 +37,23 @@ function updateDisplay() {
                 div.addEventListener('click', click)
                 
                 // Store
-                window.connected_lines[div.id.toString()] = {};
-                codeSnippet.innerHTML = JSON.stringify(window.connected_lines, null, 2);
+                window.connected_lines[div.id] = [];
             }
         });
     }
+
+    // Create connections    
+    for (let node1 in window.connected_lines) {
+        if (window.connections.hasOwnProperty(node1)) {
+            let node1_array = window.connections[node1];
+            node1_array.forEach(node2 => {
+                console.log(`Connection from ${node1} to ${node2}`);
+                window.connected_lines[node1].push(node2);
+                drawConnection(node1, node2);
+            })
+        }
+    }
+    codeSnippet.innerHTML = JSON.stringify(window.connected_lines, null, 2);
 }
 
 // Add event listeners to inputs to trigger updateDisplay on every keystroke
@@ -66,7 +80,7 @@ function click() {
             consoleOutput.innerHTML = `<br>Can't make connections between ${firstType} and ${thisType}<br>`;
             consoleOutput.style.color = 'red';
             window.to_be_connected = [];
-        } else if ((firstType === 'countries' & thisType === 'areas') | (firstType === 'areas' & thisType === 'countries')) {
+        } else if ((firstType === 'countries' && thisType === 'areas') || (firstType === 'areas' && thisType === 'countries')) {
             firstId.style.backgroundColor = 'rgb(185, 185, 185)';
             consoleOutput.innerHTML = `<br>Can't make connections between countries and areas<br>`;
             consoleOutput.style.color = 'red';
@@ -76,22 +90,33 @@ function click() {
             consoleOutput.innerHTML = `<br>Connection made!<br>`;
             consoleOutput.style.color = 'green';
             
-            createConnection(firstId, this);
+            // Make correct direction
+            if ((firstType === 'countries' && thisType == 'regions') || (firstType === 'regions' && thisType == 'areas')) {
+                initiate_or_append(window.connections, firstId.id, this.id)
+                // console.log(window.connections);
+            } else {
+                initiate_or_append(window.connections, this.id, firstId.id)
+                // console.log(window.connections);
+            }
 
             window.to_be_connected = [];
+            updateDisplay();
         }
     }
 }
 
-function createConnection(firstDiv, secondDiv) {
+function drawConnection(firstId, secondId) {
+    // Get divs
+    firstDiv = document.getElementById(firstId);
+    secondDiv = document.getElementById(secondId);
+
     // Insert a line between the two divs
     const line = document.createElement('div');
     line.className = 'connection-line';
     document.body.appendChild(line);
-
+    
     const firstRect = firstDiv.getBoundingClientRect();
     const thisRect = secondDiv.getBoundingClientRect();
-
     const x1 = firstRect.left + firstRect.width / 2;
     const y1 = firstRect.top + firstRect.height / 2;
     const x2 = thisRect.left + thisRect.width / 2;
@@ -106,8 +131,12 @@ function createConnection(firstDiv, secondDiv) {
     line.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
     line.style.left = `${x1}px`;
     line.style.top = `${y1}px`;
+}
 
-    // Store the connection
-
-
+function initiate_or_append(dictionary, key, entry) {
+    if (dictionary.hasOwnProperty(key)) {
+        dictionary[key].push(entry);
+    } else {
+        dictionary[key] = [entry];
+    }
 }
