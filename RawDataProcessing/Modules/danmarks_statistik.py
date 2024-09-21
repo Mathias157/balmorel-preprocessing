@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import xarray as xr
-from Modules.Submodules.municipal_template import DataContainer
+import click
+from Submodules.municipal_template import DataContainer
 
 style = 'report'
 
@@ -109,7 +110,21 @@ def load_transport_demand(include_bunkering: bool = False):
         .mul(0.277777777)
     )
     return f
+
+@click.command()
+@click.option("--get-transport-demand", is_flag=True, help="Format transport demand")
+@click.option("--include-bunkering", type=bool, required=False, help="Include bunkering in transport demand?")
+@click.option("--get-industry-demand", is_flag=True, help="Format industry demand")
+def main(get_transport_demand: bool = False,
+         include_bunkering: bool = False,
+         get_industry_demand: bool = False):
+    if get_transport_demand:
+        f = load_transport_demand(include_bunkering)
+        f.to_csv('Data/Danmarks Statistik/transport_demand.csv', index=False)
+    
+    if get_industry_demand:
+        ind = DKSTAT()
+        ind.IND.to_netcdf('Data/Danmarks Statistik/industry_demand.nc')
         
 if __name__ == '__main__':
-    ind = DKSTAT()
-    ind.IND
+    main()

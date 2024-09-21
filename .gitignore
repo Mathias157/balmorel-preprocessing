@@ -2,7 +2,8 @@ RawDataProcessing/Data/*
 RawDataProcessing/Output/*
 !RawDataProcessing/Data/IncFilePreSuf/README.md
 !RawDataProcessing/Output/Figures/.keepoutfolder
-conversion_dictionaries.pkl
+exo_elec_dem_conversion_dictionaries.pkl
+exo_heat_dem_conversion_dictionaries.pkl
 .snakemake
 __pycache__
 .new_env/*

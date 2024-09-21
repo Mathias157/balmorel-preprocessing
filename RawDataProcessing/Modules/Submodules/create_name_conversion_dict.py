@@ -3,8 +3,8 @@
 import pickle
 
 
-
-conversion_dictionaries = {
+# 1. Exogenous Electricity Demand xarray
+exo_elec_dem_conversion_dictionaries = {
     
 
     'coord_names' : {'municipality' : 'R',
@@ -33,5 +33,39 @@ conversion_dictionaries = {
 
 }
 
-with open('Modules/Submodules/conversion_dictionaries.pkl', 'wb') as f:
-    pickle.dump(conversion_dictionaries, f)
+with open('Modules/Submodules/exo_elec_dem_conversion_dictionaries.pkl', 'wb') as f:
+    pickle.dump(exo_elec_dem_conversion_dictionaries, f)
+    
+
+# 2. Exogenous Heat Demand xarray
+exo_heat_dem_conversion_dictionaries = {
+    
+
+    'coord_names' : {'municipality' : 'A',
+                                'user' : 'DHUSER',
+                                'year' : 'Y'},
+
+    'coord_element_names' : {'user' : {'district_heating' : 'RESH',
+                                       'individual' : 'RESIDENTIAL',
+                            'industry_phl' : 'IND-PHL',
+                            'industry_phm' : 'IND-PHM',
+                            'industry_phh' : 'IND-PHH'},
+                             'municipality' : {'æ' : 'ae',
+                                               'ø' : 'oe',
+                                               'å' : 'aa',
+                                               'Æ' : 'Ae',
+                                               'Ø' : 'Oe',
+                                               'Å' : 'Aa'
+                                 }},
+
+    'week_to_seasons' : ['S0%d'%i for i in range(1, 10)] +\
+                        ['S%d'%i for i in range(10, 53)],
+                        
+    'hour_to_terms'  : ['T00%d'%i for i in range(1, 10)] +\
+                       ['T0%d'%i for i in range(10, 100)] +\
+                       ['T%d'%i for i in range(100, 169)]
+
+}
+
+with open('Modules/Submodules/exo_heat_dem_conversion_dictionaries.pkl', 'wb') as f:
+    pickle.dump(exo_heat_dem_conversion_dictionaries, f)
