@@ -23,6 +23,8 @@ function updateDisplay() {
                 const div = document.createElement('div');
                 div.className = 'output-item';
                 div.id = element.trim().replace(/\s+/g, '_');
+                div.style.position = 'relative';
+                div.style.zIndex = 10;
                 div.textContent = element.trim().replace(/\s+/g, '_');
                 outputSection.appendChild(div);
                 div.style.backgroundColor = 'rgb(185, 185, 185)';
@@ -67,7 +69,35 @@ function click() {
             firstId.style.backgroundColor = 'rgb(185, 185, 185)';
             consoleOutput.innerHTML = `<br>Connection made!<br>`;
             consoleOutput.style.color = 'green';
+            
+            createLine(firstId, this);
+
             window.to_be_connected = [];
         }
     }
+}
+
+function createLine(firstDiv, secondDiv) {
+    // Insert a line between the two divs
+    const line = document.createElement('div');
+    line.className = 'connection-line';
+    document.body.appendChild(line);
+
+    const firstRect = firstDiv.getBoundingClientRect();
+    const thisRect = secondDiv.getBoundingClientRect();
+
+    const x1 = firstRect.left + firstRect.width / 2;
+    const y1 = firstRect.top + firstRect.height / 2;
+    const x2 = thisRect.left + thisRect.width / 2;
+    const y2 = thisRect.top + thisRect.height / 2;
+
+    line.style.zIndex = 1;
+    line.style.position = 'absolute';
+    line.style.width = `${Math.hypot(x2 - x1, y2 - y1)}px`;
+    line.style.height = '2px';
+    line.style.backgroundColor = 'black';
+    line.style.transformOrigin = '0 0';
+    line.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
+    line.style.left = `${x1}px`;
+    line.style.top = `${y1}px`;
 }
