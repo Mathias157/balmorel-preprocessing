@@ -1,9 +1,9 @@
 // Initial values
 let output_type = ['countries', 'regions', 'areas'];
 let consoleOutput = document.getElementById('consoleOutput');
-let codeSnippet = document.getElementById('codeSnippet')
+let codeSnippet = document.getElementById('codeSnippet');
 window.to_be_connected = [];
-updateDisplay()
+updateDisplay();
 
 function updateDisplay() {
 
@@ -106,4 +106,8 @@ function createConnection(firstDiv, secondDiv) {
     line.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
     line.style.left = `${x1}px`;
     line.style.top = `${y1}px`;
+
+    // Store the connection
+
+
 }
