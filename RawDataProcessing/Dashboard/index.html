@@ -5,13 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comma-separated Text Input</title>
     <style>
-        .output {
+        .header {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
+        }
+        .inputs {
+            display: flex;
+            justify-items: center;
+            justify-content: space-around;
+            margin-top: 10px;
+            margin-left: 200px;
+            margin-right: 200px;
+        }
+        .output {
+            display: flex;
+            justify-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            margin-left: 300px;
+            margin-right: 300px;
         }
         .output-item {
-            display: inline-block;
+            display: flex;
+            vertical-align: auto;
             margin-right: 10px;
             padding: 5px;
             background-color: #f0f0f0;
@@ -20,21 +36,27 @@
     </style>
 </head>
 <body>
-    <h2>Enter Comma-Separated Text</h2>
     
     <!-- Text Inputs -->
+    <div class="header">
+        <h2>Enter Comma-Separated Text</h2>
+    </div>
+    <div style="display: flex; justify-content: center;">
+        <button onclick="updateDisplay()">Update Display</button>
+    </div>
     <div class="inputs">
-        <input type="text" id="input1" placeholder="Enter text here">
-        <input type="text" id="input2" placeholder="Enter text here">
-        <input type="text" id="input3" placeholder="Enter text here">
+        <input type="text" id="input1" placeholder="Comma-separated countries" value="Country1, Country2">
+        <input type="text" id="input2" placeholder="Comma-separated regions", value="Region1, Region2">
+        <input type="text" id="input3" placeholder="Comma-separated areas", value="Area1">
     </div>
     
-    <button onclick="updateDisplay()">Update Display</button>
 
     <!-- Section for Displaying the Text -->
-    <div class="output" id="outputSection1"></div>
-    <div class="output" id="outputSection2"></div>
-    <div class="output" id="outputSection3"></div>
+    <div class="output">
+        <div id="outputSection1"></div>
+        <div id="outputSection2"></div>
+        <div id="outputSection3"></div>
+    </div>
 
     <script src="java.js"></script>
 </body>
