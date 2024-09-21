@@ -1,4 +1,7 @@
+// Initial values
 var output_type = ['countries', 'regions', 'areas'];
+window.to_be_connected = [];
+updateDisplay()
 
 function updateDisplay() {
 
@@ -18,8 +21,8 @@ function updateDisplay() {
             if (element.trim()) {  // Ensure there's text after trimming whitespace
                 const div = document.createElement('div');
                 div.className = 'output-item';
-                div.id = element.trim();
-                div.textContent = element.trim();
+                div.id = element.trim().replace(/\s+/g, '_');
+                div.textContent = element.trim().replace(/\s+/g, '_');
                 outputSection.appendChild(div);
                 div.style.backgroundColor = 'rgb(185, 185, 185)';
 
@@ -30,7 +33,10 @@ function updateDisplay() {
     }
 }
 
-window.to_be_connected = [];
+// Add event listeners to inputs to trigger updateDisplay on every keystroke
+for (let i = 1; i <= 3; i++) {
+    document.getElementById(`input${i}`).addEventListener('input', updateDisplay);
+}
 
 function click() {
     if (window.to_be_connected.length === 0) {
@@ -42,7 +48,7 @@ function click() {
         this.style.backgroundColor = 'rgb(185, 185, 185)';
         window.to_be_connected = [];
     } else {
-        // Try to make connection
+        // Check if connection is valid
         let firstId = document.getElementById(window.to_be_connected[0])
         firstId.style.backgroundColor = 'rgb(185, 185, 185)';
         console.log(`Connection made between ${window.to_be_connected[1]} and ${this.parentNode.id}`)

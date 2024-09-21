@@ -43,8 +43,14 @@
     <div class="header">
         <h2>Geographical Set Generator</h2>
     </div>
-    <div style="display: flex; justify-content: center;">
-        <button onclick="updateDisplay()">Update Display</button>
+    <div class="header">
+        Write comma-separated names of countries, regions and areas in the inputs below. <br>
+        Connect countries to regions, and regions to areas by clicking the respective boxes below <br>
+    </div>
+    <div class="inputs">
+        <p>Countries</p>
+        <p>Regions</p>
+        <p>Areas</p>
     </div>
     <div class="inputs">
         <input type="text" id="input1" placeholder="Comma-separated countries" value="Country1, Country2">
@@ -52,7 +58,6 @@
         <input type="text" id="input3" placeholder="Comma-separated areas", value="Area1">
     </div>
     
-
     <!-- Section for Displaying the Text -->
     <div class="output">
         <div id="countries"></div>
