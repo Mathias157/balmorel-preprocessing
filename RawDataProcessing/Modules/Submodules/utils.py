@@ -13,6 +13,7 @@ import xarray as xr
 from typing import Tuple
 import pickle
 import numpy as np
+from pybalmorel import IncFile
 
 #%% ------------------------------- ###
 ###     1. Conversion Functions     ###
@@ -101,3 +102,22 @@ def transform_xrdata(xarray: xr.Dataset,
         output = output.sel(selection)
     
     return output
+
+def create_geo_sets(geo_sets: Tuple[pd.DataFrame, dict],
+                    prefix: Tuple[str, None] = None):
+    
+    IncFile(name='CCCRRRAAA')
+    if 'C' in geo_sets.keys():
+        IncFile(name='CCC')
+        
+    if 'R' in geo_sets.keys():
+        IncFile(name='CCCRRR')
+        IncFile(name='RRR')
+        
+    if 'A' in geo_sets.keys():
+        IncFile(name='RRRAAA')
+        if prefix != None:
+            IncFile(name=f'{prefix}_AAA')
+        else:
+            IncFile(name='AAA')
+        
