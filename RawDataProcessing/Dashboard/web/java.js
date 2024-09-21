@@ -144,3 +144,17 @@ function initiate_or_append(dictionary, key, entry) {
         dictionary[key] = [entry];
     }
 }
+
+function copyCode() {
+    var copyText = document.getElementById("codeSnippet");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand("copy");
+}
+
+async function create_incfiles() {
+    let output = codeSnippet.innerHTML;
+    
+    // Call Python
+    let python_output = await eel.create_incfiles(output)();
+}
