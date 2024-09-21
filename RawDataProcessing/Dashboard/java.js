@@ -18,7 +18,19 @@ function updateDisplay() {
                 div.className = 'output-item';
                 div.textContent = element.trim();
                 outputSection.appendChild(div);
+                div.style.backgroundColor = 'rgb(185, 185, 185)';
+
+                // Add function
+                div.addEventListener('click', click)
             }
         });
+    }
+}
+
+function click() {
+    if (this.style.backgroundColor === 'rgb(185, 185, 185)') {
+        this.style.backgroundColor = 'rgb(153, 238, 154)';
+    } else {
+        this.style.backgroundColor = 'rgb(185, 185, 185)';
     }
 }
