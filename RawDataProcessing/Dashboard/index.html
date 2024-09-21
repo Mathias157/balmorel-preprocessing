@@ -65,6 +65,26 @@
         <div id="areas"></div>
     </div>
 
+    <!-- Code Snippet Box -->
+    <div class="header">
+        <br>
+        Copy the code below and insert to the python script
+    </div>
+    <div class="inputs">
+        <textarea id="codeSnippet" rows="10" cols="50">
+        </textarea>
+        <button onclick="copyCode()">Copy Code</button>
+    </div>
+
+    <script>
+    function copyCode() {
+        var copyText = document.getElementById("codeSnippet");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand("copy");
+    }
+    </script>
+
     <script src="java.js"></script>
 </body>
 </html>
