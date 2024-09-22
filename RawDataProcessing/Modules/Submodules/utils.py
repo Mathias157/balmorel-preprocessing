@@ -13,7 +13,6 @@ import xarray as xr
 from typing import Tuple
 import pickle
 import numpy as np
-from pybalmorel import IncFile
 
 #%% ------------------------------- ###
 ###     1. Conversion Functions     ###
