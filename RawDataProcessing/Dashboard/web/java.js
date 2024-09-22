@@ -6,6 +6,9 @@ window.to_be_connected = [];
 window.connections = {};
 updateDisplay();
 
+get_wkdir()
+
+
 function updateDisplay() {
     // Clear
     document.querySelectorAll('.connection-line').forEach(line => line.remove());
@@ -111,31 +114,43 @@ function click() {
 
 function drawConnection(firstId, secondId) {
     // Get divs
-    firstDiv = document.getElementById(firstId);
-    secondDiv = document.getElementById(secondId);
+    const firstDiv = document.getElementById(firstId);
+    const secondDiv = document.getElementById(secondId);
 
     // Insert a line between the two divs
     const line = document.createElement('div');
     line.className = 'connection-line';
     document.body.appendChild(line);
     
-    const firstRect = firstDiv.getBoundingClientRect();
-    const thisRect = secondDiv.getBoundingClientRect();
-    const x1 = firstRect.left + firstRect.width / 2;
-    const y1 = firstRect.top + firstRect.height / 2;
-    const x2 = thisRect.left + thisRect.width / 2;
-    const y2 = thisRect.top + thisRect.height / 2;
+    const updateLinePosition = () => {
+        const firstRect = firstDiv.getBoundingClientRect();
+        const secondRect = secondDiv.getBoundingClientRect();
+        const x1 = firstRect.left + firstRect.width / 2 ;
+        const y1 = firstRect.top + firstRect.height / 2 + window.scrollY;
+        const x2 = secondRect.left + secondRect.width / 2;
+        const y2 = secondRect.top + secondRect.height / 2 + window.scrollY;
 
-    line.style.zIndex = 1;
-    line.style.position = 'absolute';
-    line.style.width = `${Math.hypot(x2 - x1, y2 - y1)}px`;
-    line.style.height = '2px';
-    line.style.backgroundColor = 'black';
-    line.style.transformOrigin = '0 0';
-    line.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
-    line.style.left = `${x1}px`;
-    line.style.top = `${y1}px`;
+        line.style.zIndex = 1;
+        line.style.position = 'absolute';
+        line.style.width = `${Math.hypot(x2 - x1, y2 - y1)}px`;
+        line.style.height = '2px';
+        line.style.backgroundColor = 'black';
+        line.style.transformOrigin = '0 0';
+        line.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
+        line.style.left = `${x1}px`;
+        line.style.top = `${y1}px`;
+    };
+
+    updateLinePosition();
 }
+
+function move_lines(x, y) {
+    document.querySelectorAll('.connection-line').forEach(line => {
+        line.style.transform = `translate(${x}px, ${y}px)`;
+    });
+}
+
+window.addEventListener('scroll', updateLinePosition(window.scrollX, window.scrollY));
 
 function initiate_or_append(dictionary, key, entry) {
     if (dictionary.hasOwnProperty(key)) {
@@ -145,16 +160,27 @@ function initiate_or_append(dictionary, key, entry) {
     }
 }
 
-function copyCode() {
-    var copyText = document.getElementById("codeSnippet");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999); // For mobile devices
-    document.execCommand("copy");
-}
-
+// Python functions
 async function create_incfiles() {
     let output = codeSnippet.innerHTML;
+
+    let path_input = document.getElementById('save_to_path');
+    let save_path = path_input.value;
     
     // Call Python
-    let python_output = await eel.create_incfiles(output)();
+    await eel.create_incfiles(output, save_path)();
+
+    // Output console
+    consoleOutput.innerHTML = `<br>.inc files succesfully generated to ${save_path}<br>`;
+    consoleOutput.style.color = 'green';
+}
+
+
+async function get_wkdir() {
+    // Get working directory from python
+    let wkdir = await eel.get_wkdir()();
+    
+    let path_input = document.getElementById('save_to_path');
+    path_input.value = wkdir;
+    
 }

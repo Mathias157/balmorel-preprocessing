@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geographical Set Generator</title>
+    <link rel="icon" type="image/x-icon" href="network.svg">
     <style>
         .header {
             display: flex;
@@ -46,6 +47,8 @@
     <div class="header">
         Write comma-separated names of countries, regions and areas in the inputs below. <br>
         Connect countries to regions, and regions to areas by clicking the respective boxes below <br>
+        <br>
+        Beware not to resize the window after you have started connecting nodes, or the lines may look confusing.. Scrolling is ok however.
     </div>
     <div class="inputs">
         <p>Countries</p>
@@ -67,18 +70,23 @@
 
     <!-- Code Snippet Box -->
     <div class="header", id="consoleOutput", style="color:green;">
-         <br><br>
+         <br><br> 
     </div>
     <div class="header">
-        <br>
-        Copy the code below and insert to the python script
+        <br> Press button to generate corresponding .inc files for CCC, RRR, AAA and connections 
     </div>
     <form onsubmit="create_incfiles(); return false;" >
+        <br>
+        <div class="inputs", style="justify-content: center; margin: auto;">
+            Save to folder:&nbsp;&nbsp;
+            <textarea id="save_to_path" rows="2" cols="60">
+            </textarea>
+        </div>
         <div class="inputs">
             <button type="submit">Create .inc Files</button>
         </div>
         <div class="inputs", style="visibility: hidden;">
-            <textarea id="codeSnippet" rows="10" cols="50">
+            <textarea id="codeSnippet" rows="1" cols="1">
             </textarea>
         </div>
     </form>
