@@ -78,4 +78,4 @@ if __name__ == '__main__':
     eel.init('web')
     eel.expose(get_wkdir)
     eel.expose(create_incfiles)
-    eel.start('index.html', size=(1000, 700), position=(500, 200))
+    eel.start('index.html')

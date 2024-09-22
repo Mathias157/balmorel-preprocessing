@@ -6,8 +6,11 @@ window.to_be_connected = [];
 window.connections = {};
 updateDisplay();
 
+// Store the working directory in save to path
 get_wkdir()
 
+// Resize the window and center
+resizeAndCenterWindow();
 
 function updateDisplay() {
     // Clear
@@ -160,6 +163,20 @@ function initiate_or_append(dictionary, key, entry) {
     }
 }
 
+
+function resizeAndCenterWindow() {
+    const screenWidth = window.screen.availWidth;
+    const screenHeight = window.screen.availHeight;
+    const newWidth = screenWidth * 0.5;
+    const newHeight = screenHeight * 0.6;
+    const newX = (screenWidth - newWidth) / 2;
+    const newY = (screenHeight - newHeight) / 2;
+
+    window.resizeTo(newWidth, newHeight);
+    window.moveTo(newX, newY);
+}
+
+
 // Python functions
 async function create_incfiles() {
     let output = codeSnippet.innerHTML;
@@ -184,3 +201,4 @@ async function get_wkdir() {
     path_input.value = wkdir;
     
 }
+
