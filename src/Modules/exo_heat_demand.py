@@ -13,7 +13,6 @@ Created on 20.09.2024
 import matplotlib
 import matplotlib.pyplot as plt
 from pybalmorel import IncFile
-import textwrap
 import xarray as xr
 from Submodules.utils import convert_names, transform_xrdata
 from Submodules.municipal_template import DataContainer
@@ -195,11 +194,12 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
 ## 2.3.2 INDUSTRY_DH_VAR_T.inc
 @create_incfile
 def create_INDUSTRY_DH_VAR_T(incfile):
-    incfile.body = """* Assume that heat demand profile of industry correlates exactly to electricity demand profile
-DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);
-DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);
-DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);
-""" 
+    incfile.body = '\n'.join([
+        "* Assume that heat demand profile of industry correlates exactly to electricity demand profile",
+        "DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);",
+        "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);",
+        "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);"
+    ])
 
 #%% ------------------------------- ###
 ###             3. Main             ###
@@ -229,53 +229,58 @@ def main(show_difference: bool = False):
     # 3.2 Create .inc files
     ## 3.2.1 DH.inc
     create_DH(new_dataset=new_dataset, name='DH', path=out_path, 
-              prefix="""* Data from Varmeplan 2021 (AAU)
-PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';
-TABLE DH1(DHUSER,AAA,YYY)   
-""",
-            suffix="""
-;
-DH(YYY,AAA,DHUSER)  = DH1(DHUSER,AAA,YYY);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-DH1(DHUSER,AAA,YYY) = 0;
-DH('2050',AAA,DHUSER) = DH('2019', AAA, DHUSER);
-"""
+                prefix='\n'.join([
+                    "* Data from Varmeplan 2021 (AAU)",
+                    "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
+                    "TABLE DH1(DHUSER,AAA,YYY)"
+                ]),
+                suffix='\n'.join([
+                    ";",
+                    "DH(YYY,AAA,DHUSER)  = DH1(DHUSER,AAA,YYY);",
+                    "DH1(DHUSER,AAA,YYY) = 0;",
+                    "DH('2050',AAA,DHUSER) = DH('2019', AAA, DHUSER);"
+                ])
 )
     
     ## 3.2.2 INDUSTRY_DH.inc
-    create_INDUSTRY_DH(new_dataset=new_dataset, name='INDUSTRY_DH', path=out_path,
-        prefix="""* Data from Varmeplan 2021 (AAU), Danmarks statistik on industrial energy consumption pr. type
-PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';
-TABLE DH1_IND(DHUSER,AAA,YYY)  
-""",
-        suffix="""
-;
-DH(YYY,AAA,DHUSER)$DH1_IND(DHUSER,AAA,YYY)  = DH1_IND(DHUSER,AAA,YYY);
-DH('2050',AAA,DHUSER)$DH1_IND(DHUSER,AAA,'2019') = DH('2019', AAA, DHUSER)$DH1_IND(DHUSER,AAA,'2019');
-DH1_IND(DHUSER,AAA,YYY)=0;
-""")
+    create_INDUSTRY_DH(new_dataset=new_dataset, 
+                       name='INDUSTRY_DH', 
+                       path=out_path,
+                       prefix='\n'.join([
+                           "* Data from Varmeplan 2021 (AAU), Danmarks statistik on industrial energy consumption pr. type",
+                           "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
+                           "TABLE DH1_IND(DHUSER,AAA,YYY)"
+                       ]),
+                       suffix='\n'.join([
+                           ";",
+                           "DH(YYY,AAA,DHUSER)$DH1_IND(DHUSER,AAA,YYY)  = DH1_IND(DHUSER,AAA,YYY);",
+                           "DH('2050',AAA,DHUSER)$DH1_IND(DHUSER,AAA,'2019') = DH('2019', AAA, DHUSER)$DH1_IND(DHUSER,AAA,'2019');",
+                           "DH1_IND(DHUSER,AAA,YYY)=0;"
+                       ]))
     
     
     ## 3.2.3 INDIVUSERS_DH.inc
-    create_INDIVUSERS_DH(new_dataset=new_dataset, name='INDIVUSERS_DH', path=out_path,
-        prefix="""* Data from Varmeplan 2021 (AAU)
-TABLE DH1_INDIVHEATING(DHUSER,AAA,YYY) 
-""",
-        suffix="""
-;              
-INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)$(NOT INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP))=                                                         INDIVHEATING_GROUP_DHSHARE('2016',DHUSER,RRR,INDIVUSERS_GROUP);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-LOOP(INDIVUSERS_GROUP$(NOT INDIVUSERS_GROUP_NEW(INDIVUSERS_GROUP)),                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)$(INDIVUSERS_GROUP_A(AAA,DHUSER,INDIVUSERS_GROUP)  AND INDIVUSERS_DEMANDTYPE_A(AAA,DHUSER,'HOTWATER') AND INDIVUSERS_DHUSER(DHUSER) ) =          SUM(RRR$RRRAAA(RRR,AAA),INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)*SUM(IAAA_INDIV$(RRRAAA(RRR,IAAA_INDIV) AND INVDATA_INDIVUSERS(IAAA_INDIV,'IDVU-HOTWTR')),DH1_INDIVHEATING(DHUSER,IAAA_INDIV,YYY))) ;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)$(INDIVUSERS_GROUP_A(AAA,DHUSER,INDIVUSERS_GROUP)  AND INDIVUSERS_DEMANDTYPE_A(AAA,DHUSER,'SPACEHEATING') AND INDIVUSERS_DHUSER(DHUSER) ) =      SUM(RRR$RRRAAA(RRR,AAA),INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)*SUM(IAAA_INDIV$(RRRAAA(RRR,IAAA_INDIV) AND INVDATA_INDIVUSERS(IAAA_INDIV,'IDVU-SPACEHEAT')),DH1_INDIVHEATING(DHUSER,IAAA_INDIV,YYY))) ;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-DH(YYY,AAA,DHUSER)$DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)  = DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-$label NO_INDIVUSERS_AAA   
-""")
+    create_INDIVUSERS_DH(new_dataset=new_dataset, 
+                         name='INDIVUSERS_DH', 
+                         path=out_path,
+                         prefix='\n'.join([
+                             "* Data from Varmeplan 2021 (AAU)",
+                             "TABLE DH1_INDIVHEATING(DHUSER,AAA,YYY)"
+                         ]),
+                         suffix='\n'.join([
+                             ";",
+                             "INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)$(NOT INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP))=                                                         INDIVHEATING_GROUP_DHSHARE('2016',DHUSER,RRR,INDIVUSERS_GROUP);",
+                             "LOOP(INDIVUSERS_GROUP$(NOT INDIVUSERS_GROUP_NEW(INDIVUSERS_GROUP)),",
+                             "DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)$(INDIVUSERS_GROUP_A(AAA,DHUSER,INDIVUSERS_GROUP)  AND INDIVUSERS_DEMANDTYPE_A(AAA,DHUSER,'HOTWATER') AND INDIVUSERS_DHUSER(DHUSER) ) =          SUM(RRR$RRRAAA(RRR,AAA),INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)*SUM(IAAA_INDIV$(RRRAAA(RRR,IAAA_INDIV) AND INVDATA_INDIVUSERS(IAAA_INDIV,'IDVU-HOTWTR')),DH1_INDIVHEATING(DHUSER,IAAA_INDIV,YYY))) ;",
+                             "DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)$(INDIVUSERS_GROUP_A(AAA,DHUSER,INDIVUSERS_GROUP)  AND INDIVUSERS_DEMANDTYPE_A(AAA,DHUSER,'SPACEHEATING') AND INDIVUSERS_DHUSER(DHUSER) ) =      SUM(RRR$RRRAAA(RRR,AAA),INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)*SUM(IAAA_INDIV$(RRRAAA(RRR,IAAA_INDIV) AND INVDATA_INDIVUSERS(IAAA_INDIV,'IDVU-SPACEHEAT')),DH1_INDIVHEATING(DHUSER,IAAA_INDIV,YYY))) ;",
+                             ");",
+                             "DH(YYY,AAA,DHUSER)$DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)  = DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY);",
+                             "$label NO_INDIVUSERS_AAA"
+                         ]))
     
     ## 1.3 Make Heat Variation Profiles
     create_INDUSTRY_DH_VAR_T(name='INDUSTRY_DH_VAR_T', path=out_path,
-                             prefix='', suffix='')
+                                prefix='', suffix='')
     
     
 
