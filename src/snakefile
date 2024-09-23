@@ -18,11 +18,9 @@ rule create_conversion_dictionaries:
     output:
         [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl",
         f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl"]
-    shell:
-        f"""
-        python {submod_path}create_conversion_dictionaries.py
-        """
-
+    script:
+        f"{submod_path}create_conversion_dictionaries.py"
+    
 rule get_grid_from_Balmorel:
     output:
         f"{data_path}Power Grid/municipal_connectivity.nc"
