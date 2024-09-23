@@ -194,12 +194,16 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
 
 ## 2.3.2 INDUSTRY_DH_VAR_T.inc
 @create_incfile
-def create_INDUSTRY_DH_VAR_T(incfile):
-    incfile.body = f"""* Assume that heat demand profile of industry correlates exactly to electricity demand profile
-DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);
-DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);
-DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);
-""" 
+def create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xr.Dataset):
+    incfile.body = (
+        transform_xrdata(el_new_dataset,
+                         'electricity_demand_mwh')
+        .to_dataframe()
+        .reset_index()
+    )
+    incfile.body.loc[:, 'A'] = incfile.body.loc[:, 'A'].values + '_IND-HT-NODH'
+    incfile.body_prepare(['S', 'T'],
+                          ['A', 'DHUSER'], values='electricity_demand_mwh')
 
 #%% ------------------------------- ###
 ###             3. Main             ###
@@ -291,8 +295,18 @@ $label NO_INDIVUSERS_AAA
 """)
     
     ## 1.3 Make Heat Variation Profiles
-    create_INDUSTRY_DH_VAR_T(name='INDUSTRY_DH_VAR_T', path=out_path,
-                             prefix='', suffix='')
+    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                             name='INDUSTRY_DH_VAR_T', 
+                             path=out_path,
+                             prefix="""TABLE DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)\n""",
+                             suffix="""\n;\n* Collect series to other heat series, if there is a industry heat series
+DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA,DHUSER))) = DH_VAR_T_IND(SSS,TTT,AAA,DHUSER);
+DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)=0;
+
+* Assume that other temperature processes follow the same pattern, if there is a profile
+DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);
+DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);
+""")
     
     
 
