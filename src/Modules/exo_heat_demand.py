@@ -232,9 +232,11 @@ def main(show_difference: bool = False):
                 prefix='\n'.join([
                     "* Data from Varmeplan 2021 (AAU)",
                     "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
-                    "TABLE DH1(DHUSER,AAA,YYY)"
+                    "TABLE DH1(DHUSER,AAA,YYY)",
+                    ""
                 ]),
                 suffix='\n'.join([
+                    "",
                     ";",
                     "DH(YYY,AAA,DHUSER)  = DH1(DHUSER,AAA,YYY);",
                     "DH1(DHUSER,AAA,YYY) = 0;",
@@ -249,9 +251,11 @@ def main(show_difference: bool = False):
                        prefix='\n'.join([
                            "* Data from Varmeplan 2021 (AAU), Danmarks statistik on industrial energy consumption pr. type",
                            "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
-                           "TABLE DH1_IND(DHUSER,AAA,YYY)"
+                           "TABLE DH1_IND(DHUSER,AAA,YYY)",
+                           ""
                        ]),
                        suffix='\n'.join([
+                           "",
                            ";",
                            "DH(YYY,AAA,DHUSER)$DH1_IND(DHUSER,AAA,YYY)  = DH1_IND(DHUSER,AAA,YYY);",
                            "DH('2050',AAA,DHUSER)$DH1_IND(DHUSER,AAA,'2019') = DH('2019', AAA, DHUSER)$DH1_IND(DHUSER,AAA,'2019');",
@@ -265,9 +269,11 @@ def main(show_difference: bool = False):
                          path=out_path,
                          prefix='\n'.join([
                              "* Data from Varmeplan 2021 (AAU)",
-                             "TABLE DH1_INDIVHEATING(DHUSER,AAA,YYY)"
+                             "TABLE DH1_INDIVHEATING(DHUSER,AAA,YYY)",
+                             ""
                          ]),
                          suffix='\n'.join([
+                             "",
                              ";",
                              "INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)$(NOT INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP))=                                                         INDIVHEATING_GROUP_DHSHARE('2016',DHUSER,RRR,INDIVUSERS_GROUP);",
                              "LOOP(INDIVUSERS_GROUP$(NOT INDIVUSERS_GROUP_NEW(INDIVUSERS_GROUP)),",
