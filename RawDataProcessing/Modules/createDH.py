@@ -23,8 +23,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
-from Modules.Submodules.aauvarmeplan2021 import VPDK21 
-from Modules.Submodules.danmarks_statistik import DKSTAT 
+from Modules.Submodules.format_vpdk21 import VPDK21 
+from Modules.Submodules.format_dkstat import DKSTAT 
 from Modules.Submodules.municipal_template import DataContainer
 import xarray as xr
 import numpy as np

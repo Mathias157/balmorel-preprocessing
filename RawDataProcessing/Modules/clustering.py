@@ -23,7 +23,7 @@ from scipy.sparse import csr_matrix
 from Modules.Submodules.municipal_template import DataContainer
 from Modules.createFLEXDEM import distribute_road_flex_electricity_demand
 from Modules.createDH import DistrictHeatAAU
-from Modules.Submodules.energinet_electricity import energinet_el
+from Modules.Submodules.format_energinet import energinet_el
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import kneighbors_graph

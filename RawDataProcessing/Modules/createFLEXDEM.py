@@ -18,7 +18,7 @@ from pybalmorel import IncFile
 from pybalmorel.utils import read_lines
 from Modules.geofiles import prepared_geofiles
 from Modules.Submodules.municipal_template import DataContainer
-from Modules.Submodules.danmarks_statistik import load_transport_demand
+from Modules.Submodules.format_dkstat import load_transport_demand
 import matplotlib.pyplot as plt
 
 #%% ------------------------------- ###

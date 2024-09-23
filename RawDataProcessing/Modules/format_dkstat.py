@@ -1,9 +1,12 @@
 """
 Processing data from Danmarks Statistik
 
-Industriforbrug per Municipality:
-https://www.statistikbanken.dk/statbank5a/SelectVarVal/saveselections.asp
-
+Link:
+https://www.statistikbanken.dk/
+Search for:
+- ENEGEO
+- ENETYP
+- ENE3H with choice H Transport
 
 Created on 30.08.2024
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)

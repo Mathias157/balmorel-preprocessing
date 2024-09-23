@@ -20,7 +20,7 @@ rule create_conversion_dictionaries:
         f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl"]
     shell:
         f"""
-        python {submod_path}create_name_conversion_dict.py
+        python {submod_path}create_conversion_dictionaries.py
         """
 
 rule get_grid_from_Balmorel:
@@ -40,14 +40,14 @@ rule do_clustering:
         """
 
 # 2. Exogenous Electricity Demands
-rule format_energinet_electricity_data:
+rule format_energinet_data:
     input:
         f"{data_path}Timeseries/ElConsumptionEnerginet2023.csv"
     output:
         f"{data_path}Timeseries/energinet_eldem.nc"
     shell:
         """
-        python Modules/energinet_electricity.py
+        python Modules/format_energinet.py
         """
 
 rule exo_electricity_demand:
@@ -57,19 +57,19 @@ rule exo_electricity_demand:
         [f"{out_path}DE.inc", f"{out_path}DE_VAR_T.inc"]
     shell:
         """
-        python Modules/createDE.py --conversion-file={input[0]} --el-dataset={input[1]} --show-difference=False
+        python Modules/exo_electricity_demand.py --conversion-file={input[0]} --el-dataset={input[1]} --show-difference=False
         """
 
 # 3. Exogenous Heat Demands
 rule format_vpdk21_data:
     input:
-        directory(f"{data_path}AAU Kommuneplan")
+        expand(f"{data_path}AAU Kommuneplan")
     output:
         [f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
         f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc"]
     shell:
         """
-        python Modules/aauvarmeplan2021.py
+        python Modules/format_vpdk21.py
         """
 
 rule format_dkstat_industry_data:
@@ -79,7 +79,7 @@ rule format_dkstat_industry_data:
         f"{data_path}Danmarks Statistik/industry_demand.nc"
     shell:
         """
-        python Modules/danmarks_statistik.py --get-industry-demand
+        python Modules/format_dkstat.py --get-industry-demand
         """
 
 rule exo_heat_demand:
@@ -95,7 +95,7 @@ rule exo_heat_demand:
         f'{out_path}INDIVUSERS_DH.inc', f'{out_path}INDIVUSERS_DH_VAR_T.inc']
     shell:
         """
-        python Modules/createDH2.py
+        python Modules/exo_heat_demand.py
         """
 
 # 4. Transport Demand
@@ -106,6 +106,6 @@ rule format_dkstat_transport_data:
         f"{data_path}Danmarks Statistik/transport_demand.csv"
     shell:
         """
-        python Modules/danmarks_statistik.py --get-transport-demand --include-bunkering=false
+        python Modules/format_dkstat.py --get-transport-demand --include-bunkering=false
         """
  
