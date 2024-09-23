@@ -5,7 +5,7 @@ release = "0.0.1"
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv", ".venv/**"]
 
-conf_py_path = "RawDataProcessing/docs/"  # with leading and trailing slash
+conf_py_path = "docs/"  # with leading and trailing slash
 
 html_static_path = ["css"]
 

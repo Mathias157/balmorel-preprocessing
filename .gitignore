@@ -1,7 +1,7 @@
-RawDataProcessing/Data/*
-RawDataProcessing/Output/*
-!RawDataProcessing/Data/IncFilePreSuf/README.md
-!RawDataProcessing/Output/Figures/.keepoutfolder
+src/Data/*
+src/Output/*
+!src/Data/IncFilePreSuf/README.md
+!src/Output/Figures/.keepoutfolder
 exo_elec_dem_conversion_dictionaries.pkl
 exo_heat_dem_conversion_dictionaries.pkl
 .snakemake
