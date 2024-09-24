@@ -80,10 +80,11 @@ rule format_balmorel_data:
         f"{modules_path}format_balmorel_data.py"
     params:
         model_path=config["balmorel_input"]["model_path"],
-        scenario=config["balmorel_input"]["scenario"]
+        scenario=config["balmorel_input"]["scenario"],
+        load_again=config["balmorel_input"]["load_again"]
     shell:
         """
-        python {input} --model-path={params.model_path} --scenario={params.scenario}
+        python {input} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again}
         """
 
 rule exo_heat_demand:
