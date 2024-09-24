@@ -18,26 +18,20 @@ rule create_conversion_dictionaries:
     output:
         [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl",
         f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl"]
-    shell:
-        f"""
-        python {submod_path}create_conversion_dictionaries.py
-        """
-
+    script:
+        f"{submod_path}create_conversion_dictionaries.py"
+    
 rule get_grid_from_Balmorel:
     output:
         f"{data_path}Power Grid/municipal_connectivity.nc"
-    shell:
-        """
-        python Modules/Submodules/get_grid.py
-        """
+    script:
+        f"{submod_path}get_grid.py"
 
 rule do_clustering:
     input:
         f"{data_path}Power Grid/municipal_connectivity.nc"
-    shell:
-        """
-        python Modules/clustering.py
-        """
+    script:
+        f"{modules_path}clustering.py"
 
 # 2. Exogenous Electricity Demands
 rule format_energinet_data:
@@ -45,19 +39,19 @@ rule format_energinet_data:
         f"{data_path}Timeseries/ElConsumptionEnerginet2023.csv"
     output:
         f"{data_path}Timeseries/energinet_eldem.nc"
-    shell:
-        """
-        python Modules/format_energinet.py
-        """
+    script:
+        f"{modules_path}format_energinet.py"
 
 rule exo_electricity_demand:
     input:
-        [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl", f"{data_path}Timeseries/energinet_eldem.nc"]
+        [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl", 
+        f"{data_path}Timeseries/energinet_eldem.nc",
+        f"{modules_path}exo_electricity_demand.py"]
     output:
         [f"{out_path}DE.inc", f"{out_path}DE_VAR_T.inc"]
     shell:
         """
-        python Modules/exo_electricity_demand.py --conversion-file={input[0]} --el-dataset={input[1]} --show-difference=False
+        python {input[2]} --conversion-file={input[0]} --el-dataset={input[1]} --show-difference=False
         """
 
 # 3. Exogenous Heat Demands
@@ -67,19 +61,18 @@ rule format_vpdk21_data:
     output:
         [f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
         f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc"]
-    shell:
-        """
-        python Modules/format_vpdk21.py
-        """
+    script:
+        f"{modules_path}format_vpdk21.py"
 
 rule format_dkstat_industry_data:
     input:
-        r"Data\Danmarks Statistik\Industriforbrug Type.xlsx"
+        [r"Data\Danmarks Statistik\Industriforbrug Type.xlsx",
+        f"{modules_path}format_dkstat.py"]
     output:
         f"{data_path}Danmarks Statistik/industry_demand.nc"
     shell:
         """
-        python Modules/format_dkstat.py --get-industry-demand
+        python {input[1]} --get-industry-demand
         """
 
 rule exo_heat_demand:
@@ -93,19 +86,18 @@ rule exo_heat_demand:
         [f'{out_path}DH.inc', f'{out_path}DH_VAR_T.inc',
         f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
         f'{out_path}INDIVUSERS_DH.inc', f'{out_path}INDIVUSERS_DH_VAR_T.inc']
-    shell:
-        """
-        python Modules/exo_heat_demand.py
-        """
+    script:
+        f"{modules_path}exo_heat_demand.py"
 
 # 4. Transport Demand
 rule format_dkstat_transport_data:
     input:
-        r"Data\Danmarks Statistik\Transportforbrug Type.xlsx"
+        [r"Data\Danmarks Statistik\Transportforbrug Type.xlsx",
+        f"{modules_path}format_dkstat.py"]
     output:
         f"{data_path}Danmarks Statistik/transport_demand.csv"
     shell:
         """
-        python Modules/format_dkstat.py --get-transport-demand --include-bunkering=false
+        python {input[1]} --get-transport-demand --include-bunkering=false
         """
  

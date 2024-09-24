@@ -193,13 +193,17 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
 
 ## 2.3.2 INDUSTRY_DH_VAR_T.inc
 @create_incfile
-def create_INDUSTRY_DH_VAR_T(incfile):
-    incfile.body = '\n'.join([
-        "* Assume that heat demand profile of industry correlates exactly to electricity demand profile",
-        "DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);",
-        "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);",
-        "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DE_VAR_T(RRR,'PII',SSS,TTT))) = DE_VAR_T(RRR,'PII',SSS,TTT);"
-    ])
+def create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xr.Dataset):
+    incfile.body = (
+        transform_xrdata(el_new_dataset,
+                         'electricity_demand_mwh')
+        .to_dataframe()
+        .reset_index()
+    )
+    incfile.body.loc[:, 'A'] = incfile.body.loc[:, 'A'].values + '_IND-HT-NODH'
+    incfile.body_prepare(['S', 'T'],
+                          ['A', 'DHUSER'], values='electricity_demand_mwh')
+
 
 #%% ------------------------------- ###
 ###             3. Main             ###
@@ -211,9 +215,11 @@ def main(show_difference: bool = False):
     
     # 3.1 Format Dataset
     conversion_file = 'Modules/Submodules/exo_heat_dem_conversion_dictionaries.pkl'
+    
+    ## 3.1.1 Heat Demand
     dataset, new_dataset = convert_names(conversion_file, dataset, 'heat_demand_mwh')
     
-    ## Drop dimensions
+    ### Drop dimensions
     new_dataset = (
         new_dataset
         .drop_dims(['lat', 'lon'])
@@ -221,12 +227,27 @@ def main(show_difference: bool = False):
     )
     
     if show_difference:
+        print('###\nHeat Dataset\n###')
         print('Before: \n', dataset, '\n\n')
         print('After: \n', new_dataset, '\n\n')
+       
+    ## 3.1.2 Electricity Profile for Industry
+    eldem = (
+        xr.load_dataset('Data/Timeseries/energinet_eldem.nc')
+        .sel(user='industry')
+        .assign_coords(user='industry_phh')
+        .rename({'week' : 'S', 'hour' : 'T'})
+    )
+    eldataset, el_new_dataset = convert_names(conversion_file, eldem, 'electricity_demand_mwh', convert_seasons_and_terms=True)
+
+    if show_difference:
+        print('###\nElectricity Dataset\n###')
+        print('Before: \n', eldataset, '\n\n')
+        print('After: \n', el_new_dataset, '\n\n')
         
-    out_path = 'Output'
-    
+        
     # 3.2 Create .inc files
+    out_path = 'Output'
     ## 3.2.1 DH.inc
     create_DH(new_dataset=new_dataset, name='DH', path=out_path, 
                 prefix='\n'.join([
@@ -285,10 +306,21 @@ def main(show_difference: bool = False):
                          ]))
     
     ## 1.3 Make Heat Variation Profiles
-    create_INDUSTRY_DH_VAR_T(name='INDUSTRY_DH_VAR_T', path=out_path,
-                                prefix='', suffix='')
+    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                             name='INDUSTRY_DH_VAR_T', 
+                             path=out_path,
+                             prefix="""TABLE DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)\n""",
+                             suffix="""\n;\n* Collect series to other heat series, if there is a industry heat series
+DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA,DHUSER))) = DH_VAR_T_IND(SSS,TTT,AAA,DHUSER);
+DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)=0;
+
+* Assume that other temperature processes follow the same pattern, if there is a profile
+DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);
+DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);
+""")
+
     
     
 
 if __name__ == '__main__':
-    main()
+    main(show_difference=False)
