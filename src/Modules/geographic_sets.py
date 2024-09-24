@@ -1,139 +1,74 @@
-#%%
-# -*- coding: utf-8 -*-
 """
-Created on Tue Dec  6 16:29:32 2022
+TITLE
 
-@author: mathi
+Description
+
+Created on 24.09.2024
+@author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
 """
+#%% ------------------------------- ###
+###        0. Script Settings       ###
+### ------------------------------- ###
 
+import os
+import pickle
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import rc
-from scipy.optimize import curve_fit
-import geopandas as gpd
-import cartopy.crs as ccrs
-from shapely.geometry import MultiPolygon
-from Modules.geofiles import prepared_geofiles
-
-
-#%% ----------------------------- ###
-###         0. ASSUMPTIONS        ###
-### ----------------------------- ###
-
-### 0.1 Load geodata
-# What areas to load?
-choice = 'NordpoolReal'
-# choice = 'NUTS1'
-# choice = 'NUTS2'
-# choice = 'NUTS3'
-# choice = 'DK Municipalities'
-# choice = 'BalmorelVREAreas'
-
-### 0.2 Choose country 
-
-### ASSUMPTIONS
-# 2.1 Only DK right now, and the amount of areas in the loaded shapefile = amount of created areas
-# 2.2 - Investment options!!! How to distribute? Right now a semi-automatic hack
-
+from Submodules.utils import combine_dicts
+from pybalmorel.interactive.dashboard.eel_dashboard import create_incfiles
 
 #%% ------------------------------- ###
-### 1. Load Geodata and Pre-process ###
+###        1. 
 ### ------------------------------- ###
 
-the_index, areas, country_code = prepared_geofiles(choice)
-areas.plot()
+def load_set(file: str):
+    return pickle.load(open(os.path.join('Modules', 'Submodules', '%s.pkl'%file), 'rb'))
 
-areas = areas[(areas[country_code] == 'DK') | (areas[country_code] == 'DE')] # Testing DK and DE
-
-
-#%% ------------------------------- ###
-###       2. Make Set Files         ###
-### ------------------------------- ###
-
-### 2.1 Create regions and areas
-# if choice.replace(' ', '').lower() == 'dkmunicipalities':
-#     AAA = areas.GID_2
-# elif (choice.replace(' ', '').lower() == 'nuts1') |\
-#     (choice.replace(' ', '').lower() == 'nuts2') |\
-#         (choice.replace(' ', '').lower() == 'nuts3'):
-#     AAA = areas.NUTS_ID
-AAA = areas[the_index]    
-
-# Regions
-RRR = AAA
-
-# Areas
-AAA = AAA + '_A'
-
-# f = open('CCCRRRAAA.inc', 'w')
-# with open('CCCRRRAAA.inc', 'a') as f:
-#     f.write("SET AAA(CCCRRRAAA)  'All areas'\n")
-#     f.write("/\n")
-#     dfAsString = AAA.to_string(header=False, index=False)
-#     f.write(dfAsString)
-#     f.write('\n/\n;')
-
-# f = open('./Output/CCCRRRAAA.inc', 'w')
-with open('./Output/CCCRRRAAA.inc', 'w') as f:
-    f.write("SET CCCRRRAAA 'All geographic entities'       \n")
-    f.write("/\n")
-    # dfAsString = (RRR + ' . ' + AAA).to_string(header=False, index=False)
-    f.write('DENMARK\n')
-    f.write(RRR.to_string(header=False, index=False))
-    f.write('\n')
-    f.write(AAA.to_string(header=False, index=False))
-    f.write('\n/\n;')
-
-with open('./Output/CCCRRR.inc', 'w') as f:
-    f.write("SET CCCRRR(CCC, RRR) 'Regions in countries'       \n")
-    f.write("/\n")
-    dfAsString = ('DENMARK' + ' . ' + RRR).to_string(header=False, index=False)
-    f.write(dfAsString)
-    f.write('\n/\n;')
-
-# f = open('./Output/RRRAAA.inc', 'w')
-with open('./Output/RRRAAA.inc', 'w') as f:
-    f.write("SET RRRAAA(RRR,AAA) 'Areas in regions'       \n")
-    f.write("/\n")
-    dfAsString = (RRR + ' . ' + AAA).to_string(header=False, index=False)
-    f.write(dfAsString)
-    f.write('\n/\n;')
-
-
-# f = open('AAA.inc', 'w')
-with open('./Output/AAA.inc', 'w') as f:
-    f.write("SET AAA(CCCRRRAAA)  'All areas'\n")
-    f.write("/\n")
-    dfAsString = AAA.to_string(header=False, index=False)
-    f.write(dfAsString)
-    f.write('\n/\n;')
+def main():
     
-with open('./Output/RRR.inc', 'w') as f:
-    f.write("SET RRR(CCCRRRAAA)  'All regions'\n")
-    f.write("/\n")
-    dfAsString = RRR.to_string(header=False, index=False)
-    f.write(dfAsString)
-    f.write('\n/\n;')
+    # Maybe wait with this one until you have VRE areas too
+    # # 1.1 Create base .inc files 
+    # f = load_set('districtheat_sets')
+    # geo_nodes = {
+    #     'countries' : ['DENMARK'],
+    #     'regions' : f,
+    #     'areas' : f.values
+    # }
+    # create_incfiles(str(geo_nodes), 'Output')
+    
+    
+    # 1.2 Create INDUSTRY sets
+    f = combine_dicts([
+        load_set('ind-lt_sets'),
+        load_set('ind-mt_sets'),
+        load_set('ind-ht_sets')
+    ])
+    all_areas = pd.concat((pd.DataFrame(f.values())[0], pd.DataFrame(f.values())[1], pd.DataFrame(f.values())[2]), ignore_index=True)
+    all_areas = {area : [] for area in all_areas}
+    
+    ## Prepare format that create_incfiles expects
+    geo_nodes = {
+        'countries' : {'DENMARK' : list(f.keys())},
+        'regions' : f,
+        'areas' : all_areas
+    }
+    create_incfiles(str(geo_nodes), 'Output')
+    
+    # AGKN - Allowed investments how to do?
+    # Hack for now
+    # with open('./Output/AGKN.inc', 'w') as f:
+    #     for a in areas.index:
+    #         f.write("""
+    #                 AGKN('%s', GGG) = AGKN('DK2_Large',GGG) + AGKN('DK2_NoDH',GGG);
+    #                 AGKN('%s', 'GNR_ST_NUCL_CND_E-33') = YES;
+    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GWND)  = YES  ;
+    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GHSTO) = YES  ;          
+    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTO) = YES  ;          
+    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTOS) = YES ;          
+    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLE) = YES  ;          
+    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLH) = YES  ;          
+    #                 """%tuple(8*[a + '_A']))
+    #                 #.replace(' ', '')%tuple(8*[a + '_A']))
 
-### 2.2 Create investment options
-# Do something that takes into account offshore possibilities
 
-
-# AGKN - Allowed investments how to do?
-# Hack for now
-# with open('./Output/AGKN.inc', 'w') as f:
-#     for a in areas.index:
-#         f.write("""
-#                 AGKN('%s', GGG) = AGKN('DK2_Large',GGG) + AGKN('DK2_NoDH',GGG);
-#                 AGKN('%s', 'GNR_ST_NUCL_CND_E-33') = YES;
-#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GWND)  = YES  ;
-#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GHSTO) = YES  ;          
-#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTO) = YES  ;          
-#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTOS) = YES ;          
-#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLE) = YES  ;          
-#                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLH) = YES  ;          
-#                 """%tuple(8*[a + '_A']))
-#                 #.replace(' ', '')%tuple(8*[a + '_A']))
-
-
+if __name__ == '__main__':
+    main()

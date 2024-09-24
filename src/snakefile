@@ -13,7 +13,8 @@ rule all:
         f'{data_path}Power Grid/municipal_connectivity.nc',
         f"{data_path}Danmarks Statistik/transport_demand.csv",
         f"{out_path}DH.inc",
-        f"{out_path}DH_VAR_T.inc"]
+        f"{out_path}DH_VAR_T.inc",
+        f"{out_path}CCC.inc"]
 
 rule create_conversion_dictionaries:
     output:
@@ -122,3 +123,20 @@ rule format_dkstat_transport_data:
         python {input[1]} --get-transport-demand --include-bunkering=false
         """
  
+
+# 5. Sets
+rule geographic_sets:
+    input:
+        [
+            f"{submod_path}districtheat_sets.pkl",
+            f"{submod_path}individual_sets.pkl",
+            f"{submod_path}ind-lt_sets.pkl",
+            f"{submod_path}ind-mt_sets.pkl",
+            f"{submod_path}ind-ht_sets.pkl",
+        ]
+    output:
+        [
+            f"{out_path}CCC.inc"
+        ]
+    script:
+        f"{modules_path}geographic_sets.py"
