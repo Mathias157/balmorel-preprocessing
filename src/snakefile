@@ -86,7 +86,12 @@ rule format_balmorel_data:
         load_again=config["balmorel_input"]["load_again"]
     output:
         [f"{out_path}DH_VAR_T.inc",
-        f"{out_path}INDIVUSERS_DH_VAR_T.inc"]
+        f"{out_path}INDIVUSERS_DH_VAR_T.inc",
+        f"{out_path}WND_VAR_T.inc",
+        f"{out_path}SOLE_VAR_T.inc",
+        f"{out_path}WNDFLH.inc",
+        f"{out_path}SOLEFLH.inc",
+        ]
     shell:
         """
         python {input} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again}
