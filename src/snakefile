@@ -84,7 +84,8 @@ rule format_balmorel_data:
         scenario=config["balmorel_input"]["scenario"],
         load_again=config["balmorel_input"]["load_again"]
     output:
-        f"{out_path}DH_VAR_T.inc"
+        [f"{out_path}DH_VAR_T.inc",
+        f"{out_path}INDIVUSERS_DH_VAR_T.inc"]
     shell:
         """
         python {input} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again}
@@ -100,7 +101,7 @@ rule exo_heat_demand:
     output:
         [f'{out_path}DH.inc',
         f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
-        f'{out_path}INDIVUSERS_DH.inc', f'{out_path}INDIVUSERS_DH_VAR_T.inc']
+        f'{out_path}INDIVUSERS_DH.inc']
     script:
         f"{modules_path}exo_heat_demand.py"
 

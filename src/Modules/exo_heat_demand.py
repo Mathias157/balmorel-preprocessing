@@ -189,7 +189,7 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
 # 2.3 Make Time Variation Heat Demand .inc-files
 
 ## 2.3.1 DH_VAR_T.inc
-
+# See format_balmorel_data, the very similar future gas profiles are used
 
 ## 2.3.2 INDUSTRY_DH_VAR_T.inc
 @create_incfile
@@ -203,6 +203,10 @@ def create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xr.Dataset):
     incfile.body.loc[:, 'A'] = incfile.body.loc[:, 'A'].values + '_IND-HT-NODH'
     incfile.body_prepare(['S', 'T'],
                           ['A', 'DHUSER'], values='electricity_demand_mwh')
+
+
+## 2.3.3 INDIVUSERS_DH_VAR_T.inc
+# See format_balmorel_data, the very similar future gas profiles are used
 
 
 #%% ------------------------------- ###
@@ -305,7 +309,9 @@ def main(show_difference: bool = False):
                              "$label NO_INDIVUSERS_AAA"
                          ]))
     
-    ## 1.3 Make Heat Variation Profiles
+    ## 3.3 Make Heat Variation Profiles
+    
+    ### 3.3.1 INDUSTRY_DH_VAR_T
     create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
                              name='INDUSTRY_DH_VAR_T', 
                              path=out_path,

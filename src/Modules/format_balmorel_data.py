@@ -98,20 +98,41 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     ## 1.1 Save DH_VAR_T.inc
     incfile = IncFile(name='DH_VAR_T', path='Output',
                       prefix='\n'.join([
-                        "PARAMETER DH_VAR_T(AAA,DHUSER,SSS,TTT) 'Variation in heat demand';",
-                        "TABLE DH_VAR_T1(SSS,TTT,AAA,DHUSER)",
-                        ""
+                            "PARAMETER DH_VAR_T(AAA,DHUSER,SSS,TTT) 'Variation in heat demand';",
+                            "TABLE DH_VAR_T1(SSS,TTT,AAA,DHUSER)",
+                            ""
                       ]),
                       body=df,
                       suffix='\n'.join([
-                        ";",
-                        "DH_VAR_T(AAA,'RESH',SSS,TTT) = DH_VAR_T1(SSS,TTT,AAA,DHUSER);",
-                        "DH_VAR_T1(SSS,TTT,AAA,DHUSER) = 0;",
-                        "DH_VAR_T('Herlev_A','RESH',SSS,TTT) = DH_VAR_T('Ballerup_A','RESH',SSS,TTT);"
+                            "",
+                            ";",
+                            "DH_VAR_T(AAA,'RESH',SSS,TTT) = DH_VAR_T1(SSS,TTT,AAA,DHUSER);",
+                            "DH_VAR_T1(SSS,TTT,AAA,DHUSER) = 0;",
+                            "DH_VAR_T('Herlev_A','RESH',SSS,TTT) = DH_VAR_T('Ballerup_A','RESH',SSS,TTT);"
                       ]))
     incfile.body_prepare(['S', 'T'],
                          ['A', 'DHUSER'])
     incfile.save()
+    
+    ## 1.2 Save INDIVUSERS_DH_VAR_T
+    df['A'] = df.A.str.replace('_A', '_IDVU-SPACEHEAT')
+    df['DHUSER'] = 'RESIDENTIAL'
+    incfile = IncFile(name='INDIVUSERS_DH_VAR_T', path='Output',
+                    prefix='\n'.join([
+                    "TABLE DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER)",
+                    ""
+                    ]),
+                    body=df,
+                    suffix='\n'.join([
+                        "",
+                        ";",
+                        "DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER))) = DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER);",
+                        "DH_VAR_T('Herlev_A','RESIDENTIAL',SSS,TTT) = DH_VAR_T('Ballerup_A','RESIDENTIAL',SSS,TTT);"
+                    ]))
+    incfile.body_prepare(['S', 'T'],
+                         ['A', 'DHUSER'])
+    incfile.save()
+
     
 if __name__ == '__main__':
     main()
