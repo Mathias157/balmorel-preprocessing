@@ -16,17 +16,10 @@ Created on 22.08.2024
 ### ------------------------------- ###
 
 import matplotlib.pyplot as plt
-import pandas as pd
-import textwrap
-import numpy as np
 import click
-import pickle
 from Submodules.utils import convert_names, transform_xrdata 
 import xarray as xr
-from typing import Tuple
 from pybalmorel import IncFile
-from Submodules.municipal_template import DataContainer
-from Submodules.utils import convert_coordname_elements
 import matplotlib
 try:
     import cmcrameri
@@ -85,16 +78,18 @@ def main(conversion_file: str,
     # 1.2 Make .inc-files
     out_path = 'Output'
     ## 1.2.1 DE
-    DE = IncFile(name='DE',
-        prefix=textwrap.dedent("""* Data from Energinet Dataservice 2023
-        TABLE   DE1(RRR,DEUSER,YYY)   'Annual electricity consumption (MWh)' 
-        """),
-        suffix=textwrap.dedent(""";
-        DE(YYY,RRR,DEUSER)=DE1(RRR,DEUSER,YYY);
-        DE('2050',RRR,DEUSER) = DE('2023', RRR, DEUSER);
-        DE1(RRR,DEUSER,YYY) = 0;
-        """),
-        path=out_path
+    DE = IncFile(name='DE', path=out_path,
+                prefix='\n'.join([
+                    "* Data from Energinet Dataservice 2023",
+                    "TABLE   DE1(RRR,DEUSER,YYY)   'Annual electricity consumption (MWh)'", 
+                    "",
+                ]),
+                suffix='\n'.join([
+                    ";",
+                    "DE(YYY,RRR,DEUSER)=DE1(RRR,DEUSER,YYY);",
+                    "DE('2050',RRR,DEUSER) = DE('2023', RRR, DEUSER);",
+                    "DE1(RRR,DEUSER,YYY) = 0;",
+                ])
     )
     ### Sum to annual electricity demands
     DE.body = (
@@ -109,17 +104,18 @@ def main(conversion_file: str,
     DE.save()
     
     ## 1.2.2 DE_VAR_T
-    DE_VAR_T = IncFile(name='DE_VAR_T',
-                       prefix=textwrap.dedent("""
-                                              * Data from Energinet Dataservice 2023
-                                              TABLE DE_VAR_T1(DEUSER,SSS,TTT,RRR) "Variation in electricity demand"
-                                              """),
-                       suffix=textwrap.dedent("""
-                                              ;
-                                              PARAMETER DE_VAR_T(RRR,DEUSER,SSS,TTT) "Variation in electricity demand";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-                                              DE_VAR_T(RRR,DEUSER,SSS,TTT) =  DE_VAR_T1(DEUSER,SSS,TTT,RRR); 
-                                              """),
-                       path=out_path)
+    DE_VAR_T = IncFile(name='DE_VAR_T', path=out_path,
+                       prefix='\n'.join(["* Data from Energinet Dataservice 2023",
+                                        "TABLE DE_VAR_T1(DEUSER,SSS,TTT,RRR) 'Variation in electricity demand'",
+                                        "",
+                        ]),
+                       suffix='\n'.join(["",
+                                        ";",
+                                        "PARAMETER DE_VAR_T(RRR,DEUSER,SSS,TTT) 'Variation in electricity demand';",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+                                        "DE_VAR_T(RRR,DEUSER,SSS,TTT) =  DE_VAR_T1(DEUSER,SSS,TTT,RRR); ",
+                                        "DE_VAR_T1(DEUSER,SSS,TTT,RRR) = 0;"
+                        ]),
+                       )
     DE_VAR_T.body = (
         transform_xrdata(new_dataset,
                          'electricity_demand_mwh')

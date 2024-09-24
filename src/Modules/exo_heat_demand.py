@@ -309,18 +309,17 @@ def main(show_difference: bool = False):
     create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
                              name='INDUSTRY_DH_VAR_T', 
                              path=out_path,
-                             prefix="""TABLE DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)\n""",
-                             suffix="""\n;\n* Collect series to other heat series, if there is a industry heat series
-DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA,DHUSER))) = DH_VAR_T_IND(SSS,TTT,AAA,DHUSER);
-DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)=0;
+                             prefix="TABLE DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)\n",
+                             suffix='\n'.join(["",
+                                               ";",
+                                               "* Collect series to other heat series, if there is a industry heat series",
+                                               "DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA,DHUSER))) = DH_VAR_T_IND(SSS,TTT,AAA,DHUSER);",
+                                               "DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)=0;",
+                                               "* Assume that other temperature processes follow the same pattern, if there is a profile",
+                                               "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);",
+                                               "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);",
+                             ]))
 
-* Assume that other temperature processes follow the same pattern, if there is a profile
-DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);
-DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);
-""")
-
-    
-    
 
 if __name__ == '__main__':
     main(show_difference=False)
