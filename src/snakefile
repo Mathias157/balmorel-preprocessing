@@ -12,7 +12,8 @@ rule all:
         [f'{out_path}DE.inc', 
         f'{data_path}Power Grid/municipal_connectivity.nc',
         f"{data_path}Danmarks Statistik/transport_demand.csv",
-        f"{out_path}DH.inc"]
+        f"{out_path}DH.inc",
+        f"{out_path}DH_VAR_T.inc"]
 
 rule create_conversion_dictionaries:
     output:
@@ -82,6 +83,8 @@ rule format_balmorel_data:
         model_path=config["balmorel_input"]["model_path"],
         scenario=config["balmorel_input"]["scenario"],
         load_again=config["balmorel_input"]["load_again"]
+    output:
+        f"{out_path}DH_VAR_T.inc"
     shell:
         """
         python {input} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again}
@@ -95,7 +98,7 @@ rule exo_heat_demand:
         f"{data_path}Danmarks Statistik/industry_demand.nc",
         f"{data_path}Timeseries/energinet_eldem.nc"]
     output:
-        [f'{out_path}DH.inc', f'{out_path}DH_VAR_T.inc',
+        [f'{out_path}DH.inc',
         f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
         f'{out_path}INDIVUSERS_DH.inc', f'{out_path}INDIVUSERS_DH_VAR_T.inc']
     script:
