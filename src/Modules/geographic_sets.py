@@ -16,14 +16,6 @@ import cartopy.crs as ccrs
 from shapely.geometry import MultiPolygon
 from Modules.geofiles import prepared_geofiles
 
-style = 'ppt'
-
-if style == 'report':
-    plt.style.use('default')
-    fc = 'white'
-elif style == 'ppt':
-    plt.style.use('dark_background')
-    fc = 'none'
 
 #%% ----------------------------- ###
 ###         0. ASSUMPTIONS        ###

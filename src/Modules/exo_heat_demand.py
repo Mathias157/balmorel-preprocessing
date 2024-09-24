@@ -14,7 +14,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from pybalmorel import IncFile
 import xarray as xr
-from Submodules.utils import convert_names, transform_xrdata
+import pickle
+from Submodules.utils import convert_names, transform_xrdata, save_dict_set
 from Submodules.municipal_template import DataContainer
 from pybalmorel import IncFile
     
@@ -141,6 +142,8 @@ def create_DH(incfile, new_dataset: xr.Dataset):
     print('Total district heating demand: ', round(incfile.body['heat_demand_mwh'].sum() / 1e6, 2) , ' TWh')
     ### Assign area suffix
     incfile.body.A = incfile.body.A + '_A'
+    save_dict_set('Modules/Submodules/districtheat_sets.pkl', incfile.body.loc[:, ['A']], 'A', '_A', 'R') # Save region-to-area dictionary
+
     incfile.body_prepare(['DHUSER', 'A'],
                     'Y',
                     values='heat_demand_mwh')
@@ -161,10 +164,16 @@ def create_INDUSTRY_DH(incfile, new_dataset: xr.Dataset):
     ### Assign area suffix
     idx = incfile.body.query('DHUSER == "IND-PHL"').index
     incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-LT-NODH'
+    save_dict_set('Modules/Submodules/ind-lt_sets.pkl', incfile.body.loc[idx, ['A']], 'A', '_IND-LT-NODH', 'R') # Save region-to-area dictionary
+        
     idx = incfile.body.query('DHUSER == "IND-PHM"').index
     incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-MT-NODH'
+    save_dict_set('Modules/Submodules/ind-mt_sets.pkl', incfile.body.loc[idx, ['A']], 'A', '_IND-MT-NODH', 'R') # Save region-to-area dictionary
+
     idx = incfile.body.query('DHUSER == "IND-PHH"').index
-    incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-HT-NODH'
+    incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-HT-NODH'    
+    save_dict_set('Modules/Submodules/ind-ht_sets.pkl', incfile.body.loc[idx, ['A']], 'A', '_IND-HT-NODH', 'R') # Save region-to-area dictionary
+
     incfile.body_prepare(['DHUSER', 'A'],
                     'Y',
                     values='heat_demand_mwh')
@@ -182,6 +191,8 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
     print('Total individual heat demand: ', round(incfile.body['heat_demand_mwh'].sum() / 1e6, 2) , ' TWh')
     ### Assign area suffix
     incfile.body.A = incfile.body.A + '_IDVU-SPACEHEAT'
+    save_dict_set('Modules/Submodules/individual_sets.pkl', incfile.body.loc[:, ['A']], 'A', '_IDVU-SPACEHEAT', 'R') # Save region-to-area dictionary
+
     incfile.body_prepare(['DHUSER', 'A'],
                     'Y',
                     values='heat_demand_mwh')

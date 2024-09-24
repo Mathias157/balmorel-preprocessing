@@ -13,6 +13,8 @@ Created on 24.09.2024
 from gams import GamsWorkspace
 from pybalmorel import Balmorel
 from pybalmorel.utils import symbol_to_df
+from Submodules.utils import df_set_to_dictionary, combine_dicts
+import pickle
 from geofiles import prepared_geofiles
 from typing import Tuple
 import pandas as pd
@@ -21,7 +23,7 @@ import click
 import os
 
 #%% ------------------------------- ###
-###        1. 
+###      1. Utility Functions       ###
 ### ------------------------------- ###
 
 def store_balmorel_input(symbol: str,
@@ -59,6 +61,10 @@ def store_balmorel_input(symbol: str,
         
     return f
 
+
+#%% ------------------------------- ###
+###            1. Main              ###
+### ------------------------------- ###
     
 @click.command()
 @click.option("--model-path", type=str, required=True, help="Path of the Balmorel model")

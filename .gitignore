@@ -13,3 +13,9 @@ snakemake_dag
 snakemake_dag.*
 !snakemake_dag.pdf
 gurobi.log
+
+districtheat_sets.pkl
+individual_sets.pkl
+ind-lt_sets.pkl
+ind-mt_sets.pkl
+ind-ht_sets.pkl

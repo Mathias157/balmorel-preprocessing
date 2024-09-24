@@ -99,7 +99,12 @@ rule exo_heat_demand:
         f"{data_path}Danmarks Statistik/industry_demand.nc",
         f"{data_path}Timeseries/energinet_eldem.nc"]
     output:
-        [f'{out_path}DH.inc',
+        [f"{submod_path}districtheat_sets.pkl",
+        f"{submod_path}individual_sets.pkl",
+        f"{submod_path}ind-lt_sets.pkl",
+        f"{submod_path}ind-mt_sets.pkl",
+        f"{submod_path}ind-ht_sets.pkl",
+        f'{out_path}DH.inc',
         f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
         f'{out_path}INDIVUSERS_DH.inc']
     script:
