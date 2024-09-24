@@ -1,5 +1,5 @@
 # Load the config file at the top
-# configfile: "config.yaml"
+configfile: "snakeconfig.yaml"
 
 out_path     = "Output/"
 data_path    = "Data/"
@@ -73,6 +73,17 @@ rule format_dkstat_industry_data:
     shell:
         """
         python {input[1]} --get-industry-demand
+        """
+
+rule format_balmorel_data:
+    input:
+        f"{modules_path}format_balmorel_data.py"
+    params:
+        model_path=config["balmorel_input"]["model_path"],
+        scenario=config["balmorel_input"]["scenario"]
+    shell:
+        """
+        python {input} --model-path={params.model_path} --scenario={params.scenario}
         """
 
 rule exo_heat_demand:
