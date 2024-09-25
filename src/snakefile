@@ -10,7 +10,6 @@ submod_path  = "Modules/Submodules/"
 rule all:
     input:
         [f'{out_path}DE.inc', 
-        f'{data_path}Power Grid/municipal_connectivity.nc',
         f"{data_path}Danmarks Statistik/transport_demand.csv",
         f"{out_path}DH.inc",
         f"{out_path}DH_VAR_T.inc",
@@ -22,12 +21,6 @@ rule create_conversion_dictionaries:
         f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl"]
     script:
         f"{submod_path}create_conversion_dictionaries.py"
-    
-rule get_grid_from_Balmorel:
-    output:
-        f"{data_path}Power Grid/municipal_connectivity.nc"
-    script:
-        f"{submod_path}get_grid.py"
 
 rule do_clustering:
     input:
@@ -41,8 +34,10 @@ rule format_energinet_data:
         f"{data_path}Timeseries/ElConsumptionEnerginet2023.csv"
     output:
         f"{data_path}Timeseries/energinet_eldem.nc"
-    script:
-        f"{modules_path}format_energinet.py"
+    shell:
+        """
+        python {modules_path}format_energinet.py --energinet-data-path={input}
+        """
 
 rule exo_electricity_demand:
     input:

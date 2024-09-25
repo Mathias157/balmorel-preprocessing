@@ -15,7 +15,10 @@ from typing import Union
 import pandas as pd
 import matplotlib.pyplot as plt
 import geopandas as gpd
-import cartopy.crs as ccrs
+try:
+    import cartopy.crs as ccrs
+except ModuleNotFoundError:
+    pass
 from pyproj import Proj
 import os
 

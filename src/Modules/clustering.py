@@ -10,20 +10,18 @@ Created on 11.09.2024
 ###        0. Script Settings       ###
 ### ------------------------------- ###
 
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcol
-import geopandas as gpd
 import pandas as pd
 import numpy as np
 import xarray as xr
-from Modules.geofiles import prepared_geofiles
-from pybalmorel import Balmorel
+from geofiles import prepared_geofiles
 from pybalmorel.utils import symbol_to_df
 from scipy.sparse import csr_matrix
-from Modules.Submodules.municipal_template import DataContainer
-from Modules.createFLEXDEM import distribute_road_flex_electricity_demand
-from Modules.createDH import DistrictHeatAAU
-from Modules.Submodules.format_energinet import energinet_el
+from Submodules.municipal_template import DataContainer
+from createFLEXDEM import distribute_road_flex_electricity_demand
+from createDH import DistrictHeatAAU
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import kneighbors_graph
@@ -109,8 +107,7 @@ def convert_municipal_code_to_name(to_be_converted: pd.DataFrame,
     return to_be_converted
 
 
-def collect_clusterdata(energinet_el: pd.DataFrame,
-                        plot_cf: bool = False):
+def collect_clusterdata(plot_cf: bool = False):
 
     con = DataContainer()
     
@@ -120,6 +117,7 @@ def collect_clusterdata(energinet_el: pd.DataFrame,
     con.muni = con.muni.merge(temp.data)
     
     ## Annual Electricity Demands - assume 2023 = 2019
+    energinet_el = xr.load_dataset('Data/Timeseries/energinet_eldem.nc')
     energinet_el = energinet_el.assign_coords(year=[2019])
     con.muni = con.muni.merge(energinet_el.sum(dim=['week', 'hour']))
 
@@ -276,5 +274,5 @@ def cluster(con: DataContainer,
     return fig, ax, clustering
 
 if __name__ == '__main__':
-    collected = collect_clusterdata(energinet_el)
+    collected = collect_clusterdata()
     fig, ax, clustering = cluster(collected, 20)

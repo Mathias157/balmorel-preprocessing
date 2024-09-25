@@ -13,10 +13,12 @@ Created on 24.09.2024
 from gams import GamsWorkspace
 from pybalmorel import Balmorel
 from pybalmorel.utils import symbol_to_df
-from Submodules.utils import df_set_to_dictionary, combine_dicts
+from Submodules.municipal_template import DataContainer
+from clustering import convert_municipal_code_to_name
 import geopandas as gpd
-import pickle
 from geofiles import prepared_geofiles
+import numpy as np
+import xarray as xr
 from typing import Tuple
 import pandas as pd
 from pybalmorel import IncFile
@@ -32,7 +34,8 @@ def store_balmorel_input(symbol: str,
                          balmorel_model_path: str, 
                          scenario: str,
                          load_again: bool = False,
-                         filter_func: Tuple[None, callable] = None):
+                         filter_func: Tuple[None, callable] = None,
+                         save: bool = True):
     
     balm = Balmorel(balmorel_model_path)
     
@@ -57,7 +60,9 @@ def store_balmorel_input(symbol: str,
         f = symbol_to_df(balm.input_data[scenario], symbol, columns)
         if filter_func != None:
             f = filter_func(f)
-        f.to_parquet('Data/BalmorelData/%s.gzip'%symbol)
+            
+        if save:
+            f.to_parquet('Data/BalmorelData/%s.gzip'%symbol)
         
     return f
 
@@ -77,6 +82,66 @@ def join_to_gpd(df: pd.DataFrame,
         df[left_col] = df[left_col] + suffix
     
     return df 
+
+def get_grid(balmorel_model_path: str,
+             scenario: str, load_again: bool):
+    """A different way to merge the names through xarray
+
+    Args:
+        balmorel_model_path (str): _description_
+        scenario (str): _description_
+        load_again (bool): _description_
+    """
+        
+    # 1.1 Load Model
+    file = 'Data/BalmorelData/municipal_connectivity.nc'
+    if os.path.exists(file):
+        y = xr.load_dataset(file)
+    else:
+        XINVCOST = store_balmorel_input('XINVCOST',
+                            ['Y', 'RE', 'RI', 'connection'],
+                            balmorel_model_path, scenario, load_again,
+                            lambda x: x.query("Y == '2050' and (RE.str.contains('DK_') and RI.str.contains('DK_'))"),
+                            False)
+
+        ## Convert names and get 0/1 2D array
+        connectivity = (
+        # Convert from muni code to name
+        convert_municipal_code_to_name(
+            convert_municipal_code_to_name(XINVCOST, 
+                                        'RI', exclude_regions=[]), 
+            'RE', exclude_regions=[])
+        
+        # Count connections (i.e.: is there a connection or not)    
+        .pivot_table(index=['RE', 'RI'],  
+                    values='connection', 
+                    aggfunc='count', 
+                    fill_value=0)
+        )
+        connectivity.index.names = ['municipality', 'municipality_to']
+
+        # 1.2 Merge to shapefile to include islands
+        x = DataContainer()
+        y = x.muni.merge(connectivity.to_xarray())
+
+        ## Merge again
+        y = y.connection
+        y = y.rename({'municipality' : 'municipality_from',
+                'municipality_to' : 'municipality'})
+        y = x.muni.merge(y)
+        y = y.rename({'municipality' : 'municipality_to'}).fillna(0)
+        y.connection.data = y.connection.data.astype(int)
+
+
+        ## Check for islands with no connections
+        for i,row in y.connection.to_pandas().iterrows():
+            if np.all(row == 0):
+                print('No connections to %s'%i)
+
+        ## Save
+        y.connection.to_netcdf('Data/BalmorelData/municipal_connectivity.nc')
+    
+    return y
 
 #%% ------------------------------- ###
 ###            1. Main              ###
@@ -250,5 +315,10 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     incfile.body.columns = ['']
     incfile.save()
     
+    # 1.7 Get Connection 
+    get_grid(model_path, scenario, load_again)
+    
+    
 if __name__ == '__main__':
     main()
+    

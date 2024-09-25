@@ -16,9 +16,9 @@ import pandas as pd
 import numpy as np
 from pybalmorel import IncFile
 from pybalmorel.utils import read_lines
-from Modules.geofiles import prepared_geofiles
-from Modules.Submodules.municipal_template import DataContainer
-from Modules.Submodules.format_dkstat import load_transport_demand
+from geofiles import prepared_geofiles
+from Submodules.municipal_template import DataContainer
+from format_dkstat import load_transport_demand
 import matplotlib.pyplot as plt
 
 #%% ------------------------------- ###
