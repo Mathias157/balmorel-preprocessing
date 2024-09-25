@@ -136,13 +136,22 @@ def individual_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         "A.str.contains('IDVU')"
     )
     
+    ## Get rid of solar heating investments
+    solar_heating = [
+        'GNR_SH_SUN_SS-4-KW_Y-2020',
+        'GNR_SH_SUN_SS-4-KW_Y-2030',
+        'GNR_SH_SUN_SS-4-KW_Y-2040',
+        'GNR_SH_SUN_SS-4-KW_Y-2050',
+    ]
+    
     # Get individual investment options
-    individual_options = [option for option in temp.G.unique()]
+    individual_options = [option for option in temp.G.unique() if option not in solar_heating]
     
     # Use this to inspect 
     if print_options:
         print('\nCaptured areas:\n%s'%('\n'.join(temp.A.unique())))
         print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
+        print('\nIndividual options without solar heating:\n%s'%('\n'.join(individual_options)))
         
     return individual_options
 
@@ -224,7 +233,24 @@ def main(path_to_allendofmodel: str):
 
 
     # 2.4 Get individual options
-    individual_options = individual_AGKN(f, True)
+    individual_options = individual_AGKN(f)
+    
+    ## Load individual areas
+    individual_areas = pickle.load(open('Modules/Submodules/individual_sets.pkl', 'rb'))
+    
+    ## Make table for individual
+    incfile = IncFile(name='INIDVUSERS_AGKN', path='Output',
+                      prefix='\n'.join([
+                          "* Defining individual user investment options",
+                          "SET INDIVUSERS_INV_OPTIONS(GGG)",
+                          "/",
+                          "\n".join(individual_options),
+                          "/;",
+                          ""
+                      ]),
+                      suffix='')
+    incfile.body = "\n".join(["AGKN('%s',GGG) = INDIVUSERS_INV_OPTIONS(GGG);"%area for area in individual_areas.values()])
+    incfile.save()
 
 if __name__ == '__main__':
     main()
