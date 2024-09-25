@@ -34,11 +34,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
 import shapely
+import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
 from Modules.geofiles import prepared_geofiles
 from scipy.spatial import distance_matrix
 from Submodules.municipal_template import DataContainer
+from Submodules.utils import convert_names
 import yaml
         
         
@@ -61,6 +63,110 @@ def get_distance_matrix(areas: gpd.GeoDataFrame):
     
     return d
 
+def get_connections(areas: pd.DataFrame):
+    X = pd.DataFrame(np.zeros((len(areas), len(areas))).astype(int),
+                index=areas.loc[:, the_index],
+                columns=areas.loc[:, the_index])
+    X.index.name = 'IRRRE'
+    X.columns.name = 'IRRRI'
+
+def create_grid_incfiles(d: pd.DataFrame,
+                         X: pd.DataFrame,
+                         XE_cost: float,
+                         XCOST_E: float,
+                         XLOSS_E: float,
+                         DCOST_E: float,
+                         DLOSS_E: float):
+    
+    ### 4.1 Transmission - ASSUMPTIONS
+    # It is assumed that costs are symmmetrical
+    D = d.sum().sum()/2  # Total, modelled length
+    L = (d > 0).sum().sum()/2 # Total modelled lines
+
+    XE = X * d * XE_cost # € pr. MW
+    # XE = d * 3.1/2 # seems like 1.65 €/MW/m 
+
+    ### 4.2 XINVCOST.inc
+    # Remove names
+    XE.columns.name = ''
+    XE.index.name = ''
+
+    # Add year
+    XE.index = '2016 . ' + XE.index
+
+    # Delete zeros
+    XE = XE.replace(0, '')
+
+    with open('./Output/XINVCOST.inc', 'w') as f:
+        f.write("TABLE XINVCOST(YYY,IRRRE,IRRRI)        'Investment cost in new transmission capacity (Money/MW)'\n")
+        dfAsString = XE.to_string(header=True, index=True)
+        f.write(dfAsString)
+        f.write('\n;')
+        f.write("\nXINVCOST(YYY,IRRRE,IRRRI) = XINVCOST('2016',IRRRE,IRRRI);")
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+            
+    ### 4.3 Energy losses
+    XL = XLOSS_E * d
+
+    ## Transmission
+    # Adjust
+    XL.columns.name = ''
+    XL.index.name = ''
+    XL = XL.replace(0, '')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+    with open('./Output/XLOSS.inc', 'w') as f:
+        f.write("TABLE XLOSS(IRRRE,IRRRI)        'Transmission loss between regions (fraction)'\n")
+        dfAsString = XL.to_string(header=True, index=True)
+        f.write(dfAsString)
+        f.write('\n;')
+
+
+
+    ### 4.4 XCOST.inc                   
+    xcost_e = X * XCOST_E
+    xcost_e.index.name = ''
+    xcost_e.columns.name = ''
+    xcost_e = (
+        xcost_e.astype(str)
+        .replace(0, '')
+    )
+
+    with open('./Output/XCOST.inc', 'w') as f:
+        f.write("TABLE XCOST(IRRRE,IRRRI)  'Transmission cost between regions (Money/MWh)'\n")
+        dfAsString = xcost_e.to_string(header=True, index=True)
+        f.write(dfAsString)
+        f.write('\n;')
+
+
+
+
+    ### 4.5 Distribution
+    ## DISLOSS_E
+    disloss_e = pd.DataFrame(data={'' : [DLOSS_E]*len(X.index)}, index=X.columns) # create losses
+    disloss_e.index.name = ''
+    disloss_e.columns.name = ''
+
+    with open('./Output/DISLOSS_E.inc', 'w') as f:
+        f.write("PARAMETER DISLOSS_E(RRR)  'Loss in electricity distribution'              \n")
+        f.write('/')
+        dfAsString = disloss_e.to_string(header=True, index=True)
+        f.write(dfAsString)
+        f.write('\n/;')
+        
+        
+    ## DISCOST_E
+    discost_e = pd.DataFrame(data={'' : [DCOST_E]*len(X.index)}, index=X.columns) # create losses
+    discost_e.index.name = ''
+    discost_e.columns.name = ''
+
+    with open('./Output/DISCOST_E.inc', 'w') as f:
+        f.write("PARAMETER DISCOST_E(RRR)  'Cost of electricity distribution (Money/MWh)'")
+        f.write('/')
+        dfAsString = discost_e.to_string(header=True, index=True)
+        f.write(dfAsString)
+        f.write('\n/;')
+
+
 def main():
     
     # 1. Load Inputs
@@ -78,9 +184,38 @@ def main():
     # 2. Get Distance Matrix
     x = DataContainer()
     geofile = x.get_polygons()
+    geofile.index = (
+        geofile
+        .index
+        .str.replace('Æ', 'Ae')
+        .str.replace('Ø', 'Oe')
+        .str.replace('Å', 'Aa')
+        .str.replace('æ', 'ae')
+        .str.replace('ø', 'oe')
+        .str.replace('å', 'aa')
+    )
     d = get_distance_matrix(geofile)
     
+    # 3. Get connections
+    f = xr.load_dataset("Data/BalmorelData/municipal_connectivity.nc")
+    f, fnew = convert_names('Modules/Submodules/exo_grid_conversion_dictionaries.pkl',
+                      f, 'connection')
+    ## Convert to dataframe
+    X = (
+        fnew
+        .to_dataframe()
+        .pivot_table(
+            index='IRRRE', 
+            columns='IRRRI', 
+            values='connection',
+            aggfunc='sum'
+        )
+    )
+    ## Check validity
+    assert np.all(X < 2), 'Double connection counts for some reason?'
     
+    # 4. Generate .inc files
+    create_grid_incfiles(d, X, XE_cost, XCOST_E, XLOSS_E, DCOST_E, DLOSS_E)
 
 if __name__ == '__main__':
     
@@ -193,7 +328,8 @@ if __name__ == '__main__':
         ###     2. Calculate Distances    ###
         ### ----------------------------- ###
 
-        def get_distance_matrix(areas: gpd.GeoDataFrame):
+        def get_distance_matrix2(areas: gpd.GeoDataFrame,
+                                choice: str):
             # Convert to geocentric coordinates for meter units
             if choice.lower().replace(' ','') == 'nordpoolreal':
                 areas.crs = 4326 
@@ -210,6 +346,7 @@ if __name__ == '__main__':
             )
             
             return d
+        d = get_distance_matrix2(areas, choice)
 
         #%% ----------------------------- ###
         ###        3. Create XKFX         ###

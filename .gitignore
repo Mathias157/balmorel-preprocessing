@@ -2,8 +2,6 @@ src/Data/*
 src/Output/*
 !src/Data/IncFilePreSuf/README.md
 !src/Output/Figures/.keepoutfolder
-exo_elec_dem_conversion_dictionaries.pkl
-exo_heat_dem_conversion_dictionaries.pkl
 .snakemake
 __pycache__
 .new_env/*
@@ -13,6 +11,10 @@ snakemake_dag
 snakemake_dag.*
 !snakemake_dag.pdf
 gurobi.log
+
+exo_elec_dem_conversion_dictionaries.pkl
+exo_heat_dem_conversion_dictionaries.pkl
+exo_grid_conversion_dictionaries.pkl
 
 districtheat_sets.pkl
 individual_sets.pkl

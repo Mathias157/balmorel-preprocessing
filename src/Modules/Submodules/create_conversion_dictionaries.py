@@ -69,3 +69,32 @@ exo_heat_dem_conversion_dictionaries = {
 
 with open('Modules/Submodules/exo_heat_dem_conversion_dictionaries.pkl', 'wb') as f:
     pickle.dump(exo_heat_dem_conversion_dictionaries, f)
+    
+    
+# 3. Exogenous Grid xarray
+exo_grid_conversion_dictionaries = {
+    
+
+    'coord_names' : {'municipality_from' : 'IRRRE',
+                     'municipality_to' : 'IRRRI'},
+
+    'coord_element_names' : {'municipality_from' : {'æ' : 'ae',
+                                               'ø' : 'oe',
+                                               'å' : 'aa',
+                                               'Æ' : 'Ae',
+                                               'Ø' : 'Oe',
+                                               'Å' : 'Aa'
+                                 },
+                             'municipality_to' : {'æ' : 'ae',
+                                               'ø' : 'oe',
+                                               'å' : 'aa',
+                                               'Æ' : 'Ae',
+                                               'Ø' : 'Oe',
+                                               'Å' : 'Aa'
+                                 }},
+
+}
+
+with open('Modules/Submodules/exo_grid_conversion_dictionaries.pkl', 'wb') as f:
+    pickle.dump(exo_grid_conversion_dictionaries, f)
+    
