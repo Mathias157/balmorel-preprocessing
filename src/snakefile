@@ -111,7 +111,8 @@ rule exo_heat_demand:
         f"{submod_path}ind-mt_sets.pkl",
         f"{submod_path}ind-ht_sets.pkl",
         f'{out_path}DH.inc',
-        f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
+        f'{out_path}INDUSTRY_DH.inc', 
+        f'{out_path}INDUSTRY_DH_VAR_T.inc',
         f'{out_path}INDIVUSERS_DH.inc']
     script:
         f"{modules_path}exo_heat_demand.py"
@@ -128,7 +129,6 @@ rule format_dkstat_transport_data:
         python {input[1]} --get-transport-demand --include-bunkering=false
         """
  
-
 # 5. Sets
 rule geographic_sets:
     input:
@@ -140,8 +140,6 @@ rule geographic_sets:
             f"{submod_path}ind-ht_sets.pkl",
         ]
     output:
-        [
-            f"{out_path}CCC.inc"
-        ]
+        f"{out_path}CCC.inc"
     script:
         f"{modules_path}geographic_sets.py"
