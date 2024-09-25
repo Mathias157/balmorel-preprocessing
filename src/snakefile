@@ -14,7 +14,8 @@ rule all:
         f"{out_path}DH.inc",
         f"{out_path}DH_VAR_T.inc",
         f"{out_path}CCC.inc",
-        f"{out_path}XINVCOST.inc"]
+        f"{out_path}XINVCOST.inc",
+        f"{out_path}AGKN.inc"]
 
 rule create_conversion_dictionaries:
     output:
@@ -141,6 +142,20 @@ rule geographic_sets:
         f"{out_path}CCC.inc"
     script:
         f"{modules_path}geographic_sets.py"
+
+rule define_investment_options:
+    input:
+        [
+            f"{submod_path}districtheat_sets.pkl",
+            f"{submod_path}individual_sets.pkl",
+            f"{submod_path}ind-lt_sets.pkl",
+            f"{submod_path}ind-mt_sets.pkl",
+            f"{submod_path}ind-ht_sets.pkl", 
+        ]
+    output:
+        f"{out_path}AGKN.inc"
+    script:
+        f"{modules_path}define_investment_options.py"
 
 # 6. Grids
 rule define_grids:
