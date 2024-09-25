@@ -625,7 +625,7 @@ if __name__ == '__main__':
         discost_e.columns.name = ''
 
         with open('./Output/DISCOST_E.inc', 'w') as f:
-            f.write("PARAMETER DISCOST_E(RRR)  'Cost of electricity distribution (Money/MWh)'")
+            f.write("PARAMETER DISCOST_E(RRR)  'Cost of electricity distribution (Money/MWh)'\n")
             f.write('/')
             dfAsString = discost_e.to_string(header=True, index=True).replace(the_index, '')
             f.write(dfAsString)
