@@ -111,7 +111,7 @@ def create_grid_incfiles(d: pd.DataFrame,
         dfAsString = XE.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
-        f.write("\n%sINVCOST(YYY,IRRRE,IRRRI) = XINVCOST('2016',IRRRE,IRRRI);"%carrier_symbol)
+        f.write("\n%sINVCOST(YYY,IRRRE,IRRRI) = %sINVCOST('2016',IRRRE,IRRRI);"%(carrier_symbol, carrier_symbol))
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
             
     ### 4.3 Energy losses

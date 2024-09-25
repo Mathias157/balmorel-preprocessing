@@ -52,6 +52,7 @@ def main():
         load_set('ind-ht_sets')
     ])
     create_incfiles(str(format_set(f, 3)), 'Output', 'INDUSTRY_')
+    create_incfiles(str(format_set(f, 3)), 'Output', 'INDUSTRY_INDUSTRY_')
     
     # 1.3 Create INDIVUSERS sets
     f = combine_dicts([load_set('individual_sets')])
