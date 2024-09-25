@@ -1,4 +1,0 @@
-balmorel_input:
-  model_path: "C:/Users/mberos/gitRepos/Balmorel"
-  scenario: "muni"
-  load_again: False

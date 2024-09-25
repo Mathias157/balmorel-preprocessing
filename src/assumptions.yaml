@@ -1,0 +1,23 @@
+balmorel_input:
+  model_path: "C:/Users/mberos/gitRepos/Balmorel"
+  scenario: "muni"
+  load_again: False
+  
+grid_assumptions:
+  electricity:
+    investment_cost: 3.1 # €/MW/m DEA high bound
+    # XE_cost: 2.511 # €/MW/m DEA low bound
+    # XE_cost: 2.175 # €/MW/m actual transmission data (from US though): Maxwell Brown, Wesley Cole, Kelly Eurek, Jonathon Becker, David Bielen, Ilya Chernyakhovskiy, Stuart Cohen, Allister Frazier, Pieter Gagnon, Nathaniel Gates, et al. Regional energy deployment system (reeds) model documentation: Version 2019. Technical report, National Renewable Energy Lab.(NREL), Golden, CO (United States), 2020.
+    XE_substation_cost: 76000 # €/MW very high bound
+    # XE_substation_cost: 4476 # €/MW low bound
+    # XE_substation_cost: 0 # No cost
+    XE_FOM: 21.7/1e3 # €/MW/m/year
+    Xsub: 99 # Amount of substations (assumed similar to today ~ one pr. municipality)
+    lifetime: 40 # Lifetime of grid elements
+    transmission_loss: 3.318383e-08 # fraction of loss pr. m, From Balmorel DK1-DK2 line
+    transmission_cost: 0.0001 # €/MWh
+    distribution_loss: 0.05 # fraction of loss pr. m
+    distribution_cost: 5 # €/MWh
+  hydrogen:
+    investment_cost: 150/1e3 # €/MW/m repurposed H2 onshore 
+    lifetime: 50 # Lifetime of H2 pipes

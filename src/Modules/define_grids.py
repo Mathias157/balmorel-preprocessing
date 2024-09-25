@@ -39,6 +39,7 @@ import matplotlib.pyplot as plt
 from Modules.geofiles import prepared_geofiles
 from scipy.spatial import distance_matrix
 from Submodules.municipal_template import DataContainer
+import yaml
         
         
 #%% ----------------------------- ###
@@ -61,12 +62,25 @@ def get_distance_matrix(areas: gpd.GeoDataFrame):
     return d
 
 def main():
+    
+    # 1. Load Inputs
+    # Load configuration from snakeconfig.yaml
+    with open('assumptions.yaml', 'r') as file:
+        config = yaml.safe_load(file)
+
+    XE_cost = config['grid_assumptions']['electricity']['investment_cost'] # €/MW/m high bound
+    XT = config['grid_assumptions']['electricity']['lifetime'] # Lifetime of grid elements
+    XLOSS_E = config['grid_assumptions']['electricity']['transmission_loss'] # fraction of loss pr. m, From Balmorel DK1-DK2 line
+    XCOST_E = config['grid_assumptions']['electricity']['transmission_cost'] # €/MWh Transmission costs
+    DLOSS_E = config['grid_assumptions']['electricity']['distribution_loss'] # Distribution loss
+    DCOST_E = config['grid_assumptions']['electricity']['distribution_cost'] # €/MWh distribution cost 
+    
+    # 2. Get Distance Matrix
     x = DataContainer()
     geofile = x.get_polygons()
-
     d = get_distance_matrix(geofile)
     
-    print(d)
+    
 
 if __name__ == '__main__':
     
@@ -75,52 +89,7 @@ if __name__ == '__main__':
         main()
         
     else:
-        #%%
-        # -*- coding: utf-8 -*-
-        """
-        Created on Thu Dec 22 22:51:15 2022
-
-        @author: Mathias Berg Rosendal, PhD, DTU Management
-
-        Use electricity transmission cost data from DEA2021:
-        https://ens.dk/en/our-services/projections-and-models/technology-data/technology-catalogue-transport-energy
-        A map of the extisting transmission grids:
-        https://energinet.dk/media/gqjj2xpk/eksisterende-net-2021.pdf <- DK
-
-        This is used to create demand files for Balmorel.
-
-        Assumption of how much a certain kV of transmission line can transmit of power
-        comes from: https://wise-answer.com/how-much-power-can-a-transmission-line-carry/
-        765 kV => 2200-2400 MW
-        500 kV => 900 MW
-        345 kV => 400 MW
-        *300 kV => 300 MW
-        *132 kV => 100 MW
-        *220 kV => 200 MW
-        GET A BETTER SOURCE!!! Look in power grid course material?
-        * = derived from three data assumptions (2nd degree assumption)
-
-
-        Power grid is manually drawed from: https://energinet.dk/media/ouufo5ll/eksisterende-net-2021.jpeg
-        NEED automatic source! (ENTSO-E data)
-
-        Works with the environment.yaml distributed in XXX
-        """
-
-        import matplotlib.pyplot as plt
-        from matplotlib import rc
-        import pandas as pd
-        import geopandas as gpd
-        import cartopy.crs as ccrs
-        from shapely.geometry import MultiPolygon, Point, LineString
-        import shapely
-        from pyproj import Proj
-        import numpy as np
-        import matplotlib.pyplot as plt
-        from Modules.geofiles import prepared_geofiles
-        from pyproj import Proj
-        from scipy.spatial import distance_matrix
-                
+        #%%     
         style = 'report'
 
         if style == 'report':

@@ -1,5 +1,5 @@
 # Load the config file at the top
-configfile: "snakeconfig.yaml"
+configfile: "assumptions.yaml"
 
 out_path     = "Output/"
 data_path    = "Data/"
