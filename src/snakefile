@@ -13,7 +13,8 @@ rule all:
         f"{data_path}Danmarks Statistik/transport_demand.csv",
         f"{out_path}DH.inc",
         f"{out_path}DH_VAR_T.inc",
-        f"{out_path}CCC.inc"]
+        f"{out_path}CCC.inc",
+        f"{out_path}XINVCOST.inc"]
 
 rule create_conversion_dictionaries:
     output:
@@ -86,6 +87,7 @@ rule format_balmorel_data:
         f"{out_path}SOLE_VAR_T.inc",
         f"{out_path}WNDFLH.inc",
         f"{out_path}SOLEFLH.inc",
+        f"{data_path}BalmorelData/municipal_connectivity.nc"
         ]
     shell:
         """
@@ -123,7 +125,7 @@ rule format_dkstat_transport_data:
         """
         python {input[1]} --get-transport-demand --include-bunkering=false
         """
- 
+
 # 5. Sets
 rule geographic_sets:
     input:
@@ -138,3 +140,12 @@ rule geographic_sets:
         f"{out_path}CCC.inc"
     script:
         f"{modules_path}geographic_sets.py"
+
+# 6. Grids
+rule define_grids:
+    input:
+        f"{data_path}BalmorelData/municipal_connectivity.nc"
+    output:
+        f"{out_path}XINVCOST.inc"
+    script:
+        f"{modules_path}define_grids.py"

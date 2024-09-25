@@ -316,7 +316,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     incfile.save()
     
     # 1.7 Get Connection 
-    get_grid(model_path, scenario, load_again)
+    y = get_grid(model_path, scenario, load_again)
     
     
 if __name__ == '__main__':
