@@ -45,6 +45,7 @@ def save_symbol_from_all_endofmodel(symbol: str,
 
 def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     # 1. Special options
+    # This was copy pasted from the outcommented print statements below
     wind_off_G = [
         "DK2-OFF1_WT_WIND_OFF_L-RG1_Y-2020",
         "DK2-OFF1_WT_WIND_OFF_L-RG2_Y-2020",
@@ -64,7 +65,8 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         "DK1-OFF1_WT_WIND_OFF_L-RG2_Y-2050",
     ]
     
-    h2_G = [
+    # This was copy pasted from the outcommented print statements below
+    hydrogen_options = [
         'GNR_ELYS_ELEC_AEC_Y-2020',
         'GNR_ELYS_ELEC_AEC_Y-2030',
         'GNR_ELYS_ELEC_AEC_Y-2040',
@@ -92,19 +94,60 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     temp = AGKN.query(
         "~A.str.contains('IDVU') and ~A.str.contains('IND')"
     )
-    # print('Captured areas:\n%s'%('\n'.join(temp.A.unique())))
-    # print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
-
-    # Get base investment options and remove elements in wind_off_G from base_options (add hydrogen when the error arrives)
-    base_options = [option for option in temp.G.unique() if option not in wind_off_G and option not in h2_G]
     
+    # Get base investment options and remove elements in wind_off_G from base_options (add hydrogen when the error arrives)
+    base_options = [option for option in temp.G.unique() if option not in wind_off_G and option not in hydrogen_options]
+    
+    # Use this to inspect offshore and hydrogen investment options
     if print_options:
-        print('Base options:\n%s'%('\n'.join(base_options)))
+        print('\nCaptured areas:\n%s'%('\n'.join(temp.A.unique())))
+        print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
+        print('\nBase options without offshore or hydrogen:\n%s'%('\n'.join(base_options)))
 
-    return base_options
+    return base_options, hydrogen_options
+
+def industry_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
+    
+    industry_options = {'LOWTEMP' : [],
+                        'MIDTEMP' : [],
+                        'HIGHTEMP' : []}
+    area_names = {'LOWTEMP' : 'IND-LT',
+                  'MIDTEMP' : 'IND-MT',
+                  'HIGHTEMP' : 'IND-HT'}
+    for heat_type in industry_options.keys():
+        temp = AGKN.query(
+            "A.str.contains('{}')".format(area_names[heat_type])
+        )
+        
+        # Use this to inspect
+        if print_options:
+            print('\nCaptured areas:\n%s'%('\n'.join(temp.A.unique())))
+            print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
+
+        # Get base investment options and remove elements in wind_off_G from base_options (add hydrogen when the error arrives)
+        industry_options[heat_type] = [option for option in temp.G.unique()]
+    
+    return industry_options
+
+def individual_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
+       
+    # Get individual investment options
+    temp = AGKN.query(
+        "A.str.contains('IDVU')"
+    )
+    
+    # Get individual investment options
+    individual_options = [option for option in temp.G.unique()]
+    
+    # Use this to inspect 
+    if print_options:
+        print('\nCaptured areas:\n%s'%('\n'.join(temp.A.unique())))
+        print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
+        
+    return individual_options
 
 #%% ------------------------------- ###
-###            X. Main              ###
+###            2. Main              ###
 ### ------------------------------- ###
 
 @click.command()
@@ -115,13 +158,14 @@ def main(path_to_allendofmodel: str):
     f = pd.read_parquet(r'C:\Users\mberos\gitRepos\balmorel-preprocessing\src\Data\BalmorelData\AGKN_fromKountouris2024.gzip')
     f = f.query('A.str.contains("DK")')
 
-    # Get base options for base AGKN
-    base_options = base_AGKN(f)
+
+    # 2.1 Get base options
+    base_options, hydrogen_options = base_AGKN(f)
     
-    # Load base areas
+    ## Load base areas
     base_areas = pickle.load(open('Modules/Submodules/districtheat_sets.pkl', 'rb'))
     
-    # Make table for base
+    ## Make table for base
     incfile = IncFile(name='AGKN', path='Output',
                       prefix='\n'.join([
                           "* Defining base investment options",
@@ -134,6 +178,53 @@ def main(path_to_allendofmodel: str):
                       suffix='')
     incfile.body = "\n".join(["AGKN('%s',GGG) = BASE_INV_OPTIONS(GGG);"%area for area in base_areas.values()])
     incfile.save()
+    
+    # 2.2 Get hydrogen options
+    incfile = IncFile(name='HYDROGEN_AGKN', path='Output',
+                      prefix='\n'.join([
+                          "* Defining hydrogen investment options",
+                          "SET H2_INV_OPTIONS(GGG)",
+                          "/",
+                          "\n".join(hydrogen_options),
+                          "/;",
+                          ""
+                      ]),
+                      suffix='')
+    incfile.body = "\n".join(["AGKN('%s',GGG) = H2_INV_OPTIONS(GGG);"%area for area in base_areas.values()])
+    incfile.save()
+    
+    
+    # 2.3 Get industry options
+    industry_options = industry_AGKN(f)
+    
+    ## Prepare .inc file
+    incfile = IncFile(name='INDUSTRY_AGKN', 
+                      path='Output',
+                      prefix='', suffix='')
+    
+    ## Make tables
+    temp_area_dict = {'LOWTEMP' : 'lt',
+                      'MIDTEMP' : 'mt',
+                      'HIGHTEMP' : 'ht'}
+
+    for heat_type in industry_options.keys():
+        incfile.prefix += "SET %s_INV_OPTIONS(GGG)\n/\n"%heat_type
+        temp = pd.DataFrame(industry_options[heat_type])
+        temp = temp.to_string(header=None, index=None, formatters={col: '{{:<{}}}'.format(temp[col].str.len().max()).format for col in temp.columns}, line_width=0)
+        temp = '\n'.join([line.lstrip() for line in temp.split('\n')])
+        incfile.prefix += temp
+        incfile.prefix += "\n/;\n"
+    
+        ## Load industry heat area
+        temp_area = pickle.load(open('Modules/Submodules/ind-%s_sets.pkl'%temp_area_dict[heat_type], 'rb'))
+        incfile.body += "\n\n"
+        incfile.body += "\n".join(["AGKN('%s',GGG) = %s_INV_OPTIONS(GGG);"%(area, heat_type) for area in temp_area.values()])
+        
+    incfile.save()
+
+
+    # 2.4 Get individual options
+    individual_options = individual_AGKN(f, True)
 
 if __name__ == '__main__':
     main()

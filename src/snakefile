@@ -143,7 +143,7 @@ rule geographic_sets:
     script:
         f"{modules_path}geographic_sets.py"
 
-rule define_investment_options:
+rule investment_options:
     input:
         [
             f"{submod_path}districtheat_sets.pkl",
@@ -153,12 +153,16 @@ rule define_investment_options:
             f"{submod_path}ind-ht_sets.pkl", 
         ]
     output:
-        f"{out_path}AGKN.inc"
+        [
+            f"{out_path}AGKN.inc",
+            f"{out_path}HYDROGEN_AGKN.inc",
+            f"{out_path}INDUSTRY_AGKN.inc",
+        ]
     script:
-        f"{modules_path}define_investment_options.py"
+        f"{modules_path}investment_options.py"
 
 # 6. Grids
-rule define_grids:
+rule grids:
     input:
         [f"{data_path}BalmorelData/municipal_connectivity.nc",
         f"{submod_path}exo_grid_conversion_dictionaries.pkl",
@@ -166,4 +170,4 @@ rule define_grids:
     output:
         f"{out_path}XINVCOST.inc"
     script:
-        f"{modules_path}define_grids.py"
+        f"{modules_path}grids.py"
