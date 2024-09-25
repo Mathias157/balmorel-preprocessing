@@ -76,7 +76,15 @@ def create_grid_incfiles(d: pd.DataFrame,
                          XCOST_E: float,
                          XLOSS_E: float,
                          DCOST_E: float,
-                         DLOSS_E: float):
+                         DLOSS_E: float,
+                         carrier: str):
+    
+    if carrier == 'electricity':
+        carrier_symbol = 'X'
+        prefix = ''
+    else:
+        carrier_symbol = 'XH2'
+        prefix = 'HYDROGEN_'
     
     ### 4.1 Transmission - ASSUMPTIONS
     # It is assumed that costs are symmmetrical
@@ -96,13 +104,14 @@ def create_grid_incfiles(d: pd.DataFrame,
 
     # Delete zeros
     XE = XE.replace(0, '')
+    
 
-    with open('./Output/XINVCOST.inc', 'w') as f:
-        f.write("TABLE XINVCOST(YYY,IRRRE,IRRRI)        'Investment cost in new transmission capacity (Money/MW)'\n")
+    with open('./Output/%sINVCOST.inc'%carrier_symbol, 'w') as f:
+        f.write("TABLE %sINVCOST(YYY,IRRRE,IRRRI)        'Investment cost in new %s transmission capacity (Money/MW)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = XE.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
-        f.write("\nXINVCOST(YYY,IRRRE,IRRRI) = XINVCOST('2016',IRRRE,IRRRI);")
+        f.write("\n%sINVCOST(YYY,IRRRE,IRRRI) = XINVCOST('2016',IRRRE,IRRRI);"%carrier_symbol)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
             
     ### 4.3 Energy losses
@@ -114,8 +123,8 @@ def create_grid_incfiles(d: pd.DataFrame,
     XL.index.name = ''
     XL = XL.replace(0, '')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-    with open('./Output/XLOSS.inc', 'w') as f:
-        f.write("TABLE XLOSS(IRRRE,IRRRI)        'Transmission loss between regions (fraction)'\n")
+    with open('./Output/%sLOSS.inc'%carrier_symbol, 'w') as f:
+        f.write("TABLE %sLOSS(IRRRE,IRRRI)        '%s transmission loss between regions (fraction)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = XL.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
@@ -131,40 +140,40 @@ def create_grid_incfiles(d: pd.DataFrame,
         .replace(0, '')
     )
 
-    with open('./Output/XCOST.inc', 'w') as f:
-        f.write("TABLE XCOST(IRRRE,IRRRI)  'Transmission cost between regions (Money/MWh)'\n")
+    with open('./Output/%s%sCOST.inc'%(prefix, carrier_symbol), 'w') as f:
+        f.write("TABLE %sCOST(IRRRE,IRRRI)  '%s transmission cost between regions (Money/MWh)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = xcost_e.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
 
 
 
+    if carrier == 'electricity':
+        ### 4.5 Distribution
+        ## DISLOSS_E
+        disloss_e = pd.DataFrame(data={'' : [DLOSS_E]*len(X.index)}, index=X.columns) # create losses
+        disloss_e.index.name = ''
+        disloss_e.columns.name = ''
 
-    ### 4.5 Distribution
-    ## DISLOSS_E
-    disloss_e = pd.DataFrame(data={'' : [DLOSS_E]*len(X.index)}, index=X.columns) # create losses
-    disloss_e.index.name = ''
-    disloss_e.columns.name = ''
+        with open('./Output/%sDISLOSS_E.inc'%prefix, 'w') as f:
+            f.write("PARAMETER DISLOSS_E(RRR)  'Loss in electricity distribution'              \n")
+            f.write('/')
+            dfAsString = disloss_e.to_string(header=True, index=True)
+            f.write(dfAsString)
+            f.write('\n/;')
+            
+            
+        ## DISCOST_E
+        discost_e = pd.DataFrame(data={'' : [DCOST_E]*len(X.index)}, index=X.columns) # create losses
+        discost_e.index.name = ''
+        discost_e.columns.name = ''
 
-    with open('./Output/DISLOSS_E.inc', 'w') as f:
-        f.write("PARAMETER DISLOSS_E(RRR)  'Loss in electricity distribution'              \n")
-        f.write('/')
-        dfAsString = disloss_e.to_string(header=True, index=True)
-        f.write(dfAsString)
-        f.write('\n/;')
-        
-        
-    ## DISCOST_E
-    discost_e = pd.DataFrame(data={'' : [DCOST_E]*len(X.index)}, index=X.columns) # create losses
-    discost_e.index.name = ''
-    discost_e.columns.name = ''
-
-    with open('./Output/DISCOST_E.inc', 'w') as f:
-        f.write("PARAMETER DISCOST_E(RRR)  'Cost of electricity distribution (Money/MWh)'")
-        f.write('/')
-        dfAsString = discost_e.to_string(header=True, index=True)
-        f.write(dfAsString)
-        f.write('\n/;')
+        with open('./Output/%sDISCOST_E.inc'%prefix, 'w') as f:
+            f.write("PARAMETER DISCOST_E(RRR)  'Cost of electricity distribution (Money/MWh)'\n")
+            f.write('/')
+            dfAsString = discost_e.to_string(header=True, index=True)
+            f.write(dfAsString)
+            f.write('\n/;')
 
 
 def main():
@@ -180,6 +189,10 @@ def main():
     XCOST_E = config['grid_assumptions']['electricity']['transmission_cost'] # €/MWh Transmission costs
     DLOSS_E = config['grid_assumptions']['electricity']['distribution_loss'] # Distribution loss
     DCOST_E = config['grid_assumptions']['electricity']['distribution_cost'] # €/MWh distribution cost 
+    XH2E_cost = config['grid_assumptions']['hydrogen']['investment_cost'] # €/MW/m high bound
+    XH2T = config['grid_assumptions']['hydrogen']['lifetime'] # Lifetime of grid elements
+    XH2LOSS_E = config['grid_assumptions']['hydrogen']['transmission_loss'] # fraction of loss pr. m, From Balmorel DK1-DK2 line
+    XH2COST_E = config['grid_assumptions']['hydrogen']['transmission_cost'] # €/MWh Transmission costs
     
     # 2. Get Distance Matrix
     x = DataContainer()
@@ -215,7 +228,8 @@ def main():
     assert np.all(X < 2), 'Double connection counts for some reason?'
     
     # 4. Generate .inc files
-    create_grid_incfiles(d, X, XE_cost, XCOST_E, XLOSS_E, DCOST_E, DLOSS_E)
+    create_grid_incfiles(d, X, XE_cost, XCOST_E, XLOSS_E, DCOST_E, DLOSS_E, 'electricity')
+    create_grid_incfiles(d, X, XH2E_cost, XH2COST_E, XH2LOSS_E, DCOST_E, DLOSS_E, 'hydrogen')
 
 if __name__ == '__main__':
     
