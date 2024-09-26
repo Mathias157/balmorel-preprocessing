@@ -19,17 +19,6 @@ import gams
 import click
 
 
-def plot_style(style: str = 'report'):
-    
-    if style == 'report':
-        plt.style.use('default')
-        fc = 'white'
-    elif style == 'ppt':
-        plt.style.use('dark_background')
-        fc = 'none'
-
-    return fc
-
 #%% ------------------------------- ###
 ###        1. Getting AGKN          ###
 ### ------------------------------- ###
