@@ -163,8 +163,12 @@ def individual_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
 @click.option('--path-to-allendofmodel', type=str, required=False, help='A parameter')
 def main(path_to_allendofmodel: str):
     
+    # Create file
+    if not(os.path.exists(r'Data\BalmorelData\AGKN_fromKountouris2024.gzip')):
+        save_symbol_from_all_endofmodel('AGKN', ['A', 'G'], 'set', r'C:\Users\mathi\gitRepos\Balmorel\all_endofmodel.gdx')
+    
     # Load file
-    f = pd.read_parquet(r'C:\Users\mberos\gitRepos\balmorel-preprocessing\src\Data\BalmorelData\AGKN_fromKountouris2024.gzip')
+    f = pd.read_parquet(r'Data\BalmorelData\AGKN_fromKountouris2024.gzip')
     f = f.query('A.str.contains("DK")')
 
 

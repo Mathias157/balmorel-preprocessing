@@ -168,6 +168,17 @@ rule grids:
         f"{submod_path}exo_grid_conversion_dictionaries.pkl",
         f"assumptions.yaml"]
     output:
-        f"{out_path}XINVCOST.inc"
+        [
+            f"{out_path}XINVCOST.inc",
+            f"{out_path}XLOSS.inc",
+            f"{out_path}DISCOST_E.inc",
+            f"{out_path}DISLOSS_E.inc",
+            f"{out_path}DISLOSS_E_AG.inc",
+            f"{out_path}INDUSTRY_DISLOSS_E_AG.inc",
+            f"{out_path}INDIVUSERS_DISLOSS_E_AG.inc",
+            f"{out_path}HYDROGEN_XH2INVCOST.inc",
+            f"{out_path}HYDROGEN_XH2COST.inc",
+            f"{out_path}HYDROGEN_XH2LOSS.inc"
+        ]
     script:
         f"{modules_path}grids.py"

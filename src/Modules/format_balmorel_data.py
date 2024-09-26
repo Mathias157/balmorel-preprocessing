@@ -186,7 +186,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                       suffix='\n'.join([
                             "",
                             ";",
-                            "DH_VAR_T(AAA,'RESH',SSS,TTT) = DH_VAR_T1(SSS,TTT,AAA,DHUSER);",
+                            "DH_VAR_T(AAA,'RESH',SSS,TTT) = DH_VAR_T1(SSS,TTT,AAA,'RESH');",
                             "DH_VAR_T1(SSS,TTT,AAA,DHUSER) = 0;",
                             "DH_VAR_T('Herlev_A','RESH',SSS,TTT) = DH_VAR_T('Ballerup_A','RESH',SSS,TTT);"
                       ]))
@@ -225,7 +225,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     
     incfile = IncFile(name='WND_VAR_T', path='Output',
                 prefix='\n'.join([
-                    "TABLE WND_VAR_T1(SSS,TTT,AAA) 'Variation of the wind generation';",
+                    "TABLE WND_VAR_T1(SSS,TTT,AAA) 'Variation of the wind generation'",
                     ""
                 ]),
                 body=df,
@@ -251,7 +251,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     
     incfile = IncFile(name='SOLE_VAR_T', path='Output',
                 prefix='\n'.join([
-                    "TABLE SOLE_VAR_T1(SSS,TTT,AAA) 'Variation of the solar generation';",
+                    "TABLE SOLE_VAR_T1(SSS,TTT,AAA) 'Variation of the solar generation'",
                     ""
                 ]),
                 body=df,

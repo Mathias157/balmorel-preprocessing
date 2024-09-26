@@ -30,7 +30,7 @@ NEED automatic source! (ENTSO-E data)
 Works with the environment.yaml distributed in XXX
 """
 
-import matplotlib.pyplot as plt
+import pickle
 import pandas as pd
 import geopandas as gpd
 import shapely
@@ -42,6 +42,7 @@ from scipy.spatial import distance_matrix
 from Submodules.municipal_template import DataContainer
 from Submodules.utils import convert_names
 import yaml
+from pybalmorel import IncFile
         
         
 #%% ----------------------------- ###
@@ -106,7 +107,7 @@ def create_grid_incfiles(d: pd.DataFrame,
     XE = XE.replace(0, '')
     
 
-    with open('./Output/%sINVCOST.inc'%carrier_symbol, 'w') as f:
+    with open('./Output/%s%sINVCOST.inc'%(prefix, carrier_symbol), 'w') as f:
         f.write("TABLE %sINVCOST(YYY,IRRRE,IRRRI)        'Investment cost in new %s transmission capacity (Money/MW)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = XE.to_string(header=True, index=True)
         f.write(dfAsString)
@@ -123,7 +124,7 @@ def create_grid_incfiles(d: pd.DataFrame,
     XL.index.name = ''
     XL = XL.replace(0, '')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-    with open('./Output/%sLOSS.inc'%carrier_symbol, 'w') as f:
+    with open('./Output/%s%sLOSS.inc'%(prefix, carrier_symbol), 'w') as f:
         f.write("TABLE %sLOSS(IRRRE,IRRRI)        '%s transmission loss between regions (fraction)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = XL.to_string(header=True, index=True)
         f.write(dfAsString)
@@ -174,6 +175,71 @@ def create_grid_incfiles(d: pd.DataFrame,
             dfAsString = discost_e.to_string(header=True, index=True)
             f.write(dfAsString)
             f.write('\n/;')
+
+def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
+                                           industry_loss: float,
+                                           individual_loss: float):
+    # Offshore wind
+    # RG1 = 0.1
+    # RG2 and RG3 = 0.2
+    f = IncFile(name='DISLOSS_E_AG', path='Output',
+                prefix='\n'.join([
+                        "PARAMETER DISLOSS_E_AG(AAA,GGG)  'Loss in electricity distribution associated to specific technology in a particular area';",
+                        "*Source for offshore losses: https://www.sciencedirect.com/science/article/pii/S0378779605002609",
+                        ""
+                    ]),
+                body='\n'.join([
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDTECHGROUP') EQ WINDTURBINE_OFFSHORE AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG1']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG2_OFF1 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG2']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG2_OFF2 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG2']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG2_OFF3 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG2']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG2_OFF4 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG2']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG2_OFF5 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG2']};",
+                        "*Offshore type 3                                                                                         ",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF1 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF2 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF3 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF4 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
+                        f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF5 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
+                    ]))
+    f.save()    
+
+    
+    # Industry
+    set = pickle.load(open('Modules/Submodules/ind-ht_sets.pkl', 'rb'))
+    f = IncFile(name='INDUSTRY_DISLOSS_E_AG', path='Output',
+                prefix='\n'.join([
+                        "PARAMETER DISLOSS_E_AG_IND(AAA,GGG)  'Loss in electricity distribution associated to specific technology in a particular area' ;",
+                        ""
+                    ]),
+                suffix='\n'.join([
+                    "",
+                    "DISLOSS_E_AG(IA,G)$DISLOSS_E_AG_IND(IA,G)= DISLOSS_E_AG_IND(IA,G);",
+                    "DISLOSS_E_AG_IND(IA,G)=0;" 
+                ])
+                )   
+    for temp_area in ['-LT', '-MT', '-HT']:
+        for area in set.values():
+            replaced_area = area.replace('-HT', temp_area)
+            f.body += f"DISLOSS_E_AG_IND('{replaced_area}',G)$((GDATA(G,'GDTYPE') EQ GETOH OR  GDATA(G,'GDTYPE') EQ GESTO OR GDATA(G,'GDTYPE') EQ GESTOS)  AND (SUM(Y,GKFX(Y,'{replaced_area}',G)) OR AGKN('{replaced_area}',G)))={industry_loss};\n"
+    f.save()
+    
+    # Individual
+    set = pickle.load(open('Modules/Submodules/individual_sets.pkl', 'rb'))
+    f = IncFile(name='INDIVUSERS_DISLOSS_E_AG', path='Output',
+                prefix='\n'.join([
+                        "PARAMETER DISLOSS_E_AG_INDIVUSERS(AAA,GGG)  'Loss in electricity distribution associated to specific technology in a particular area' ;",
+                        ""
+                    ]),
+                suffix='\n'.join([
+                    "",
+                    "DISLOSS_E_AG(IA,G)$DISLOSS_E_AG_INDIVUSERS(IA,G)= DISLOSS_E_AG_INDIVUSERS(IA,G);",
+                    "DISLOSS_E_AG_INDIVUSERS(IA,G)=0;"
+                ])
+                )   
+    f.body += "\n".join([f"DISLOSS_E_AG_INDIVUSERS('{area}',G)$((GDATA(G,'GDTYPE') EQ GETOH OR  GDATA(G,'GDTYPE') EQ GESTO OR GDATA(G,'GDTYPE') EQ GESTOS)  AND (SUM(Y,GKFX(Y,'{area}',G)) OR AGKN('{area}',G)))={individual_loss};" for area in set.values()])
+    f.save()                                                                                                                                                                                                                                                                      
+
 
 
 def main():
@@ -230,6 +296,14 @@ def main():
     # 4. Generate .inc files
     create_grid_incfiles(d, X, XE_cost, XCOST_E, XLOSS_E, DCOST_E, DLOSS_E, 'electricity')
     create_grid_incfiles(d, X, XH2E_cost, XH2COST_E, XH2LOSS_E, DCOST_E, DLOSS_E, 'hydrogen')
+
+
+    # 5. Generate tech specific distribution loss
+    wind_offshore_loss = {'RG1' : 0.1, 'RG2' : 0.2, 'RG3' : 0.2}
+    industry_loss = config['grid_assumptions']['electricity']['industry_technologies'] # €/MWh Transmission costs
+    individual_loss = config['grid_assumptions']['electricity']['individual_technologies'] # €/MWh Transmission costs
+    
+    create_tech_specific_distribution_loss(wind_offshore_loss, industry_loss, individual_loss)
 
 if __name__ == '__main__':
     

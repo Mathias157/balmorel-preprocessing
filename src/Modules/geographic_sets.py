@@ -52,7 +52,12 @@ def main():
         load_set('ind-ht_sets')
     ])
     create_incfiles(str(format_set(f, 3)), 'Output', 'INDUSTRY_')
-    create_incfiles(str(format_set(f, 3)), 'Output', 'INDUSTRY_INDUSTRY_')
+    # Make INDUSTRY_INDUSTRY_AAA.inc
+    with open('Output/INDUSTRY_AAA.inc', 'r') as f:
+        file = f.read()
+    file = file.replace("SET AAA(CCCRRRAAA)  'All areas'", "SET INDUSTRY_AAA(CCCRRRAAA)  'All areas'")
+    with open('Output/INDUSTRY_INDUSTRY_AAA.inc', 'w') as f:
+        f.write(file)
     
     # 1.3 Create INDIVUSERS sets
     f = combine_dicts([load_set('individual_sets')])

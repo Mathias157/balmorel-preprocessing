@@ -18,6 +18,8 @@ grid_assumptions:
     transmission_cost: 0.0001 # €/MWh
     distribution_loss: 0.05 # fraction of loss pr. m
     distribution_cost: 5 # €/MWh
+    industry_technologies: 0.05 # assumed equal to distribution loss
+    individual_technologies: 0.05 # assumed equal to distribution loss
   hydrogen:
     investment_cost: 150.0e-03 # €/MW/m repurposed H2 onshore, Kountouries et al. 2024 
     lifetime: 50 # Lifetime of H2 pipes, Kountouries et al. 2024
