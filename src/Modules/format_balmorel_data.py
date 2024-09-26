@@ -73,7 +73,7 @@ def join_to_gpd(df: pd.DataFrame,
                 new_col: list, 
                 suffix: Tuple[None, str] = None):
     if suffix != None:
-        df[left_col] = df.A.str.replace(suffix, '')
+        df[left_col] = df[left_col].str.replace(suffix, '')
     df.index = df[left_col]
     df = df.join(gpd[right_col])
     df.columns = new_col
@@ -168,30 +168,30 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     
     # 1.2 Load DH_VAR_T
     df = store_balmorel_input('DH_VAR_T', ['A', 'DHUSER', 'S', 'T', 'Value'], 
-                         model_path, scenario, load_again, 
-                         lambda x: x.loc[x.A.str.contains('DK_')].query("DHUSER == 'RESH'"))
+                        model_path, scenario, load_again, 
+                        lambda x: x.loc[x.A.str.contains('DK_')].query("DHUSER == 'RESH'"))
     
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
-                     ['A_old', 'DHUSER', 'S', 'T', 'Value', 'A'], '_A')
+                    ['A_old', 'DHUSER', 'S', 'T', 'Value', 'A'], '_A')
         
     ### 1.2.1 Save DH_VAR_T.inc
     incfile = IncFile(name='DH_VAR_T', path='Output',
-                      prefix='\n'.join([
+                    prefix='\n'.join([
                             "PARAMETER DH_VAR_T(AAA,DHUSER,SSS,TTT) 'Variation in heat demand';",
                             "TABLE DH_VAR_T1(SSS,TTT,AAA,DHUSER)",
                             ""
-                      ]),
-                      body=df,
-                      suffix='\n'.join([
+                    ]),
+                    body=df,
+                    suffix='\n'.join([
                             "",
                             ";",
                             "DH_VAR_T(AAA,'RESH',SSS,TTT) = DH_VAR_T1(SSS,TTT,AAA,'RESH');",
                             "DH_VAR_T1(SSS,TTT,AAA,DHUSER) = 0;",
                             "DH_VAR_T('Herlev_A','RESH',SSS,TTT) = DH_VAR_T('Ballerup_A','RESH',SSS,TTT);"
-                      ]))
+                    ]))
     incfile.body_prepare(['S', 'T'],
-                         ['A', 'DHUSER'])
+                        ['A', 'DHUSER'])
     incfile.save()
     
     ### 1.2.2 Save INDIVUSERS_DH_VAR_T
@@ -211,17 +211,17 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                         "DH_VAR_T('Herlev_A','RESIDENTIAL',SSS,TTT) = DH_VAR_T('Ballerup_A','RESIDENTIAL',SSS,TTT);"
                     ]))
     incfile.body_prepare(['S', 'T'],
-                         ['A', 'DHUSER'])
+                        ['A', 'DHUSER'])
     incfile.save()
     
     # 1.3 Load and Save WND_VAR_T
     df = store_balmorel_input('WND_VAR_T', ['A', 'S', 'T', 'Value'], 
-                         model_path, scenario, load_again, 
-                         lambda x: x.loc[x.A.str.contains('DK_')])
+                        model_path, scenario, load_again, 
+                        lambda x: x.loc[x.A.str.contains('DK_')])
     
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
-                     ['A_old', 'S', 'T', 'Value', 'A'], '_A')
+                    ['A_old', 'S', 'T', 'Value', 'A'], '_A')
     
     incfile = IncFile(name='WND_VAR_T', path='Output',
                 prefix='\n'.join([
@@ -237,18 +237,18 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "WND_VAR_T('Frederiksberg_A',SSS,TTT) = WND_VAR_T('Koebenhavn_A',SSS,TTT);"
                 ]))
     incfile.body_prepare(['S', 'T'],
-                         ['A'])
+                        ['A'])
     incfile.save()
     
     
     # 1.4 Load and Save SOLE_VAR_T
     df = store_balmorel_input('SOLE_VAR_T', ['A', 'S', 'T', 'Value'], 
-                         model_path, scenario, load_again, 
-                         lambda x: x.loc[x.A.str.contains('DK_')])
+                        model_path, scenario, load_again, 
+                        lambda x: x.loc[x.A.str.contains('DK_')])
     
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
-                     ['A_old', 'S', 'T', 'Value', 'A'], '_A')
+                    ['A_old', 'S', 'T', 'Value', 'A'], '_A')
     
     incfile = IncFile(name='SOLE_VAR_T', path='Output',
                 prefix='\n'.join([
@@ -264,17 +264,17 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "SOLE_VAR_T('Frederiksberg_A',SSS,TTT) = SOLE_VAR_T('Koebenhavn_A',SSS,TTT);"
                 ]))
     incfile.body_prepare(['S', 'T'],
-                         ['A'])
+                        ['A'])
     incfile.save()
     
     # 1.5 Load and save WNDFLH
     df = store_balmorel_input('WNDFLH', ['A', 'Value'], 
-                         model_path, scenario, load_again, 
-                         lambda x: x.loc[x.A.str.contains('DK_')])
+                        model_path, scenario, load_again, 
+                        lambda x: x.loc[x.A.str.contains('DK_')])
     
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
-                     ['A_old', 'Value', 'A'], '_A')
+                    ['A_old', 'Value', 'A'], '_A')
     
     incfile = IncFile(name='WNDFLH', path='Output',
                 prefix='\n'.join([
@@ -294,12 +294,12 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     
     # 1.6 Load and save SOLEFLH
     df = store_balmorel_input('SOLEFLH', ['A', 'Value'], 
-                         model_path, scenario, load_again, 
-                         lambda x: x.loc[x.A.str.contains('DK_')])
+                        model_path, scenario, load_again, 
+                        lambda x: x.loc[x.A.str.contains('DK_')])
     
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
-                     ['A_old', 'Value', 'A'], '_A')
+                    ['A_old', 'Value', 'A'], '_A')
     
     incfile = IncFile(name='SOLEFLH', path='Output',
                 prefix='\n'.join([
@@ -319,6 +319,31 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     
     # 1.7 Get Connection 
     y = get_grid(model_path, scenario, load_again)
+    
+        
+    # 1.8 Get VRE Potentials
+    df = store_balmorel_input('SUBTECHGROUPKPOT', ['CRA', 'TECH_GROUP', 'SUBTECH_GROUP', 'Value'],
+                            model_path, scenario, load_again, 
+                            lambda x: x.loc[x.CRA.str.contains('DK_')])
+        
+    ## Join municipal codes ('CRA') to names ('NAME_2')
+    df = join_to_gpd(df, 'CRA', mun, 'NAME_2', 
+                      ['CRA', 'TECH_GROUP', 'SUBTECH_GROUP', 'Value', 'A'], '_A')
+    
+    incfile = IncFile(name='SUBTECHGROUPKPOT', path='Output',
+                prefix='\n'.join([
+                    "TABLE SUBTECHGROUPKPOT(CCCRRRAAA, TECH_GROUP, SUBTECH_GROUP)  'Subtechnology group capacity restriction by geography (MW)'",
+                    ""  
+                ]),
+                body=df,
+                suffix='\n'.join([
+                    "",
+                    ";",
+                ]))
+    incfile.body_prepare(['A', 'TECH_GROUP'], 'SUBTECH_GROUP', values='Value')
+    # incfile.body.index.names = ['', '']
+    # incfile.body.columns.name = ''
+    incfile.save()
     
     
 if __name__ == '__main__':
