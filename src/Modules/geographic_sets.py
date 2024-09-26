@@ -62,7 +62,12 @@ def main():
     # 1.3 Create INDIVUSERS sets
     f = combine_dicts([load_set('individual_sets')])
     create_incfiles(str(format_set(f, 1)), 'Output', 'INDIVUSERS_')
-    
+    # Make INDIVUSERS_INDIVUSERS_AAA.inc
+    with open('Output/INDIVUSERS_AAA.inc', 'r') as f:
+        file = f.read()
+    file = file.replace("SET AAA(CCCRRRAAA)  'All areas'", "SET INDIVUSERS_AAA(CCCRRRAAA)  'Individual user areas'")
+    with open('Output/INDIVUSERS_INDIVUSERS_AAA.inc', 'w') as f:
+        f.write(file)
     
     # AGKN - Allowed investments how to do?
     # Hack for now

@@ -261,7 +261,7 @@ def main(path_to_allendofmodel: str):
     individual_areas = pickle.load(open('Modules/Submodules/individual_sets.pkl', 'rb'))
     
     ## Make table for individual
-    incfile = IncFile(name='INIDVUSERS_AGKN', path='Output',
+    incfile = IncFile(name='INDIVUSERS_AGKN', path='Output',
                       prefix='\n'.join([
                           "* Defining individual user investment options",
                           "SET INDIVUSERS_INV_OPTIONS(GGG)",
