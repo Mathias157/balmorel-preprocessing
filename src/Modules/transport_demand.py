@@ -14,6 +14,7 @@ ASSUMPTIONS:
 import os 
 import pandas as pd
 import numpy as np
+import geopandas as gpd
 from pybalmorel import IncFile
 from pybalmorel.utils import read_lines
 from geofiles import prepared_geofiles
@@ -69,7 +70,7 @@ class FlexDem():
         self.charge_cap = self.n_vehicles['Cars 2009']*charger_capacity_pr_vehicle # In MW
         
 
-    def create_charging_profile(self, area_choice: str = 'AntBalm'):
+    def create_charging_profile(self, area_choice: str = 'dkmunicipalities_names'):
         
         # Load Areas
         the_index, areas, country_code = prepared_geofiles(area_choice)
@@ -78,7 +79,8 @@ class FlexDem():
         # Create Normalised Max Limit on Charging
         FLEXDEM_MAXCONS = IncFile(name='FLEXDEM_MAXLIMIT',
                                 path='Output',
-                                prefix=read_lines('FLEXDEM_MAXLIMIT_prefix.inc', r'Data\IncFilePreSuf'),
+                                prefix='',
+                                # prefix=read_lines('FLEXDEM_MAXLIMIT_prefix.inc', r'Data\IncFilePreSuf'),
                                 suffix="\n;\nFLEXMAXLIMIT(FLEXUSER, RRR, SSS, TTT) = FLEXMAXLIMIT1('S01',TTT,FLEXUSER);\nFLEXMAXLIMIT1(SSS,TTT,FLEXUSER)=0;\n\n* Scale charger capacities to regions:\n")
 
         # Make correct index
@@ -101,11 +103,13 @@ class FlexDem():
         FLEXDEM_FLEXYDEMAND.body = pd.DataFrame(columns=['Value'])
         
         # Scale to country capacities
-        for country in areas[country_code].unique():
+        # for country in areas[country_code].unique():
+        for country in ['Denmark']:
             try:
                 print(country, 'total:\t%d MW'%(round(self.charge_cap.loc[country])))
                 
-                regions = areas[areas[country_code]==country].index
+                # regions = areas[areas[country_code]==country].index
+                regions = areas.index
                 N_regions = len(regions)
                 for region in regions:
                     print(region, len(regions))
@@ -133,12 +137,6 @@ class FlexDem():
         FLEXDEM_FLEXYDEMAND.suffix += "FLEXYDEMAND('2030',CCCRRRAAA,FLEXUSER) = 0.33*FLEXYDEMAND('2050',CCCRRRAAA,FLEXUSER);\n"
         FLEXDEM_FLEXYDEMAND.save()
 
-if __name__ == '__main__':
-    FD = FlexDem()
-    FD.load_traffic_data()
-    FD.create_general_demand()
-    FD.create_charging_profile()
-
 
 #%% ------------------------------- ###
 ###        2. Spatial Spread        ###
@@ -148,6 +146,7 @@ def distribute_road_flex_electricity_demand():
     # 2.1 Vehicle Counts on Roads from Ioannis' source 
     f = gpd.read_file('Data/Gas, Transport and Industry Data/gdf_all_ETISplus.geojson')
 
+    x = DataContainer()
     fig, ax = plt.subplots()
     geo = gpd.GeoDataFrame(x.muni.polygons.to_pandas())
     geo = geo.set_geometry(col=0, crs=x.muni.polygons.crs)
@@ -158,12 +157,12 @@ def distribute_road_flex_electricity_demand():
         muni = geo.loc[idx]
         if len(muni) != 0:
             for mun in muni.index:
-                geo.loc[mun, 'traffic_count'] += row.vehicles / len(muni.index)
+                geo.loc[mun, 'traffic_count'] += float(row.vehicles) / len(muni.index)
             # print('%d intersects %d'%(i, muni.index))
 
     # 2.2 National Transport Fuel Demand
     f = load_transport_demand(include_bunkering=False)
-
+    print(f)
     ## Plot yearly tendencies
     # fig, ax = plt.subplots()
     # f.T.plot(ax=ax)
@@ -192,17 +191,11 @@ def distribute_road_flex_electricity_demand():
     return road_demand
 
 #%% 
-# 2.3 Merging to other data
+
 if __name__ == '__main__':
-    x = DataContainer()
-    x.muni = x.muni.merge(road_demand)
-    temp = x.get_polygons()
-
-    fig, ax = plt.subplots()
-    temp.plot(ax=ax)
-    xlims = ax.get_xlim()
-    ylims = ax.get_ylim()
-
-    f.plot(color='r', ax=ax, linewidth=f['vehicles']/1e4)
-    ax.set_ylim(ylims)
-    ax.set_xlim(xlims)
+    FD = FlexDem()
+    FD.load_traffic_data()
+    FD.create_general_demand()
+    FD.create_charging_profile()
+    road_demand = distribute_road_flex_electricity_demand()
+    print(FD)

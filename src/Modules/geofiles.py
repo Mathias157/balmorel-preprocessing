@@ -98,6 +98,39 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         # Change . to _
         areas.loc[:, area_names] = areas.loc[:, area_names].str.replace('.', '_')
         
+    if choice.replace(' ','').lower() == 'dkmunicipalities_names':
+        # Filter away unnescescary columns
+        # areas = areas[['NAME_1', 'NAME_2', 'geometry']]
+        areas = gpd.read_file(r'.\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
+        # # Aggregate hovedstaden - MODIFY TO USE NUTS3 AREAS FOR CAPITAL REGION
+        # idx = (areas.NAME_1 == 'Hovedstaden') & (areas.NAME_2 != 'Bornholm') & (areas.NAME_2 != 'Christiansø')
+        # hovedstaden = MultiPolygon(areas[idx].geometry.cascaded_union)
+        # areas = areas.drop(index=list(areas.index[idx]))
+        # areas = pd.concat((areas, gpd.GeoDataFrame({'NAME_1' : 'Hovedstaden', 
+        #                       'NAME_2' : 'København',
+        #                       'GID_2' : 'DNK.5.23_1',
+        #                       'geometry' : [hovedstaden]})))
+        area_names = 'NAME_2'
+        
+        # Correcting Municipal Names
+        correct_names = {'Århus' : 'Aarhus',
+                         'Høje Taastrup' : 'Høje-Taastrup',
+                         'Vesthimmerland' : 'Vesthimmerlands'}
+        
+        areas['NAME_2'] = areas['NAME_2'].replace(correct_names)
+        
+        # Converting æ, ø, å
+        areas['NAME_2'] = (
+            areas.NAME_2
+            .str.replace('Æ', 'Ae')
+            .str.replace('Ø', 'Oe')
+            .str.replace('Å', 'Aa')
+            .str.replace('æ', 'ae')
+            .str.replace('ø', 'oe')
+            .str.replace('å', 'aa') 
+        )
+        
+        
         
         
 
