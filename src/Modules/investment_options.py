@@ -65,6 +65,13 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         "DK1-OFF1_WT_WIND_OFF_L-RG2_Y-2050",
     ]
     
+    solar_heating = [
+        'GNR_SH_SUN_LS_Y-2020',
+        'GNR_SH_SUN_LS_Y-2030',
+        'GNR_SH_SUN_LS_Y-2040',
+        'GNR_SH_SUN_LS_Y-2050',
+    ]
+    
     # This was copy pasted from the outcommented print statements below
     hydrogen_options = [
         'GNR_ELYS_ELEC_AEC_Y-2020',
@@ -96,7 +103,7 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     )
     
     # Get base investment options and remove elements in wind_off_G from base_options (add hydrogen when the error arrives)
-    base_options = [option for option in temp.G.unique() if option not in wind_off_G and option not in hydrogen_options]
+    base_options = [option for option in temp.G.unique() if option not in wind_off_G and option not in hydrogen_options and option not in solar_heating]
     
     # Use this to inspect offshore and hydrogen investment options
     if print_options:
@@ -104,7 +111,16 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
         print('\nBase options without offshore or hydrogen:\n%s'%('\n'.join(base_options)))
 
-    return base_options, hydrogen_options
+    # Remove cavern, will 
+    h2_caverns = [
+        'GNR_H2S_H2-CAVERN_Y-2030',
+        'GNR_H2S_H2-CAVERN_Y-2040',
+        'GNR_H2S_H2-CAVERN_Y-2050'
+    ]
+    hydrogen_options_without_caverns = [option for option in hydrogen_options if option not in h2_caverns]
+
+
+    return base_options, hydrogen_options_without_caverns, h2_caverns
 
 def industry_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     
@@ -173,7 +189,7 @@ def main(path_to_allendofmodel: str):
 
 
     # 2.1 Get base options
-    base_options, hydrogen_options = base_AGKN(f)
+    base_options, hydrogen_options, h2_caverns = base_AGKN(f)
     
     ## Load base areas
     base_areas = pickle.load(open('Modules/Submodules/districtheat_sets.pkl', 'rb'))
@@ -203,7 +219,9 @@ def main(path_to_allendofmodel: str):
                           ""
                       ]),
                       suffix='')
-    incfile.body = "\n".join(["AGKN('%s',GGG) = H2_INV_OPTIONS(GGG);"%area for area in base_areas.values()])
+    incfile.body = "\n".join([f"AGKN('{area}',GGG) = AGKN('{area}',GGG) + H2_INV_OPTIONS(GGG);" for area in base_areas.values()])
+    # Add cavern option in Viborg (Lille Torup)
+    incfile.body += "\n\n* Add cavern investment option in Viborg\n" + "\n".join([f"AGKN('Viborg_A','{g}') = YES;" for g in h2_caverns])
     incfile.save()
     
     

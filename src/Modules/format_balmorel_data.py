@@ -234,6 +234,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     ";",
                     "WND_VAR_T(AAA,SSS,TTT) = WND_VAR_T1(SSS,TTT,AAA);",
                     "WND_VAR_T1(SSS,TTT,AAA) = 0;",
+                    "WND_VAR_T('Frederiksberg_A',SSS,TTT) = WND_VAR_T('Koebenhavn_A',SSS,TTT);"
                 ]))
     incfile.body_prepare(['S', 'T'],
                          ['A'])
@@ -260,6 +261,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     ";",
                     "SOLE_VAR_T(AAA,SSS,TTT) = SOLE_VAR_T1(SSS,TTT,AAA);",
                     "SOLE_VAR_T1(SSS,TTT,AAA) = 0;",
+                    "SOLE_VAR_T('Frederiksberg_A',SSS,TTT) = SOLE_VAR_T('Koebenhavn_A',SSS,TTT);"
                 ]))
     incfile.body_prepare(['S', 'T'],
                          ['A'])
