@@ -123,9 +123,8 @@ class FlexDem():
         # for country in areas[country_code].unique():
         for country in ['Denmark']:
             try:
-                road_dem_TWh = road_demand.data.sum()
                 print(country, '\nTotal charging capacity:\t%d MW'%(round(self.charge_cap.loc[country])))
-                print('\nTotal energy demand:\t%d TWh'%round(road_dem_TWh))
+                print('\nTotal energy demand:\t%d TWh'%round(self.annual_demand))
                 
                 # regions = areas[areas[country_code]==country].index
                 regions = areas.index
@@ -134,7 +133,7 @@ class FlexDem():
                     print(region, len(regions))
                     
                     # Uniform distribution of charger capacities
-                    FLEXDEM_MAXCONS.suffix += "FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT) = %0.2f*FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT);\n"%(region, self.charge_cap.loc[country]*road_demand.sel({the_index : region}).data / road_dem_TWh, region)
+                    FLEXDEM_MAXCONS.suffix += "FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT) = %0.2f*FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT);\n"%(region, self.charge_cap.loc[country]*road_demand.sel({the_index : region}).data / self.annual_demand, region)
                 
                     # Uniform distribution of demand
                     FLEXDEM_FLEXYDEMAND.body.loc[region, 'Value'] = road_demand.sel({the_index : region}).data * 1e6 # MWh

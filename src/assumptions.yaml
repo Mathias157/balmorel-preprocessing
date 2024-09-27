@@ -25,3 +25,7 @@ grid_assumptions:
     lifetime: 50 # Lifetime of H2 pipes, Kountouries et al. 2024
     transmission_loss: 2.2e-08 # frac/m
     transmission_cost: 1.0e-06
+
+fuel_assumptions:
+  h2_demand_per_shipfuel_mwh: 0.412  # Assuming TG-MeOH
+  h2_demand_per_jetfuel_mwh:  0.614  # Assuming TG-FT-H2
