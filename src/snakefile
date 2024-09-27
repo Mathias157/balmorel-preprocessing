@@ -130,9 +130,11 @@ rule format_dkstat_transport_data:
 
 rule transport_demand:
     input: 
-        f'{data_path}Danmarks Statistik/transport_demand.csv'
+        [f'{data_path}Danmarks Statistik/transport_demand.csv',
+        f'{data_path}Gas, Transport and Industry Data/gdf_all_ETISplus.geojson']
     output:
-        f'{out_path}FLEXDEM_FLEXYDEMAND.inc'
+        [f'{out_path}FLEXDEM_FLEXYDEMAND.inc',
+        f'{out_path}FLEXDEM_MAXLIMIT.inc']
     script: 
         f"{modules_path}transport_demand.py"
 
