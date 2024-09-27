@@ -2,19 +2,20 @@ digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
     edge[penwidth=2, color=grey];
-	0[label = "all", color = "0.14 0.6 0.85", style="rounded,dashed"];
-	1[label = "exo_electricity_demand", color = "0.00 0.6 0.85", style="rounded,dashed"];
-	2[label = "create_conversion_dictionaries", color = "0.10 0.6 0.85", style="rounded,dashed"];
-	3[label = "format_energinet_data", color = "0.05 0.6 0.85", style="rounded,dashed"];
-	4[label = "transport_road_demand", color = "0.57 0.6 0.85", style="rounded,dashed"];
-	5[label = "format_dkstat_transport_data", color = "0.52 0.6 0.85", style="rounded,dashed"];
-	6[label = "exo_heat_demand", color = "0.48 0.6 0.85", style="rounded,dashed"];
-	7[label = "format_vpdk21_data", color = "0.29 0.6 0.85", style="rounded,dashed"];
-	8[label = "format_dkstat_industry_data", color = "0.38 0.6 0.85", style="rounded,dashed"];
-	9[label = "format_balmorel_data", color = "0.19 0.6 0.85", style="rounded,dashed"];
-	10[label = "geographic_sets", color = "0.33 0.6 0.85", style="rounded,dashed"];
-	11[label = "grids", color = "0.43 0.6 0.85", style="rounded,dashed"];
-	12[label = "investment_options", color = "0.24 0.6 0.85", style="rounded,dashed"];
+	0[label = "all", color = "0.58 0.6 0.85", style="rounded,dashed"];
+	1[label = "exo_electricity_demand", color = "0.62 0.6 0.85", style="rounded,dashed"];
+	2[label = "create_conversion_dictionaries", color = "0.31 0.6 0.85", style="rounded,dashed"];
+	3[label = "format_energinet_data", color = "0.40 0.6 0.85", style="rounded,dashed"];
+	4[label = "transport_road_demand", color = "0.53 0.6 0.85", style="rounded,dashed"];
+	5[label = "format_dkstat_transport_data", color = "0.36 0.6 0.85", style="rounded,dashed"];
+	6[label = "exo_heat_demand", color = "0.00 0.6 0.85", style="rounded,dashed"];
+	7[label = "format_vpdk21_data", color = "0.49 0.6 0.85", style="rounded,dashed"];
+	8[label = "format_dkstat_industry_data", color = "0.04 0.6 0.85", style="rounded,dashed"];
+	9[label = "format_balmorel_data", color = "0.09 0.6 0.85", style="rounded,dashed"];
+	10[label = "geographic_sets", color = "0.13 0.6 0.85", style="rounded,dashed"];
+	11[label = "grids", color = "0.18 0.6 0.85", style="rounded,dashed"];
+	12[label = "investment_options", color = "0.22 0.6 0.85", style="rounded,dashed"];
+	13[label = "transport_h2_demand", color = "0.27 0.6 0.85", style="rounded,dashed"];
 	1 -> 0
 	4 -> 0
 	6 -> 0
@@ -22,6 +23,7 @@ digraph snakemake_dag {
 	10 -> 0
 	11 -> 0
 	12 -> 0
+	13 -> 0
 	2 -> 1
 	3 -> 1
 	5 -> 4
@@ -33,4 +35,5 @@ digraph snakemake_dag {
 	9 -> 11
 	2 -> 11
 	6 -> 12
+	5 -> 13
 }            
