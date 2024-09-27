@@ -136,7 +136,7 @@ rule transport_road_demand:
         [f'{out_path}FLEXDEM_FLEXYDEMAND.inc',
         f'{out_path}FLEXDEM_MAXLIMIT.inc']
     script: 
-        f"{modules_path}transport_demand.py"
+        f"{modules_path}transport_road_demand.py"
 
 # 5. Sets
 rule geographic_sets:
