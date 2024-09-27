@@ -17,10 +17,8 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 from geofiles import prepared_geofiles
-from pybalmorel.utils import symbol_to_df
 from scipy.sparse import csr_matrix
 from Submodules.municipal_template import DataContainer
-from transport_demand import distribute_road_flex_electricity_demand
 from createDH import DistrictHeatAAU
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler

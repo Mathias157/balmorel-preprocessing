@@ -128,7 +128,7 @@ rule format_dkstat_transport_data:
         python {input[1]} --get-transport-demand --include-bunkering=false
         """
 
-rule transport_demand:
+rule transport_road_demand:
     input: 
         [f'{data_path}Danmarks Statistik/transport_demand.csv',
         f'{data_path}Gas, Transport and Industry Data/gdf_all_ETISplus.geojson']
