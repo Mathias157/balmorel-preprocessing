@@ -101,3 +101,39 @@ def transform_xrdata(xarray: xr.Dataset,
         output = output.sel(selection)
     
     return output
+
+#%% ------------------------------- ###
+###     2. DataFrames and Dicts     ###
+### ------------------------------- ###
+
+def df_set_to_dictionary(df: pd.DataFrame, 
+                column: str, 
+                suffix: Tuple[str, None] = None, 
+                parent_column: Tuple[str, None] = None) -> dict:
+    # Get set
+    sets = pd.DataFrame({column : df[column].unique()})
+    
+    # Connect area to region by suffix, if there is a suffix
+    if suffix != None:
+        sets[parent_column] = sets.loc[:, column].str.replace(suffix, '') 
+        sets = sets.pivot_table(index=parent_column, aggfunc='sum')
+
+    return sets.to_dict()
+
+def save_dict_set(save_path: str,
+                  df: pd.DataFrame, 
+                column: str, 
+                suffix: Tuple[str, None] = None, 
+                parent_column: Tuple[str, None] = None,
+                ):
+    # Save df set to dictionary
+    set = df_set_to_dictionary(df, column, suffix, parent_column)
+    with open(save_path, 'wb') as f:
+        pickle.dump(set[column], f)
+
+def combine_dicts(dict_list: list):
+    combined = {}
+    # Assuming dictionaries have identical keys 
+    for key in dict_list[0]:
+        combined[key] = [dict0[key] for dict0 in dict_list]
+    return combined

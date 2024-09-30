@@ -1,5 +1,5 @@
 # Load the config file at the top
-# configfile: "config.yaml"
+configfile: "assumptions.yaml"
 
 out_path     = "Output/"
 data_path    = "Data/"
@@ -10,22 +10,22 @@ submod_path  = "Modules/Submodules/"
 rule all:
     input:
         [f'{out_path}DE.inc', 
-        f'{data_path}Power Grid/municipal_connectivity.nc',
-        f"{data_path}Danmarks Statistik/transport_demand.csv",
-        f"{out_path}DH.inc"]
+        f'{out_path}FLEXDEM_FLEXYDEMAND.inc',
+        f"{out_path}DH.inc",
+        f"{out_path}DH_VAR_T.inc",
+        f"{out_path}CCC.inc",
+        f"{out_path}XINVCOST.inc",
+        f"{out_path}AGKN.inc",
+        f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc",
+        f'{out_path}OFFSHORE_WND_VAR_T.inc']
 
 rule create_conversion_dictionaries:
     output:
         [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl",
-        f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl"]
+        f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
+        f"{submod_path}exo_grid_conversion_dictionaries.pkl"]
     script:
         f"{submod_path}create_conversion_dictionaries.py"
-    
-rule get_grid_from_Balmorel:
-    output:
-        f"{data_path}Power Grid/municipal_connectivity.nc"
-    script:
-        f"{submod_path}get_grid.py"
 
 rule do_clustering:
     input:
@@ -39,8 +39,10 @@ rule format_energinet_data:
         f"{data_path}Timeseries/ElConsumptionEnerginet2023.csv"
     output:
         f"{data_path}Timeseries/energinet_eldem.nc"
-    script:
-        f"{modules_path}format_energinet.py"
+    shell:
+        """
+        python {modules_path}format_energinet.py --energinet-data-path={input}
+        """
 
 rule exo_electricity_demand:
     input:
@@ -75,6 +77,27 @@ rule format_dkstat_industry_data:
         python {input[1]} --get-industry-demand
         """
 
+rule format_balmorel_data:
+    input:
+        f"{modules_path}format_balmorel_data.py"
+    params:
+        model_path=config["balmorel_input"]["model_path"],
+        scenario=config["balmorel_input"]["scenario"],
+        load_again=config["balmorel_input"]["load_again"]
+    output:
+        [f"{out_path}DH_VAR_T.inc",
+        f"{out_path}INDIVUSERS_DH_VAR_T.inc",
+        f"{out_path}WND_VAR_T.inc",
+        f"{out_path}SOLE_VAR_T.inc",
+        f"{out_path}WNDFLH.inc",
+        f"{out_path}SOLEFLH.inc",
+        f"{data_path}BalmorelData/municipal_connectivity.nc"
+        ]
+    shell:
+        """
+        python {input} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again}
+        """
+
 rule exo_heat_demand:
     input:
         [f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
@@ -83,9 +106,15 @@ rule exo_heat_demand:
         f"{data_path}Danmarks Statistik/industry_demand.nc",
         f"{data_path}Timeseries/energinet_eldem.nc"]
     output:
-        [f'{out_path}DH.inc', f'{out_path}DH_VAR_T.inc',
-        f'{out_path}INDUSTRY_DH.inc', f'{out_path}INDUSTRY_DH_VAR_T.inc',
-        f'{out_path}INDIVUSERS_DH.inc', f'{out_path}INDIVUSERS_DH_VAR_T.inc']
+        [f"{submod_path}districtheat_sets.pkl",
+        f"{submod_path}individual_sets.pkl",
+        f"{submod_path}ind-lt_sets.pkl",
+        f"{submod_path}ind-mt_sets.pkl",
+        f"{submod_path}ind-ht_sets.pkl",
+        f'{out_path}DH.inc',
+        f'{out_path}INDUSTRY_DH.inc', 
+        f'{out_path}INDUSTRY_DH_VAR_T.inc',
+        f'{out_path}INDIVUSERS_DH.inc']
     script:
         f"{modules_path}exo_heat_demand.py"
 
@@ -100,4 +129,97 @@ rule format_dkstat_transport_data:
         """
         python {input[1]} --get-transport-demand --include-bunkering=false
         """
- 
+
+rule transport_road_demand:
+    input: 
+        [f'{data_path}Danmarks Statistik/transport_demand.csv',
+        f'{data_path}Gas, Transport and Industry Data/gdf_all_ETISplus.geojson']
+    output:
+        [f'{out_path}FLEXDEM_FLEXYDEMAND.inc',
+        f'{out_path}FLEXDEM_MAXLIMIT.inc']
+    script: 
+        f"{modules_path}transport_road_demand.py"
+
+rule transport_h2_demand:
+    input:
+        [
+            f"{data_path}Danmarks Statistik/transport_demand.csv"
+        ]
+    params:
+        h2dem_per_ship=config["fuel_assumptions"]["h2_demand_per_shipfuel_mwh"],
+        h2dem_per_jet=config["fuel_assumptions"]["h2_demand_per_jetfuel_mwh"]
+    output:
+        f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc" 
+    shell:
+        """
+        python {modules_path}transport_h2_demand.py --h2-demand-per-jetfuel-mwh={params.h2dem_per_jet} --h2-demand-per-shipfuel-mwh={params.h2dem_per_ship}
+        """
+
+# 5. Sets
+rule geographic_sets:
+    input:
+        [
+            f"{submod_path}districtheat_sets.pkl",
+            f"{submod_path}individual_sets.pkl",
+            f"{submod_path}ind-lt_sets.pkl",
+            f"{submod_path}ind-mt_sets.pkl",
+            f"{submod_path}ind-ht_sets.pkl",
+        ]
+    output:
+        f"{out_path}CCC.inc"
+    script:
+        f"{modules_path}geographic_sets.py"
+
+rule investment_options:
+    input:
+        [
+            f"{submod_path}districtheat_sets.pkl",
+            f"{submod_path}individual_sets.pkl",
+            f"{submod_path}ind-lt_sets.pkl",
+            f"{submod_path}ind-mt_sets.pkl",
+            f"{submod_path}ind-ht_sets.pkl", 
+        ]
+    output:
+        [
+            f"{out_path}AGKN.inc",
+            f"{out_path}HYDROGEN_AGKN.inc",
+            f"{out_path}INDUSTRY_AGKN.inc",
+        ]
+    script:
+        f"{modules_path}investment_options.py"
+
+# 6. Grids
+rule grids:
+    input:
+        [f"{data_path}BalmorelData/municipal_connectivity.nc",
+        f"{submod_path}exo_grid_conversion_dictionaries.pkl",
+        f"assumptions.yaml"]
+    output:
+        [
+            f"{out_path}XINVCOST.inc",
+            f"{out_path}XLOSS.inc",
+            f"{out_path}DISCOST_E.inc",
+            f"{out_path}DISLOSS_E.inc",
+            f"{out_path}DISLOSS_E_AG.inc",
+            f"{out_path}INDUSTRY_DISLOSS_E_AG.inc",
+            f"{out_path}INDIVUSERS_DISLOSS_E_AG.inc",
+            f"{out_path}HYDROGEN_XH2INVCOST.inc",
+            f"{out_path}HYDROGEN_XH2COST.inc",
+            f"{out_path}HYDROGEN_XH2LOSS.inc"
+        ]
+    script:
+        f"{modules_path}grids.py"
+
+# 7. Other
+rule offshore_wind:
+    input:
+        f'{out_path}VRE/2012_offshore_wind.nc'
+    params:
+        weather_year=config['timeseries']['weather_year'],
+        total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential']
+    output:
+        f'{out_path}OFFSHORE_WND_VAR_T.inc'
+    shell:
+        """
+        python {modules_path}offshore_wind.py --weather-year={params.weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential}
+        """

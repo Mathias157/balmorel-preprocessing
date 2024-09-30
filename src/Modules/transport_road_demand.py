@@ -14,15 +14,17 @@ ASSUMPTIONS:
 import os 
 import pandas as pd
 import numpy as np
+import geopandas as gpd
 from pybalmorel import IncFile
 from pybalmorel.utils import read_lines
-from Modules.geofiles import prepared_geofiles
-from Modules.Submodules.municipal_template import DataContainer
-from Modules.Submodules.format_dkstat import load_transport_demand
+from geofiles import prepared_geofiles
+from Submodules.municipal_template import DataContainer
+from format_dkstat import load_transport_demand
 import matplotlib.pyplot as plt
+import xarray as xr
 
 #%% ------------------------------- ###
-###        1. Temporal Profile      ###
+###   1. Temporal Profile for Road  ###
 ### ------------------------------- ###
 
 class FlexDem():
@@ -43,10 +45,8 @@ class FlexDem():
                                     '1000pop 1995', '1000pop 2005',
                                     '1000pop 2007', '1000pop 2009']
 
-    def create_general_demand(self, 
-                         demand_pr_vehicle: float = 100*52/1000,
-                         charger_capacity_pr_vehicle: float = 1.5/1000):
-        
+
+    def create_profile(self, plot: bool = False):
         # Normalise Traffic Count
         f = self.traffic_count.pivot_table(index=['day', 'hour'],
                             values='count')
@@ -57,19 +57,37 @@ class FlexDem():
         self.inv_demand = inv_demand + (1 - inv_demand.max())
 
         # Plot
-        ax = self.inv_demand.plot(legend=True)
-        f.plot(ax=ax, legend=True)
-        ax.legend(['1 - Normalised Traffic Count', 'Normalised Traffic Count'], bbox_to_anchor=(.5, 1),
-                  loc='lower center', ncols=2)
+        if plot:
+            ax = self.inv_demand.plot(legend=True)
+            f.plot(ax=ax, legend=True)
+            ax.legend(['1 - Normalised Traffic Count', 'Normalised Traffic Count'], bbox_to_anchor=(.5, 1),
+                    loc='lower center', ncols=2)
+            plt.show()
+
+
+    def create_road_demand_from_Nvehicles(self, 
+                         demand_pr_vehicle: float = 100*52/1000,
+                         charger_capacity_pr_vehicle: float = 1.5/1000):
 
         # Calculate annual demand
-        self.annual_demand = self.n_vehicles['Cars 2009']*demand_pr_vehicle # In MWh
+        self.annual_demand_from_Nvehicles = self.n_vehicles['Cars 2009']*demand_pr_vehicle # In MWh
+        # print(self.annual_demand)
         
         # Calculate charging capacity pr. region
         self.charge_cap = self.n_vehicles['Cars 2009']*charger_capacity_pr_vehicle # In MW
+        # print(self.charge_cap)
         
+        
+    def create_road_demand_from_dkstat(self, road_demand: xr.DataArray):
+        # Using Danmarks statistik
+        self.annual_demand = road_demand.data.sum()
+        
+        # Look at ratio between the two assumptions:
+        # print('Ratio of energy demand from DKSTAT to energy demand from N vehicles:')
+        # print(self.annual_demand_from_Nvehicles['Denmark'] / self.annual_demand)
 
-    def create_charging_profile(self, area_choice: str = 'AntBalm'):
+
+    def create_flexdem_incfiles(self, area_choice: str = 'dkmunicipalities_names'):
         
         # Load Areas
         the_index, areas, country_code = prepared_geofiles(area_choice)
@@ -78,7 +96,8 @@ class FlexDem():
         # Create Normalised Max Limit on Charging
         FLEXDEM_MAXCONS = IncFile(name='FLEXDEM_MAXLIMIT',
                                 path='Output',
-                                prefix=read_lines('FLEXDEM_MAXLIMIT_prefix.inc', r'Data\IncFilePreSuf'),
+                                prefix='',
+                                # prefix=read_lines('FLEXDEM_MAXLIMIT_prefix.inc', r'Data\IncFilePreSuf'),
                                 suffix="\n;\nFLEXMAXLIMIT(FLEXUSER, RRR, SSS, TTT) = FLEXMAXLIMIT1('S01',TTT,FLEXUSER);\nFLEXMAXLIMIT1(SSS,TTT,FLEXUSER)=0;\n\n* Scale charger capacities to regions:\n")
 
         # Make correct index
@@ -101,20 +120,23 @@ class FlexDem():
         FLEXDEM_FLEXYDEMAND.body = pd.DataFrame(columns=['Value'])
         
         # Scale to country capacities
-        for country in areas[country_code].unique():
+        # for country in areas[country_code].unique():
+        for country in ['Denmark']:
             try:
-                print(country, 'total:\t%d MW'%(round(self.charge_cap.loc[country])))
+                print(country, '\nTotal charging capacity:\t%d MW'%(round(self.charge_cap.loc[country])))
+                print('\nTotal energy demand:\t%d TWh'%round(self.annual_demand))
                 
-                regions = areas[areas[country_code]==country].index
-                N_regions = len(regions)
+                # regions = areas[areas[country_code]==country].index
+                regions = areas.index
+                N_regions = len(regions) # Making an even distribution
                 for region in regions:
                     print(region, len(regions))
                     
                     # Uniform distribution of charger capacities
-                    FLEXDEM_MAXCONS.suffix += "FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT) = %0.2f*FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT);\n"%(region, self.charge_cap.loc[country]/N_regions, region)
+                    FLEXDEM_MAXCONS.suffix += "FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT) = %0.2f*FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT);\n"%(region, self.charge_cap.loc[country]*road_demand.sel({the_index : region}).data / self.annual_demand, region)
                 
                     # Uniform distribution of demand
-                    FLEXDEM_FLEXYDEMAND.body.loc[region, 'Value'] = self.annual_demand.loc[country] / N_regions 
+                    FLEXDEM_FLEXYDEMAND.body.loc[region, 'Value'] = road_demand.sel({the_index : region}).data * 1e6 # MWh
                 
             except KeyError:
                 print('No EV data in %s'%country)
@@ -133,42 +155,32 @@ class FlexDem():
         FLEXDEM_FLEXYDEMAND.suffix += "FLEXYDEMAND('2030',CCCRRRAAA,FLEXUSER) = 0.33*FLEXYDEMAND('2050',CCCRRRAAA,FLEXUSER);\n"
         FLEXDEM_FLEXYDEMAND.save()
 
-if __name__ == '__main__':
-    FD = FlexDem()
-    FD.load_traffic_data()
-    FD.create_general_demand()
-    FD.create_charging_profile()
-
 
 #%% ------------------------------- ###
 ###        2. Spatial Spread        ###
 ### ------------------------------- ###
 
-def distribute_road_flex_electricity_demand():
+def distribute_road_flex_electricity_demand(choice: str = 'dkmunicipalities_names'):
     # 2.1 Vehicle Counts on Roads from Ioannis' source 
     f = gpd.read_file('Data/Gas, Transport and Industry Data/gdf_all_ETISplus.geojson')
 
-    fig, ax = plt.subplots()
-    geo = gpd.GeoDataFrame(x.muni.polygons.to_pandas())
-    geo = geo.set_geometry(col=0, crs=x.muni.polygons.crs)
-    geo.plot(ax=ax)
+    id, geo, c = prepared_geofiles(choice)
     geo['traffic_count'] = 0
     for i, row in f.iterrows():
         idx = row.geometry.intersects(geo.geometry)
         muni = geo.loc[idx]
         if len(muni) != 0:
             for mun in muni.index:
-                geo.loc[mun, 'traffic_count'] += row.vehicles / len(muni.index)
+                geo.loc[mun, 'traffic_count'] += float(row.vehicles) / len(muni.index)
             # print('%d intersects %d'%(i, muni.index))
+    
+    return geo
 
-    # 2.2 National Transport Fuel Demand
+def distribute_dkstat_demand(geo: gpd.GeoDataFrame,
+                      plot: bool = False):
+    # National Transport Fuel Demand
     f = load_transport_demand(include_bunkering=False)
-
-    ## Plot yearly tendencies
-    # fig, ax = plt.subplots()
-    # f.T.plot(ax=ax)
-    # ax.set_ylabel('Dansk Brændstofforbrug (TWh)')
-    # ax.legend(loc='center', bbox_to_anchor=(.5, 1.15))
+    # print(f)
 
     ## I choose road demand from 2019 since it seems in the average (assuming no change in mobility demand, avoiding too many electric vehicles)
     year = 2019
@@ -178,6 +190,7 @@ def distribute_road_flex_electricity_demand():
     ## Distribute
     geo['flex_electricity_demand_twh'] = (
         geo.traffic_count
+        # Normalise traffic count, so it can be used as distribution key
         .div(geo.traffic_count.sum())
         .mul(road_demand_twh)
         # Convert from ICE efficiency to mobility demand
@@ -185,24 +198,36 @@ def distribute_road_flex_electricity_demand():
         # Convert from mobility demand to electric demand
         .div(0.9)
     )
-    geo.plot(column='flex_electricity_demand_twh', legend=True)
+    
+    if plot:
+        ## Plot yearly tendencies
+        fig, ax = plt.subplots()
+        f.T.plot(ax=ax)
+        ax.set_ylabel('Dansk Brændstofforbrug (TWh)')
+        ax.legend(loc='center', bbox_to_anchor=(.5, 1.15))
+        
+        ## Plot distribution of demand
+        fig2, ax2 = plt.subplots()
+        geo.plot(ax=ax2, column='flex_electricity_demand_twh', legend=True)
+        ax2.set_title('Demand distribution')
+        plt.show()
+
     road_demand = geo['flex_electricity_demand_twh'].to_xarray()
     road_demand = road_demand.assign_coords(year=year, user='road')
-    
+    print(road_demand.sel(NAME_2='Aabenraa').data, ' TWh')
     return road_demand
 
 #%% 
-# 2.3 Merging to other data
+
 if __name__ == '__main__':
-    x = DataContainer()
-    x.muni = x.muni.merge(road_demand)
-    temp = x.get_polygons()
-
-    fig, ax = plt.subplots()
-    temp.plot(ax=ax)
-    xlims = ax.get_xlim()
-    ylims = ax.get_ylim()
-
-    f.plot(color='r', ax=ax, linewidth=f['vehicles']/1e4)
-    ax.set_ylim(ylims)
-    ax.set_xlim(xlims)
+    # Distribute road demand to municipalities using the transport study
+    geo = distribute_road_flex_electricity_demand()
+    road_demand = distribute_dkstat_demand(geo)
+    
+    # Create demands
+    FD = FlexDem()
+    FD.load_traffic_data()
+    FD.create_profile(plot=False)
+    FD.create_road_demand_from_Nvehicles()
+    FD.create_road_demand_from_dkstat(road_demand)
+    FD.create_flexdem_incfiles()

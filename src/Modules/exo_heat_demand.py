@@ -14,7 +14,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from pybalmorel import IncFile
 import xarray as xr
-from Submodules.utils import convert_names, transform_xrdata
+import pickle
+from Submodules.utils import convert_names, transform_xrdata, save_dict_set
 from Submodules.municipal_template import DataContainer
 from pybalmorel import IncFile
     
@@ -141,6 +142,8 @@ def create_DH(incfile, new_dataset: xr.Dataset):
     print('Total district heating demand: ', round(incfile.body['heat_demand_mwh'].sum() / 1e6, 2) , ' TWh')
     ### Assign area suffix
     incfile.body.A = incfile.body.A + '_A'
+    save_dict_set('Modules/Submodules/districtheat_sets.pkl', incfile.body.loc[:, ['A']], 'A', '_A', 'R') # Save region-to-area dictionary
+
     incfile.body_prepare(['DHUSER', 'A'],
                     'Y',
                     values='heat_demand_mwh')
@@ -161,10 +164,16 @@ def create_INDUSTRY_DH(incfile, new_dataset: xr.Dataset):
     ### Assign area suffix
     idx = incfile.body.query('DHUSER == "IND-PHL"').index
     incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-LT-NODH'
+    save_dict_set('Modules/Submodules/ind-lt_sets.pkl', incfile.body.loc[idx, ['A']], 'A', '_IND-LT-NODH', 'R') # Save region-to-area dictionary
+        
     idx = incfile.body.query('DHUSER == "IND-PHM"').index
     incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-MT-NODH'
+    save_dict_set('Modules/Submodules/ind-mt_sets.pkl', incfile.body.loc[idx, ['A']], 'A', '_IND-MT-NODH', 'R') # Save region-to-area dictionary
+
     idx = incfile.body.query('DHUSER == "IND-PHH"').index
-    incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-HT-NODH'
+    incfile.body.loc[idx, 'A'] = incfile.body.loc[idx, 'A'].values + '_IND-HT-NODH'    
+    save_dict_set('Modules/Submodules/ind-ht_sets.pkl', incfile.body.loc[idx, ['A']], 'A', '_IND-HT-NODH', 'R') # Save region-to-area dictionary
+
     incfile.body_prepare(['DHUSER', 'A'],
                     'Y',
                     values='heat_demand_mwh')
@@ -182,6 +191,8 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
     print('Total individual heat demand: ', round(incfile.body['heat_demand_mwh'].sum() / 1e6, 2) , ' TWh')
     ### Assign area suffix
     incfile.body.A = incfile.body.A + '_IDVU-SPACEHEAT'
+    save_dict_set('Modules/Submodules/individual_sets.pkl', incfile.body.loc[:, ['A']], 'A', '_IDVU-SPACEHEAT', 'R') # Save region-to-area dictionary
+
     incfile.body_prepare(['DHUSER', 'A'],
                     'Y',
                     values='heat_demand_mwh')
@@ -189,20 +200,24 @@ def create_INDIVUSERS_DH(incfile, new_dataset: xr.Dataset):
 # 2.3 Make Time Variation Heat Demand .inc-files
 
 ## 2.3.1 DH_VAR_T.inc
-
+# See format_balmorel_data, the very similar future gas profiles are used
 
 ## 2.3.2 INDUSTRY_DH_VAR_T.inc
 @create_incfile
-def create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xr.Dataset):
+def create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xr.Dataset, A_suffix: str):
     incfile.body = (
         transform_xrdata(el_new_dataset,
                          'electricity_demand_mwh')
         .to_dataframe()
         .reset_index()
     )
-    incfile.body.loc[:, 'A'] = incfile.body.loc[:, 'A'].values + '_IND-HT-NODH'
+    incfile.body.loc[:, 'A'] = incfile.body.loc[:, 'A'].values + A_suffix
     incfile.body_prepare(['S', 'T'],
-                          ['A', 'DHUSER'], values='electricity_demand_mwh')
+                          ['A'], values='electricity_demand_mwh')
+
+
+## 2.3.3 INDIVUSERS_DH_VAR_T.inc
+# See format_balmorel_data, the very similar future gas profiles are used
 
 
 #%% ------------------------------- ###
@@ -296,28 +311,51 @@ def main(show_difference: bool = False):
                          suffix='\n'.join([
                              "",
                              ";",
-                             "INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)$(NOT INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP))=                                                         INDIVHEATING_GROUP_DHSHARE('2016',DHUSER,RRR,INDIVUSERS_GROUP);",
-                             "LOOP(INDIVUSERS_GROUP$(NOT INDIVUSERS_GROUP_NEW(INDIVUSERS_GROUP)),",
-                             "DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)$(INDIVUSERS_GROUP_A(AAA,DHUSER,INDIVUSERS_GROUP)  AND INDIVUSERS_DEMANDTYPE_A(AAA,DHUSER,'HOTWATER') AND INDIVUSERS_DHUSER(DHUSER) ) =          SUM(RRR$RRRAAA(RRR,AAA),INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)*SUM(IAAA_INDIV$(RRRAAA(RRR,IAAA_INDIV) AND INVDATA_INDIVUSERS(IAAA_INDIV,'IDVU-HOTWTR')),DH1_INDIVHEATING(DHUSER,IAAA_INDIV,YYY))) ;",
-                             "DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)$(INDIVUSERS_GROUP_A(AAA,DHUSER,INDIVUSERS_GROUP)  AND INDIVUSERS_DEMANDTYPE_A(AAA,DHUSER,'SPACEHEATING') AND INDIVUSERS_DHUSER(DHUSER) ) =      SUM(RRR$RRRAAA(RRR,AAA),INDIVHEATING_GROUP_DHSHARE(YYY,DHUSER,RRR,INDIVUSERS_GROUP)*SUM(IAAA_INDIV$(RRRAAA(RRR,IAAA_INDIV) AND INVDATA_INDIVUSERS(IAAA_INDIV,'IDVU-SPACEHEAT')),DH1_INDIVHEATING(DHUSER,IAAA_INDIV,YYY))) ;",
-                             ");",
-                             "DH(YYY,AAA,DHUSER)$DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY)  = DH1_INDIVHEATING_GROUP(DHUSER,AAA,YYY);",
-                             "$label NO_INDIVUSERS_AAA"
+                             "DH1_INDIVHEATING(DHUSER,AAA,'2050') = DH1_INDIVHEATING(DHUSER,AAA,'2019');",
+                             "DH(YYY,AAA,DHUSER)$DH1_INDIVHEATING(DHUSER,AAA,YYY)  = DH1_INDIVHEATING(DHUSER,AAA,YYY);",
+                             "DH1_INDIVHEATING(DHUSER,AAA,YYY)=0;"
                          ]))
     
-    ## 1.3 Make Heat Variation Profiles
+    ## 3.3 Make Heat Variation Profiles
+    
+    ### 3.3.1 INDUSTRY_DH_VAR_T
+    #### High process heat
     create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
                              name='INDUSTRY_DH_VAR_T', 
+                             A_suffix='_IND-HT-NODH',
                              path=out_path,
-                             prefix="TABLE DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)\n",
+                             prefix="TABLE DH_VAR_T_IND(SSS,TTT,AAA)\n",
                              suffix='\n'.join(["",
                                                ";",
                                                "* Collect series to other heat series, if there is a industry heat series",
-                                               "DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA,DHUSER))) = DH_VAR_T_IND(SSS,TTT,AAA,DHUSER);",
-                                               "DH_VAR_T_IND(SSS,TTT,AAA,DHUSER)=0;",
-                                               "* Assume that other temperature processes follow the same pattern, if there is a profile",
-                                               "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);",
-                                               "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T(AAA,'IND-PHH',SSS,TTT))) = DH_VAR_T(AAA,'IND-PHH',SSS,TTT);",
+                                               "DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA))) = DH_VAR_T_IND(SSS,TTT,AAA);",
+                                               "DH_VAR_T_IND(SSS,TTT,AAA)=0;",
+                                               "$include ../data/INDUSTRY_DH_VAR_T2.inc",
+                                               "$include ../data/INDUSTRY_DH_VAR_T3.inc"
+                             ]))
+    #### Medium process heat
+    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                             name='INDUSTRY_DH_VAR_T2', 
+                             A_suffix='_IND-MT-NODH',
+                             path=out_path,
+                             prefix="TABLE DH_VAR_T_INDMT(SSS,TTT,AAA)\n",
+                             suffix='\n'.join(["",
+                                               ";",
+                                               "* Collect series to other heat series, if there is a industry heat series",
+                                               "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T_INDMT(S,T,AAA))) = DH_VAR_T_INDMT(SSS,TTT,AAA);",
+                                               "DH_VAR_T_INDMT(SSS,TTT,AAA)=0;"
+                             ]))
+    #### Low process heat
+    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                             name='INDUSTRY_DH_VAR_T3', 
+                             A_suffix='_IND-LT-NODH',
+                             path=out_path,
+                             prefix="TABLE DH_VAR_T_INDLT(SSS,TTT,AAA)\n",
+                             suffix='\n'.join(["",
+                                               ";",
+                                               "* Collect series to other heat series, if there is a industry heat series",
+                                               "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T_INDLT(S,T,AAA))) = DH_VAR_T_INDLT(SSS,TTT,AAA);",
+                                               "DH_VAR_T_INDLT(SSS,TTT,AAA)=0;"
                              ]))
 
 
