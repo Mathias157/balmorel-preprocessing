@@ -16,7 +16,8 @@ rule all:
         f"{out_path}CCC.inc",
         f"{out_path}XINVCOST.inc",
         f"{out_path}AGKN.inc",
-        f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc"]
+        f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc",
+        f'{out_path}OFFSHORE_WND_VAR_T.inc']
 
 rule create_conversion_dictionaries:
     output:
@@ -208,3 +209,17 @@ rule grids:
         ]
     script:
         f"{modules_path}grids.py"
+
+# 7. Other
+rule offshore_wind:
+    input:
+        f'{out_path}VRE/2012_offshore_wind.nc'
+    params:
+        weather_year=config['timeseries']['weather_year'],
+        total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential']
+    output:
+        f'{out_path}OFFSHORE_WND_VAR_T.inc'
+    shell:
+        """
+        python {modules_path}offshore_wind.py --weather-year={params.weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential}
+        """

@@ -6,13 +6,6 @@ balmorel_input:
 grid_assumptions:
   electricity:
     investment_cost: 3.1 # €/MW/m DEA high bound
-    # XE_cost: 2.511 # €/MW/m DEA low bound
-    # XE_cost: 2.175 # €/MW/m actual transmission data (from US though): Maxwell Brown, Wesley Cole, Kelly Eurek, Jonathon Becker, David Bielen, Ilya Chernyakhovskiy, Stuart Cohen, Allister Frazier, Pieter Gagnon, Nathaniel Gates, et al. Regional energy deployment system (reeds) model documentation: Version 2019. Technical report, National Renewable Energy Lab.(NREL), Golden, CO (United States), 2020.
-    XE_substation_cost: 76000 # €/MW very high bound
-    # XE_substation_cost: 4476 # €/MW low bound
-    # XE_substation_cost: 0 # No cost
-    XE_FOM: 21.7/1e3 # €/MW/m/year
-    Xsub: 99 # Amount of substations (assumed similar to today ~ one pr. municipality)
     lifetime: 40 # Lifetime of grid elements
     transmission_loss: 3.318383e-08 # fraction of loss pr. m, From Balmorel DK1-DK2 line
     transmission_cost: 0.0001 # €/MWh
@@ -29,3 +22,7 @@ grid_assumptions:
 fuel_assumptions:
   h2_demand_per_shipfuel_mwh: 0.412  # Assuming TG-MeOH
   h2_demand_per_jetfuel_mwh:  0.614  # Assuming TG-FT-H2
+
+timeseries:
+  weather_year: 2012
+  total_offshore_wind_potential: 40000 # MW
