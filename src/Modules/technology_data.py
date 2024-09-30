@@ -262,16 +262,5 @@ with open('./Output/GGG.inc', 'w') as f:
     f.write('\n'.join(GDATA.index))
     # f.write('\n/;')  
 
-#%% ------------------------------------- ###
-###            4. Create AGKN             ###
-### ------------------------------------- ###
 
-### 4.1 Hack, all techs can be invested everywhere
-with open('./Output/AGKN.inc', 'w') as f:
-    # f.write("SET GGG  'All generation technologies'\n")
-    for A in areas[the_index]:
-        for G in GDATA.index:
-            f.write("AGKN('%s_A', '%s') = YES;\n"%(A, G))
-    # f.write('/\n')
-    # f.write('\n/;')  
 
