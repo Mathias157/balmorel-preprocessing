@@ -1,5 +1,5 @@
-@REM Run workflow
-snakemake -s preprocessing
+@REM Run workflow with additional arguments
+snakemake -s preprocessing %*
 
 @REM Make DAG plot
 snakemake -s preprocessing --dag > analysis/preprocessing_dot_source.txt
