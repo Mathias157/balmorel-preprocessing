@@ -294,6 +294,10 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "$offmulti"
                 ]))
     incfile.body = incfile.body.pivot_table(index='A', values='Value', aggfunc='sum')
+    
+    # Hard-coded assumption on Frederiksberg 
+    incfile.body.loc['Frederiksberg_A', 'Value'] = incfile.body.loc['Koebenhavn_A', 'Value']
+    
     incfile.body.index.name = ''
     incfile.body.columns = ['']
     incfile.save()
@@ -306,6 +310,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
                     ['A_old', 'Value', 'A'], '_A')
+
     
     incfile = IncFile(name='SOLEFLH', path='Output',
                 prefix='\n'.join([
@@ -319,6 +324,10 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     ";"
                 ]))
     incfile.body = incfile.body.pivot_table(index='A', values='Value', aggfunc='sum')
+    
+    # Hard-coded assumption on Frederiksberg 
+    incfile.body.loc['Frederiksberg_A', 'Value'] = incfile.body.loc['Koebenhavn_A', 'Value']
+    
     incfile.body.index.name = ''
     incfile.body.columns = ['']
     incfile.save()
@@ -335,6 +344,8 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     ## Join municipal codes ('CRA') to names ('NAME_2')
     df = join_to_gpd(df, 'CRA', mun, 'NAME_2', 
                       ['CRA', 'TECH_GROUP', 'SUBTECH_GROUP', 'Value', 'A'], '_A')
+    df['A'] = df.A + '_A'
+    
     
     # Convert very small numbers to EPS
     idx = df.Value < 1e-10
