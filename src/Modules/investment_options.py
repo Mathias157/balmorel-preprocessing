@@ -193,7 +193,12 @@ def main(path_to_allendofmodel: str):
                           "/;",
                           ""
                       ]),
-                      suffix='')
+                      suffix="\n".join([
+                          "",
+                          "$onmulti",
+                          "$include '../data/OFFSHORE_AGKN.inc'",
+                          "$offmulti"
+                      ]))
     incfile.body = "\n".join(["AGKN('%s',GGG) = BASE_INV_OPTIONS(GGG);"%area for area in base_areas.values()])
     incfile.save()
     

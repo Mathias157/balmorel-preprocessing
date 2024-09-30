@@ -234,7 +234,10 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     ";",
                     "WND_VAR_T(AAA,SSS,TTT) = WND_VAR_T1(SSS,TTT,AAA);",
                     "WND_VAR_T1(SSS,TTT,AAA) = 0;",
-                    "WND_VAR_T('Frederiksberg_A',SSS,TTT) = WND_VAR_T('Koebenhavn_A',SSS,TTT);"
+                    "WND_VAR_T('Frederiksberg_A',SSS,TTT) = WND_VAR_T('Koebenhavn_A',SSS,TTT);",
+                    "$onmulti",
+                    "$include '../data/OFFSHORE_WND_VAR_T.inc'",
+                    "$offmulti"
                 ]))
     incfile.body_prepare(['S', 'T'],
                         ['A'])
@@ -286,8 +289,15 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "",
                     "/",
                     ";",
+                    "$onmulti",
+                    "$include '../data/OFFSHORE_WNDFLH.inc'",
+                    "$offmulti"
                 ]))
     incfile.body = incfile.body.pivot_table(index='A', values='Value', aggfunc='sum')
+    
+    # Hard-coded assumption on Frederiksberg 
+    incfile.body.loc['Frederiksberg_A', 'Value'] = incfile.body.loc['Koebenhavn_A', 'Value']
+    
     incfile.body.index.name = ''
     incfile.body.columns = ['']
     incfile.save()
@@ -300,6 +310,7 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     ## Join municipal codes ('A') to names ('NAME_2')
     df = join_to_gpd(df, 'A', mun, 'NAME_2', 
                     ['A_old', 'Value', 'A'], '_A')
+
     
     incfile = IncFile(name='SOLEFLH', path='Output',
                 prefix='\n'.join([
@@ -310,9 +321,13 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                 suffix='\n'.join([
                     "",
                     "/",
-                    ";",
+                    ";"
                 ]))
     incfile.body = incfile.body.pivot_table(index='A', values='Value', aggfunc='sum')
+    
+    # Hard-coded assumption on Frederiksberg 
+    incfile.body.loc['Frederiksberg_A', 'Value'] = incfile.body.loc['Koebenhavn_A', 'Value']
+    
     incfile.body.index.name = ''
     incfile.body.columns = ['']
     incfile.save()
@@ -329,6 +344,12 @@ def main(model_path: str, scenario: str, load_again: bool = False):
     ## Join municipal codes ('CRA') to names ('NAME_2')
     df = join_to_gpd(df, 'CRA', mun, 'NAME_2', 
                       ['CRA', 'TECH_GROUP', 'SUBTECH_GROUP', 'Value', 'A'], '_A')
+    df['A'] = df.A + '_A'
+    
+    
+    # Convert very small numbers to EPS
+    idx = df.Value < 1e-10
+    df.loc[idx, 'Value'] = 'EPS'
     
     incfile = IncFile(name='SUBTECHGROUPKPOT', path='Output',
                 prefix='\n'.join([
@@ -339,6 +360,9 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                 suffix='\n'.join([
                     "",
                     ";",
+                    "$onmulti",
+                    "$include '../data/OFFSHORE_SUBTECHGROUPKPOT.inc'",
+                    "$offmulti"
                 ]))
     incfile.body_prepare(['A', 'TECH_GROUP'], 'SUBTECH_GROUP', values='Value')
     # incfile.body.index.names = ['', '']
