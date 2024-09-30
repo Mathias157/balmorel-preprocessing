@@ -57,4 +57,4 @@ The processing is initiated through a snakemake command in a command-line interf
 snakemake -s workflow/preprocessing
 snakemake -s workflow/clustering
 ```
-A plot of the processes can be found [here](src/Analysis/snakemake_dag.pdf). Note that vre_profiles.py and existing_powerplants is currently not part of the snakemake process, but the output from vre_profiles.py is used in the offshore_wind process. 
+A plot of the processes can be found [here](src/Analysis/preprocessing_dag.pdf). Note that vre_profiles.py and existing_powerplants is currently not part of the snakemake process, but the output from vre_profiles.py is used in the offshore_wind process. 
