@@ -19,7 +19,7 @@ import xarray as xr
 from geofiles import prepared_geofiles
 from scipy.sparse import csr_matrix
 from Submodules.municipal_template import DataContainer
-from createDH import DistrictHeatAAU
+from exo_heat_demand import DistrictHeatAAU
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import kneighbors_graph
@@ -162,6 +162,7 @@ def collect_clusterdata(plot_cf: bool = False):
 
 
 def cluster(con: DataContainer,
+            data_list: list,
             n_clusters: int,
             use_connectivity: bool = True,
             manual_corrections: list = [
@@ -176,14 +177,7 @@ def cluster(con: DataContainer,
             data_remark: str = 'all combined + xy coords'):
     
     # Stack data for clustering
-    X = np.vstack((
-        con.muni.coords['lat'].data,
-        con.muni.coords['lon'].data,
-        con.muni.electricity_demand_mwh.sum(dim=['year', 'user']),
-        con.muni.heat_demand_mwh.sum(dim=['year', 'user']),
-        con.muni.wind_cf.data,
-        con.muni.solar_cf.data,
-    )).T
+    X = np.vstack([eval(data_evaluation) for data_evaluation in data_list]).T
 
     # K-Means Clustering
     # est = KMeans(n_clusters=n_clusters)
@@ -244,6 +238,7 @@ def cluster(con: DataContainer,
         # ax.set_title('%d clusters, %s linkage, %s'%(n_clusters, name, connection_remark))    
         
         ax.axes.axis('off')
+        plt.show()
         
         # fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
         #             transparent=True,
@@ -273,4 +268,12 @@ def cluster(con: DataContainer,
 
 if __name__ == '__main__':
     collected = collect_clusterdata()
-    fig, ax, clustering = cluster(collected, 20)
+    fig, ax, clustering = cluster(collected, [
+        "collected.muni.coords['lat'].data",
+        "collected.muni.coords['lon'].data",
+        "collected.muni.electricity_demand_mwh.sum(dim=['year', 'user'])",
+        "collected.muni.heat_demand_mwh.sum(dim=['year', 'user'])",
+        'collected.muni.wind_cf.data',
+        'collected.muni.solar_cf.data'
+    ],
+    6)
