@@ -68,7 +68,7 @@ rule format_vpdk21_data:
 
 rule format_dkstat_industry_data:
     input:
-        [r"Data\Danmarks Statistik\Industriforbrug Type.xlsx",
+        [f"{data_path}Danmarks Statistik/Industriforbrug Type.xlsx",
         f"{modules_path}format_dkstat.py"]
     output:
         f"{data_path}Danmarks Statistik/industry_demand.nc"
@@ -121,7 +121,7 @@ rule exo_heat_demand:
 # 4. Transport Demand
 rule format_dkstat_transport_data:
     input:
-        [r"Data\Danmarks Statistik\Transportforbrug Type.xlsx",
+        [f"{data_path}Danmarks Statistik/Transportforbrug Type.xlsx",
         f"{modules_path}format_dkstat.py"]
     output:
         f"{data_path}Danmarks Statistik/transport_demand.csv"
