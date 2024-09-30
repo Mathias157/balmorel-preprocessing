@@ -44,6 +44,14 @@ def main():
     f = combine_dicts([load_set('districtheat_sets')])
     create_incfiles(str(format_set(f, 1)), 'Output')
     
+    ## Add loading of offshore sets
+    for file in ['CCCRRRAAA', 'RRRAAA', 'AAA']:
+        with open('Output/%s.inc'%file, 'a+') as f:
+            # content = f.read()
+            f.write('\n$onmulti')
+            f.write('\n$include "../data/OFFSHORE_%s.inc"'%file)
+            f.write('\n$offmulti')
+    
     
     # 1.2 Create INDUSTRY sets
     f = combine_dicts([
@@ -69,22 +77,6 @@ def main():
     with open('Output/INDIVUSERS_INDIVUSERS_AAA.inc', 'w') as f:
         f.write(file)
     
-    # AGKN - Allowed investments how to do?
-    # Hack for now
-    # with open('./Output/AGKN.inc', 'w') as f:
-    #     for a in areas.index:
-    #         f.write("""
-    #                 AGKN('%s', GGG) = AGKN('DK2_Large',GGG) + AGKN('DK2_NoDH',GGG);
-    #                 AGKN('%s', 'GNR_ST_NUCL_CND_E-33') = YES;
-    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GWND)  = YES  ;
-    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GHSTO) = YES  ;          
-    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTO) = YES  ;          
-    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GESTOS) = YES ;          
-    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLE) = YES  ;          
-    #                 AGKN('%s', GGG)$(GDATA(GGG,"GDTYPE") EQ GSOLH) = YES  ;          
-    #                 """%tuple(8*[a + '_A']))
-    #                 #.replace(' ', '')%tuple(8*[a + '_A']))
-
 
 if __name__ == '__main__':
     main()
