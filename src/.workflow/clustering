@@ -1,0 +1,26 @@
+# Load the config file at the top
+configfile: "assumptions.yaml"
+
+out_path     = "Output/"
+data_path    = "Data/"
+modules_path = "Modules/"
+submod_path  = "Modules/Submodules/"
+balmorel_path = config['balmorel_input']['model_path']
+scenario = config['balmorel_input']['scenario']
+balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
+
+# 1. General Purpose
+rule all:
+    input:
+        [f"{out_path}WND_VAR_T.inc",
+        f"{balmorel_sc_folder}{scenario}_input_data.gdx"]
+
+
+rule clustering:
+    output:
+        [f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+        f"{out_path}WND_VAR_T.inc"]
+    script:
+        """
+        python {modules_path}clustering.py --model-path={balmorel_sc_folder} --scenario={scenario}
+        """

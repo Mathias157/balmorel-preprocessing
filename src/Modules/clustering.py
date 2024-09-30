@@ -13,6 +13,8 @@ Created on 11.09.2024
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcol
+from pybalmorel import Balmorel
+import click
 import pandas as pd
 import numpy as np
 import xarray as xr
@@ -38,14 +40,6 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
         cmap(np.linspace(minval, maxval, n)))
     return new_cmap
     
-style = 'ppt'
-
-if style == 'report':
-    plt.style.use('default')
-    fc = 'white'
-elif style == 'ppt':
-    plt.style.use('dark_background')
-    fc = 'none'
 
 #%% ------------------------------- ###
 ###        1. 
@@ -266,14 +260,35 @@ def cluster(con: DataContainer,
     
     return fig, ax, clustering
 
+@click.command()
+@click.option('--model-path', type=str, required=True, help='Balmorel model path')
+@click.option('--scenario', type=str, required=True, help='Balmorel scenario')
+@click.option('--plot-style', type=str, required=False, help='Style of the plot. Options are "report" (bright background) or "ppt" (dark background)')
+def main(model_path: str, scenario: str, plot_style: str = 'report'):
+
+    if plot_style == 'report':
+        plt.style.use('default')
+        fc = 'white'
+    elif plot_style == 'ppt':
+        plt.style.use('dark_background')
+        fc = 'none'
+
+    # Collect Balmorel input data from scenario
+    model = Balmorel(model_path)
+    model.load_incfiles(scenario)
+
+    # Old collection and clustering    
+    # collected = collect_clusterdata()
+    # fig, ax, clustering = cluster(collected, [
+    #     "collected.muni.coords['lat'].data",
+    #     "collected.muni.coords['lon'].data",
+    #     "collected.muni.electricity_demand_mwh.sum(dim=['year', 'user'])",
+    #     "collected.muni.heat_demand_mwh.sum(dim=['year', 'user'])",
+    #     'collected.muni.wind_cf.data',
+    #     'collected.muni.solar_cf.data'
+    # ],
+    # 6)
+
+
 if __name__ == '__main__':
-    collected = collect_clusterdata()
-    fig, ax, clustering = cluster(collected, [
-        "collected.muni.coords['lat'].data",
-        "collected.muni.coords['lon'].data",
-        "collected.muni.electricity_demand_mwh.sum(dim=['year', 'user'])",
-        "collected.muni.heat_demand_mwh.sum(dim=['year', 'user'])",
-        'collected.muni.wind_cf.data',
-        'collected.muni.solar_cf.data'
-    ],
-    6)
+    main()

@@ -7,9 +7,12 @@ __pycache__
 .new_env/*
 prebalm
 *.pyc
-snakemake_dag
-snakemake_dag.*
-!snakemake_dag.pdf
+
+clustering_dot_source.txt
+clustering_dag
+preprocessing_dot_source.txt
+preprocessing_dag
+
 gurobi.log
 
 exo_elec_dem_conversion_dictionaries.pkl
