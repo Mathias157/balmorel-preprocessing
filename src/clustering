@@ -1,0 +1,37 @@
+# Load the config file at the top
+configfile: "assumptions.yaml"
+
+out_path     = "Output/"
+data_path    = "Data/"
+modules_path = "Modules/"
+submod_path  = "Modules/Submodules/"
+balmorel_path = config['balmorel_input']['model_path']
+scenario = config['balmorel_input']['scenario']
+balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
+
+# 1. General Purpose
+rule all:
+    input:
+        [f"{out_path}WND_VAR_T.inc",
+        ]
+
+rule collect_balmorel_input:
+    output:
+        f"{balmorel_sc_folder}{scenario}_input_data.gdx"
+    run:
+        from pybalmorel import Balmorel
+        model = Balmorel(balmorel_path)
+        model.load_incfiles(scenario)
+
+rule clustering:
+    input:
+        [
+            f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+            f"{modules_path}clustering.py"
+        ]
+    output:
+        [f"{out_path}WND_VAR_T.inc"]
+    shell:
+        """
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario}
+        """

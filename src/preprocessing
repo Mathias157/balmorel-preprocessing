@@ -1,10 +1,10 @@
 # Load the config file at the top
 configfile: "assumptions.yaml"
 
-out_path     = "Output/"
-data_path    = "Data/"
+out_path = "Output/"
+data_path = "Data/"
 modules_path = "Modules/"
-submod_path  = "Modules/Submodules/"
+submod_path = "Modules/Submodules/"
 
 # 1. General Purpose
 rule all:
