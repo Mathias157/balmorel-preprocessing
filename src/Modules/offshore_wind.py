@@ -88,7 +88,7 @@ def create_profiles(profiles: xr.Dataset, year: int = 2012):
                 suffix="\n".join([
                     "",   
                     ";",                 
-                    "WND_VAR_T(AAA,SSS,TTT) = WND_VAR_T1(SSS,TTT,AAA);",
+                    "WND_VAR_T(AAA,SSS,TTT)$WND_VAR_T1(SSS,TTT,AAA) = WND_VAR_T1(SSS,TTT,AAA);",
                     "WND_VAR_T1(SSS,TTT,AAA) = 0;"
                 ]))
     profiles.columns.name = ''
@@ -129,16 +129,14 @@ def distribute_offshore_potential(total_potential: float, geofile: gpd.GeoDataFr
     temp = geofile.copy().to_crs('EPSG:4093') # To geocentric (meters)
     geofile['Values'] = temp.geometry.area / temp.geometry.area.sum() * total_potential
     geofile['TECH_GROUP'] = 'WINDTURBINE_OFFSHORE'
-    
-    print(geofile.drop(columns='geometry').pivot_table(index=['Name', 'TECH_GROUP']))
+    geofile['SUBTECH_GROUP'] = 'RG1'
     
     # SUBTECHGROUPKPOT
     f = IncFile(name='OFFSHORE_SUBTECHGROUPKPOT', path='Output',
                 prefix="TABLE SUBTECHGROUPKPOT(CCCRRRAAA, TECH_GROUP, SUBTECH_GROUP)  'Subtechnology group capacity restriction by geography (MW)'\n",
                 suffix='\n;')
-    f.body = geofile.drop(columns='geometry').pivot_table(index=['Name', 'TECH_GROUP'], values='Values', aggfunc='sum')
-    f.body.columns.name = 'RG1'
-    f.body.index.names = ['', '']
+    f.body = geofile.drop(columns='geometry')
+    f.body_prepare(index=['Name', 'TECH_GROUP'], columns='SUBTECH_GROUP', values='Values')
     f.save()
     
 #%% ------------------------------- ###

@@ -213,7 +213,10 @@ rule grids:
 # 7. Other
 rule offshore_wind:
     input:
-        f'{out_path}VRE/2012_offshore_wind.nc'
+        [
+            f'{out_path}VRE/2012_offshore_wind.nc',
+            f"{modules_path}offshore_wind.py"
+        ]
     params:
         weather_year=config['timeseries']['weather_year'],
         total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential']
