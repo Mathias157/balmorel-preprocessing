@@ -202,6 +202,10 @@ def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
                         f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF4 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
                         f"DISLOSS_E_AG(IA,G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG3_OFF5 AND (AGKN(IA,G) OR SUM(Y, GKFX(Y,IA,G))))={wind_offshore_loss['RG3']};",
                     ]))
+    
+    # Add larger loss for Nordsøen
+    f.body += f"\nDISLOSS_E_AG('Nordsoeen', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1) = {wind_offshore_loss['RG3']};"
+    
     f.save()    
 
     

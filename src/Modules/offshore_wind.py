@@ -129,7 +129,7 @@ def distribute_offshore_potential(total_potential: float, geofile: gpd.GeoDataFr
     temp = geofile.copy().to_crs('EPSG:4093') # To geocentric (meters)
     geofile['Values'] = temp.geometry.area / temp.geometry.area.sum() * total_potential
     geofile['TECH_GROUP'] = 'WINDTURBINE_OFFSHORE'
-    geofile['SUBTECH_GROUP'] = 'RG1'
+    geofile['SUBTECH_GROUP'] = 'RG1_OFF1'
     
     # SUBTECHGROUPKPOT
     f = IncFile(name='OFFSHORE_SUBTECHGROUPKPOT', path='Output',
