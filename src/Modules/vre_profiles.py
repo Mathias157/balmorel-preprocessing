@@ -315,6 +315,8 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     # Getting a specific profile
     pv.loc[:, getattr(pv, the_index).values[0]]
 
+    # Save profile
+    pv.to_netcdf('pv_%s'%cutout_path)
 
     ### 2.7 Calculate Wind Turbine Potential
     capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_wind
@@ -328,6 +330,9 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
     # Getting a specific profile
     wind.loc[:, getattr(wind, the_index).values[0]]
+
+    # Save profile
+    wind.to_netcdf('wind_%s'%cutout_path)
 
     #%%
     # Plot data (done with mix municipality and 2024 balmorelhighres )
