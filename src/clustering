@@ -12,8 +12,7 @@ balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 # 1. General Purpose
 rule all:
     input:
-        [f"{out_path}DE.inc",
-        ]
+        [f"{out_path}DE.inc"]
 
 rule collect_balmorel_input:
     output:
@@ -42,6 +41,9 @@ rule clustering:
 
 rule convert_demands:
     input:
-        f"{out_path}clustering.gpkg"
+        [
+            f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+            f"{out_path}clustering.gpkg"
+        ]
     output:
         f"{out_path}DE.inc"

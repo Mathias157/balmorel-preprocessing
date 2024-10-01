@@ -6,4 +6,4 @@ balmorel_input:
 clustering:
   data_for_clustering: "DE, DH, WNDFLH, SOLEFLH"
   aggregation_functions: "sum, sum, mean, mean"
-  cluster_size: 6
+  cluster_size: 20
