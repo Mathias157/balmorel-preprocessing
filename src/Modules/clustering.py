@@ -14,10 +14,14 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcol
 from pybalmorel import Balmorel
+from pybalmorel.utils import symbol_to_df
+from Submodules.utils import convert_names
 import click
 import pandas as pd
 import numpy as np
 import xarray as xr
+import gams
+import geopandas as gpd
 from geofiles import prepared_geofiles
 from scipy.sparse import csr_matrix
 from Submodules.municipal_template import DataContainer
@@ -155,117 +159,179 @@ def collect_clusterdata(plot_cf: bool = False):
     return con
 
 
-def cluster(con: DataContainer,
-            data_list: list,
+def apply_filters(df: pd.DataFrame, value_name: str, aggfunc: str = 'sum'):
+    if 'A' in df.columns:
+        df['R'] = df.A.str.split('_', expand=True)[0]
+        
+    df = df.pivot_table(index='R', values='Value', aggfunc=aggfunc)
+    df.columns = [value_name]
+    
+    return df.query('R != "Nordsoeen"')
+
+columns = {'DE' : ['Y', 'R', 'DEUSER', 'Value'],
+           'DH' : ['Y', 'A', 'DHUSER', 'Value'],
+           'WNDFLH' : ['A', 'Value'],
+           'SOLEFLH' : ['A', 'Value']}
+
+def gather_data(db: gams.GamsDatabase,  
+                cluster_params: list,
+                aggfuncs: list):
+    
+    for i in range(len(cluster_params)):
+        try:
+            df = symbol_to_df(db, cluster_params[i], columns[cluster_params[i]])
+        except KeyError:
+            print('Column names not found for %s'%cluster_params[i])
+            df = symbol_to_df(db, cluster_params[i])        
+            
+        if i == 0:
+            collected_data = apply_filters(df, cluster_params[i], aggfunc=aggfuncs[i])
+            continue
+            
+        collected_data = collected_data.join(
+            apply_filters(df, cluster_params[i], aggfunc=aggfuncs[i]),
+            how='outer'
+        )
+        
+    return collected_data.to_xarray().rename({'R':'IRRRE'})
+
+def cluster(collected_data: pd.DataFrame,
             n_clusters: int,
             use_connectivity: bool = True,
             manual_corrections: list = [
-                ['Bornholm', 'Christiansø', 1],
-                ['Bornholm', 'Dragør', 1],
-                ['Esbjerg', 'Fanø', 1],
-                ['Rødovre', 'Frederiksberg', 1],
+                ['Bornholm', 'Christiansoe', 1],
+                ['Bornholm', 'Dragoer', 1],
+                ['Esbjerg', 'Fanoe', 1],
+                ['Roedovre', 'Frederiksberg', 1],
                 ['Slagelse', 'Nyborg', 0],
-                ['Samsø', 'Kalundborg', 0]
+                ['Samsoe', 'Kalundborg', 0]
             ],
+            linkage: str = 'Ward',
             connection_remark: str = 'connec. included + artifical',
             data_remark: str = 'all combined + xy coords'):
-    
-    # Stack data for clustering
-    X = np.vstack([eval(data_evaluation) for data_evaluation in data_list]).T
 
-    # K-Means Clustering
-    # est = KMeans(n_clusters=n_clusters)
-    # est.fit(X)
-
-    # Agglomorative clustering
-    linkage = 'Ward'
-
-    X = StandardScaler().fit_transform(X) # Normalise dataset
-    ## Make higher weighting of coordinates..?
-    # X[:,0] = X[:,0]*10000
-    # X[:,1] = X[:,1]*10000
-
+    # collected_data = collected_data.drop_sel(IRRRE='Christiansoe')
 
     # Connectivity
     if use_connectivity:
         ## Use connectivity from Balmorel (Submodules/get_grid.py)
-        connectivity = xr.load_dataset(r'Data\Power Grid\municipal_connectivity.nc')
+        connectivity = xr.load_dataset('Data/BalmorelData/municipal_connectivity.nc')
+        connectivity_old, connectivity = convert_names('Modules/Submodules/exo_grid_conversion_dictionaries.pkl', connectivity, 'connection')
 
         ## Manual Corrections
         for manual_connection in manual_corrections:
             connectivity.connection.loc[manual_connection[0], manual_connection[1]] = manual_connection[2]
             connectivity.connection.loc[manual_connection[1], manual_connection[0]] = manual_connection[2]
             
-        knn_graph = connectivity.connection.data # get numpy array
+        
+        ## Make symmetric index, so the indices fit
+        collected_data = collected_data.assign_coords(IRRRI=collected_data.coords['IRRRE'].data)
+        
+        ## Combine with data
+        # connectivity = connectivity.drop_sel(IRRRE='Christiansoe', IRRRI='Christiansoe')
+        X = collected_data.merge(connectivity)
+        
+        ## Make symmetric connectivity graph 
+        knn_graph = X.connection.data # get numpy array
         knn_graph = csr_matrix(knn_graph) # make dense format
+        
+        ## Drop the connection variable again
+        X = X.drop_vars('connection')
     else:
         knn_graph = None # don't apply connectivity constraints
+        X = collected_data
 
+    # Prepare data for clustering
+    Y = np.vstack([X.get(variable).data for variable in X.data_vars]).T
+    Y = np.nan_to_num(Y)
+    Y = StandardScaler().fit_transform(Y) # Normalise dataset
+    
+    ## Make higher weighting of certain coordinates..?
+    # X[:,0] = X[:,0]*10000
+    # X[:,1] = X[:,1]*10000
+    
     # Perform Clustering
     agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage.lower(),
                                 connectivity=knn_graph)
-    agg.fit(X)
+    agg.fit(Y)
     
+    # Merge labels to xarray
+    X['cluster_groups'] = (['IRRRE'], agg.labels_)
     
     # Plot the different clustering techniques
-    clustering = con.get_polygons()
-    for name, labelling in [(linkage, agg.labels_)]:
-        
-        # Set labels
-        clustering['cluster_group'] = labelling
+    ## Get geofiles
+    the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
+    geofiles.index.name = 'IRRRE'
+    X = X.merge(geofiles['geometry'].to_xarray())
+    
 
-        # Plot clustering
-        fig, ax = plt.subplots()
-        clustering.plot(column='cluster_group', 
-                  ax=ax, 
-                #   legend=True,
-                  cmap=truncate_colormap(cmap, 0.2, 1))
-        
-        if knn_graph == None:
-            connection_remark = 'no connectivity'
+    # Plot clustering
+    fig, ax = plt.subplots()
+    
+    clustering = gpd.GeoDataFrame({'cluster_group' : X.cluster_groups.data},
+                            geometry=X.geometry.data)
+    
+    clustering.plot(ax=ax, column='cluster_group',
+                    cmap=truncate_colormap(cmap, 0.2, 1))
+            
+    if knn_graph == None:
+        connection_remark = 'no connectivity'
 
-        plot_title = '%s, %d clusters, %s\ndata: %s'%(name, 
-                                                    n_clusters,
-                                                    connection_remark,
-                                                    data_remark) 
-        ax.set_title(plot_title)
-        # ax.set_title('%d clusters, %s linkage, %s'%(n_clusters, name, connection_remark))    
-        
-        ax.axes.axis('off')
-        plt.show()
-        
-        # fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
-        #             transparent=True,
-        #             bbox_inches='tight')
-        
-        ### Label municipalities
-        # clustering.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
-        
-        ### Look at specific coordinates    
-        ## København region - Frederiksberg have 0 in both wind and solar cf, which may drive the clustering weirdly 
-        # ax.set_xlim([12.3, 12.8])
-        # ax.set_ylim([55.5, 55.8])
-        ## Nordjylland region - Nær Læsø
-        # ax.set_xlim([10, 11.3])
-        # ax.set_ylim([57.0, 57.5])
-        ## Vestjylland region - Nær Fanø
-        # ax.set_xlim([8.2, 9])
-        # ax.set_ylim([55.2, 55.7])
-        ## Storebælt
-        # ax.set_xlim([10.3, 11.6])
-        # ax.set_ylim([55.0, 55.6])
-        ## Samsø
-        # ax.set_xlim([10, 11.5])
-        # ax.set_ylim([55.4, 56.1])
+    plot_title = '%s, %d clusters, %s\ndata: %s'%(linkage, 
+                                                n_clusters,
+                                                connection_remark,
+                                                data_remark) 
+    ax.set_title(plot_title)
+    # ax.set_title('%d clusters, %s linkage, %s'%(n_clusters, name, connection_remark))    
+    
+    ax.axes.axis('off')
+    plt.show()
+    
+    # fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
+    #             transparent=True,
+    #             bbox_inches='tight')
+    
+    ### Label municipalities
+    # clustering.reset_index().apply(lambda x: ax.annotate(text=x['municipality'], xy=(x.geometry.centroid.x, x.geometry.centroid.y), ha='center'), axis=1)
+    
+    ### Look at specific coordinates    
+    ## København region - Frederiksberg have 0 in both wind and solar cf, which may drive the clustering weirdly 
+    # ax.set_xlim([12.3, 12.8])
+    # ax.set_ylim([55.5, 55.8])
+    ## Nordjylland region - Nær Læsø
+    # ax.set_xlim([10, 11.3])
+    # ax.set_ylim([57.0, 57.5])
+    ## Vestjylland region - Nær Fanø
+    # ax.set_xlim([8.2, 9])
+    # ax.set_ylim([55.2, 55.7])
+    ## Storebælt
+    # ax.set_xlim([10.3, 11.6])
+    # ax.set_ylim([55.0, 55.6])
+    ## Samsø
+    # ax.set_xlim([10, 11.5])
+    # ax.set_ylim([55.4, 56.1])
     
     return fig, ax, clustering
 
 @click.command()
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
+@click.option('--cluster-params', type=str, required=True, help='Comma-separated list of Balmorel input data to cluster (use the symbol names, e.g. DE for annual electricity demand)')
+@click.option('--aggregation-functions', type=str, required=True, help='Comma-separated list of aggregation functions used for clustering (E.g. sum for annual electricity demand and mean for wind full-load hours)')
+@click.option('--cluster-size', type=int, required=True, help='How many clusters?')
 @click.option('--plot-style', type=str, required=False, help='Style of the plot. Options are "report" (bright background) or "ppt" (dark background)')
-def main(model_path: str, scenario: str, plot_style: str = 'report'):
+def main(model_path: str, 
+         scenario: str, 
+         cluster_params: str,
+         aggregation_functions: str,
+         cluster_size: int,
+         plot_style: str = 'report'):
 
+    # Convert comma-separated string to list
+    cluster_params_list = cluster_params.replace(' ', '').split(',')
+    aggfuncs = aggregation_functions.replace(' ', '').split(',')
+
+    # Plot styles
     if plot_style == 'report':
         plt.style.use('default')
         fc = 'white'
@@ -277,17 +343,12 @@ def main(model_path: str, scenario: str, plot_style: str = 'report'):
     model = Balmorel(model_path)
     model.load_incfiles(scenario)
 
-    # Old collection and clustering    
-    # collected = collect_clusterdata()
-    # fig, ax, clustering = cluster(collected, [
-    #     "collected.muni.coords['lat'].data",
-    #     "collected.muni.coords['lon'].data",
-    #     "collected.muni.electricity_demand_mwh.sum(dim=['year', 'user'])",
-    #     "collected.muni.heat_demand_mwh.sum(dim=['year', 'user'])",
-    #     'collected.muni.wind_cf.data',
-    #     'collected.muni.solar_cf.data'
-    # ],
-    # 6)
+    # Get parameters for clustering    
+    collected = gather_data(model.input_data[scenario], 
+                            cluster_params_list, aggfuncs)
+    
+    # Do clustering
+    fig, ax, clustering = cluster(collected, cluster_size)
 
 
 if __name__ == '__main__':

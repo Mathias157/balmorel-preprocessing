@@ -45,16 +45,16 @@ def store_balmorel_input(symbol: str,
         f = pd.read_parquet('Data/BalmorelData/%s.gzip'%symbol)
     else:
         # Check Balmorel input has been loaded
-        if not('muni_input_data.gdx' in os.listdir(os.path.join(balm.path, 'muni', 'model'))) or load_again == True:      
+        if not('%s_input_data.gdx'%scenario in os.listdir(os.path.join(balm.path, scenario, 'model'))) or load_again == True:      
             print('\nLoading results into %s_input_data.gdx...\n'%scenario)
             balm.load_incfiles(scenario)
         else:
             print('\n%s_input_data.gdx already loaded!'%scenario)
-            print('Loading %s_input_data.gdx...\n'%(os.path.join(balm.path, 'muni', 'model', scenario)))
+            print('Loading %s_input_data.gdx...\n'%(os.path.join(balm.path, scenario, 'model', scenario)))
             
             # Load the input
             ws = GamsWorkspace()
-            balm.input_data[scenario] = ws.add_database_from_gdx(os.path.join(balm.path, 'muni', 'model', '%s_input_data.gdx'%scenario))
+            balm.input_data[scenario] = ws.add_database_from_gdx(os.path.join(balm.path, scenario, 'model', '%s_input_data.gdx'%scenario))
 
         # Get symbol
         f = symbol_to_df(balm.input_data[scenario], symbol, columns)
@@ -101,7 +101,7 @@ def get_grid(balmorel_model_path: str,
         XINVCOST = store_balmorel_input('XINVCOST',
                             ['Y', 'RE', 'RI', 'connection'],
                             balmorel_model_path, scenario, load_again,
-                            lambda x: x.query("Y == '2050' and (RE.str.contains('DK_') and RI.str.contains('DK_'))"),
+                            lambda x: x.query("Y == '2050' and (RE.str.contains('DK_') and RI.str.contains('DK_'))"), # Hardcoded for old database
                             False)
 
         ## Convert names and get 0/1 2D array

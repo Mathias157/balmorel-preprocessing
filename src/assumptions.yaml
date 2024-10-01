@@ -1,6 +1,6 @@
 balmorel_input:
   model_path: "../../Balmorel"
-  scenario: "new_muni"
+  scenario: "muni"
   load_again: False
   
 grid_assumptions:

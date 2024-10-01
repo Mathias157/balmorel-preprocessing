@@ -1,5 +1,5 @@
 # Load the config file at the top
-configfile: "assumptions.yaml"
+configfile: "clustering.yaml"
 
 out_path     = "Output/"
 data_path    = "Data/"
@@ -29,9 +29,13 @@ rule clustering:
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
             f"{modules_path}clustering.py"
         ]
+    params:
+        cluster_params=config['clustering']['data_for_clustering'],
+        aggregation_functions=config['clustering']['aggregation_functions'],
+        cluster_size=config['clustering']['cluster_size']
     output:
         [f"{out_path}WND_VAR_T.inc"]
     shell:
         """
-        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario}
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size}
         """
