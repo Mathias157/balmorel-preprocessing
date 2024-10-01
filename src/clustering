@@ -1,7 +1,7 @@
 # Load the config file at the top
 configfile: "clustering.yaml"
 
-out_path     = "Output/"
+out_path     = "ClusterOutput/"
 data_path    = "Data/"
 modules_path = "Modules/"
 submod_path  = "Modules/Submodules/"
@@ -12,7 +12,7 @@ balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 # 1. General Purpose
 rule all:
     input:
-        [f"{out_path}WND_VAR_T.inc",
+        [f"{out_path}DE.inc",
         ]
 
 rule collect_balmorel_input:
@@ -34,8 +34,14 @@ rule clustering:
         aggregation_functions=config['clustering']['aggregation_functions'],
         cluster_size=config['clustering']['cluster_size']
     output:
-        [f"{out_path}WND_VAR_T.inc"]
+        [f"{out_path}clustering.gpkg"]
     shell:
         """
         python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size}
         """
+
+rule convert_demands:
+    input:
+        f"{out_path}clustering.gpkg"
+    output:
+        f"{out_path}DE.inc"

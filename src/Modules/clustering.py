@@ -269,7 +269,9 @@ def cluster(collected_data: pd.DataFrame,
     fig, ax = plt.subplots()
     
     clustering = gpd.GeoDataFrame({'cluster_group' : X.cluster_groups.data},
-                            geometry=X.geometry.data)
+                                  index=X.coords['IRRRE'].data,
+                            geometry=X.geometry.data,
+                            crs='EPSG:4326')
     
     clustering.plot(ax=ax, column='cluster_group',
                     cmap=truncate_colormap(cmap, 0.2, 1))
@@ -348,7 +350,8 @@ def main(model_path: str,
     
     # Do clustering
     fig, ax, clustering = cluster(collected, cluster_size, connection_remark='', data_remark=cluster_params)
-    fig.savefig('Output/Figures/Clustering/clustering.pdf', transparent=True, bbox_inches='tight')
+    fig.savefig('ClusterOutput/Figures/clustering.pdf', transparent=True, bbox_inches='tight')
+    clustering.to_file('ClusterOutput/clustering.gpkg')
 
 if __name__ == '__main__':
     main()
