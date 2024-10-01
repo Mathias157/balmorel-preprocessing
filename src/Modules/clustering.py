@@ -285,7 +285,6 @@ def cluster(collected_data: pd.DataFrame,
     # ax.set_title('%d clusters, %s linkage, %s'%(n_clusters, name, connection_remark))    
     
     ax.axes.axis('off')
-    plt.show()
     
     # fig.savefig(r'C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Deliverables\Spatial Resolution\Investigations\240912 - Initial Clustering Method Tests'+'/'+plot_title.replace('data: ', '_').replace('\n', '').replace(' clusters', 'N').replace(' ', '_').replace(',', '') + '.png',
     #             transparent=True,
@@ -348,8 +347,8 @@ def main(model_path: str,
                             cluster_params_list, aggfuncs)
     
     # Do clustering
-    fig, ax, clustering = cluster(collected, cluster_size)
-
+    fig, ax, clustering = cluster(collected, cluster_size, connection_remark='', data_remark=cluster_params)
+    fig.savefig('Output/Figures/Clustering/clustering.pdf', transparent=True, bbox_inches='tight')
 
 if __name__ == '__main__':
     main()

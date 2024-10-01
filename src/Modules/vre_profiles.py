@@ -10,7 +10,7 @@ See the following documentation, for understanding how atlite works:
 REQUIRED:
     Using ERA5 requires an API-key from Copernicus
     1) Sign up at https://cds.climate.copernicus.eu/#!/home
-    2) Create a file called .cdsapirc in your home drive (typically C:\Users\USERNAME)
+    2) Create a file called .cdsapirc in your home drive (typically C:/Users/USERNAME)
         Copy paste the UID and API key that you got into .cdsapirc in the following format:
         url: https://cds.climate.copernicus.eu/api/v2
         key: UID:API  
