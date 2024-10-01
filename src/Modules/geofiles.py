@@ -75,7 +75,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
     if choice.replace(' ','').lower() == 'dkmunicipalities':
     # Filter away unnescescary columns
     # areas = areas[['NAME_1', 'NAME_2', 'geometry']]
-        areas = gpd.read_file(r'.\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
+        areas = gpd.read_file('Data/Shapefiles/Denmark/Adm/gadm36_DNK_2.shp')
         # # Aggregate hovedstaden - MODIFY TO USE NUTS3 AREAS FOR CAPITAL REGION
         # idx = (areas.NAME_1 == 'Hovedstaden') & (areas.NAME_2 != 'Bornholm') & (areas.NAME_2 != 'Christiansø')
         # hovedstaden = MultiPolygon(areas[idx].geometry.cascaded_union)
@@ -101,7 +101,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
     if choice.replace(' ','').lower() == 'dkmunicipalities_names':
         # Filter away unnescescary columns
         # areas = areas[['NAME_1', 'NAME_2', 'geometry']]
-        areas = gpd.read_file(r'.\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
+        areas = gpd.read_file('Data/Shapefiles/Denmark/Adm/gadm36_DNK_2.shp')
         # # Aggregate hovedstaden - MODIFY TO USE NUTS3 AREAS FOR CAPITAL REGION
         # idx = (areas.NAME_1 == 'Hovedstaden') & (areas.NAME_2 != 'Bornholm') & (areas.NAME_2 != 'Christiansø')
         # hovedstaden = MultiPolygon(areas[idx].geometry.cascaded_union)
@@ -137,7 +137,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         
     # NUTS3 (Also contains NUTS2, and NUTS1)
     elif choice.replace(' ','').lower() == 'nuts1':
-        areas = gpd.read_file(r'.\Data\Shapefiles\NUTS_RG_01M_2021_4326\NUTS_RG_01M_2021_4326.shp')
+        areas = gpd.read_file(r'Data\Shapefiles\NUTS_RG_01M_2021_4326\NUTS_RG_01M_2021_4326.shp')
         areas = areas[(areas.LEVL_CODE == 1)] 
         
         # The index for next file
@@ -147,7 +147,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         # areas = areas[areas.NUTS_ID.str.find('DK') != -1]
     
     elif choice.replace(' ','').lower() == 'nuts2':
-        areas = gpd.read_file(r'.\Data\Shapefiles\NUTS_RG_01M_2021_4326\NUTS_RG_01M_2021_4326.shp')
+        areas = gpd.read_file(r'Data\Shapefiles\NUTS_RG_01M_2021_4326\NUTS_RG_01M_2021_4326.shp')
         areas = areas[(areas.LEVL_CODE == 2)] 
         
         # The index for next file
@@ -157,7 +157,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         # areas = areas[areas.NUTS_ID.str.find('DK') != -1]
         
     elif choice.replace(' ','').lower() == 'nuts3':
-        areas = gpd.read_file(r'.\Data\Shapefiles\NUTS_RG_01M_2021_4326\NUTS_RG_01M_2021_4326.shp')
+        areas = gpd.read_file(r'Data\Shapefiles\NUTS_RG_01M_2021_4326\NUTS_RG_01M_2021_4326.shp')
         areas = areas[(areas.LEVL_CODE == 3)]
         
         # The index for next file
@@ -168,7 +168,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         
     # Nordpool market regions
     elif choice.replace(' ','').lower() == 'nordpool':
-        p = r'.\Data\Shapefiles\NordpoolRegions\geojson'
+        p = r'Data\Shapefiles\NordpoolRegions\geojson'
         
         areas = gpd.GeoDataFrame()
         for file in os.listdir(p):
@@ -179,7 +179,7 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         # areas = areas[(areas.zoneName == 'DK_1') | (areas.zoneName == 'DK_2')]
     
     elif choice.replace(' ','').lower() == 'nordpoolreal':
-        p = r'.\Data\Shapefiles\NordpoolRegions\geojson_real'
+        p = r'Data\Shapefiles\NordpoolRegions\geojson_real'
         
         i = 0
         areas = gpd.GeoDataFrame({'RRR' : []})
@@ -205,11 +205,11 @@ def prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, gpd.GeoData
         areas = areas[~areas.id.isnull()]
     
     elif choice.replace(' ','').lower() == 'balmorelvreareas':
-        areas = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmorelVREAreas.gpkg')
+        areas = gpd.read_file(r'Data\Shapefiles\BalmorelVRE\BalmorelVREAreas.gpkg')
         area_names = 'Region' 
         country_code = 'Country'
     elif choice.replace(' ','').lower() == 'antbalm':
-        areas = gpd.read_file(r'.\Data\Shapefiles\240112 AntBalmMap.gpkg')
+        areas = gpd.read_file(r'Data\Shapefiles\240112 AntBalmMap.gpkg')
         areas.loc[(areas.ISO_A3 == 'FIN'), 'id'] = 'FIN'
         areas.loc[(areas.ISO_A3 == 'DZA'), 'id'] = 'DZA'
         areas.loc[(areas.ISO_A3 == 'EGY'), 'id'] = 'EGY'

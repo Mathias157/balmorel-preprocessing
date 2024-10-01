@@ -1,3 +1,4 @@
+Logs
 src/Data/*
 src/Output/*
 !src/Data/IncFilePreSuf/README.md

@@ -26,7 +26,7 @@ from pyproj import Proj
 from rasterio.plot import show
 import xarray as xr
 from atlite.gis import shape_availability, ExclusionContainer
-from Modules.geofiles import prepared_geofiles
+from geofiles import prepared_geofiles
 import logging
 import click
 logging.basicConfig(level=logging.INFO)
@@ -77,11 +77,11 @@ def doLDC(file, cols, idx, r, c, title=''):
     
     return fig, axes
 
-#%% ------------------------------- ###
+### ------------------------------- ###
 ###         0. Assumptions          ###
 ### ------------------------------- ###
 
-@click.commands()
+@click.command()
 @click.option('--cutout-path', type=str, required=True, help="The path of a cutout .nc file")
 @click.option('--weather-year', type=int, required=True, help="The weather year")
 @click.option('--overwrite-cutout', type=str, required=False, help="Overwrite an existing cutout?")
@@ -123,7 +123,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
 
     ### 0.4 What time to load?
-    # T = "2011-01-01"
+    T = "2011-01-01"
 
 
     ### 0.6 Read Geodata
@@ -148,7 +148,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
     # MUNI DK with offshore filtering
     # areas = areas[(areas.Country == 'DK') & (areas.Type == 'Offshore')] # From BalmorelHighResolution
-    the_index, areas2, country_code = prepared_geofiles('DKMunicipalities')
+    the_index, areas2, country_code = prepared_geofiles('DKMunicipalities_names')
     areas2['id'] = areas2['NAME_2']
     areas2['muni_id'] = areas2['GID_2']
     areas = pd.concat((areas, areas2[['id', 'muni_id', 'geometry']]))
@@ -161,7 +161,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     areas = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
 
     # Read homemade offshore potentials for DK
-    OFFWNDPOT = gpd.read_file(r'.\Data\RandomOffWindPot\DK.gpkg')
+    OFFWNDPOT = gpd.read_file('Data/RandomOffWindPot/DK.gpkg')
 
     # Plot
     fig, ax = plt.subplots()
@@ -183,7 +183,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     # 3.4 Capacity is based on RG1 VRE technology - all others regions are set to 0 potential
     # 3.4 Offshore wind potential is a hack right now - manual inputted GW
 
-    #%% ------------------------------- ###
+    ### ------------------------------- ###
     ### 1. Load Geodata and Pre-process ###
     ### ------------------------------- ###
 
@@ -222,7 +222,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     # NP = pd.read_csv(project_dir/'geo_files/coordinates_RRR.csv')
     # NP = NP.loc[df_unique['Type'] == 'region', ]
 
-    #%% ------------------------------- ###
+    ### ------------------------------- ###
     ###   2. Calculate RE Potentials    ###
     ### ------------------------------- ###
 
@@ -231,15 +231,15 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
                         module="era5",
                         x=slice(cutout_bounds_x[0], cutout_bounds_x[1]),
                         y=slice(cutout_bounds_y[0], cutout_bounds_y[1]),
-                        time=weather_year
+                        time=str(weather_year)
                         )
     cutout.prepare(overwrite=overwrite_cutout)
 
 
 
-    #%% 2.2 Load Map for RE Spatial Availabilities
+    ### 2.2 Load Map for RE Spatial Availabilities
     # CORINE = 'corine.tif'
-    CORINE = r'Data\CORINE\u2018_clc2018_v2020_20u1_raster100m\u2018_clc2018_v2020_20u1_raster100m\DATA\U2018_CLC2018_V2020_20u1.tif'
+    CORINE = 'Data/CORINE/u2018_clc2018_v2020_20u1_raster100m/u2018_clc2018_v2020_20u1_raster100m/DATA/U2018_CLC2018_V2020_20u1.tif'
     excluder = ExclusionContainer()
     excluder.add_raster(CORINE, codes=range(20))
 
@@ -316,7 +316,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     pv.loc[:, getattr(pv, the_index).values[0]]
 
     # Save profile
-    pv.to_netcdf('pv_%s'%cutout_path)
+    pv.to_netcdf('pv_%s'%cutout_path.split('/')[-1])
 
     ### 2.7 Calculate Wind Turbine Potential
     capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_wind
@@ -332,9 +332,9 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     wind.loc[:, getattr(wind, the_index).values[0]]
 
     # Save profile
-    wind.to_netcdf('wind_%s'%cutout_path)
+    wind.to_netcdf('wind_%s'%cutout_path.split('/')[-1])
 
-    #%%
+    ###
     # Plot data (done with mix municipality and 2024 balmorelhighres )
     # a2 = areas[areas.Type != 'Offshore']
     # a2 = areas
@@ -353,9 +353,9 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     #     fig.savefig(('Output/Figures/VRE_time/wind_%s.png'%i).replace(':','').replace(' ','-'))
     #     plt.close(fig)
     #     n += 1
-    # Make gif = C:\Users\mberos\Danmarks Tekniske Universitet\PhD in Transmission and Sector Coupling - Dokumenter\Documents\Social\Friday Bar\createGIF.py
+    # Make gif = C:/Users/mberos/Danmarks Tekniske Universitet/PhD in Transmission and Sector Coupling - Dokumenter/Documents/Social/Friday Bar/createGIF.py
 
-    #%% ------------------------------- ###
+    ### ------------------------------- ###
     ###     3. Create Balmorel Input    ###
     ### ------------------------------- ###
 
@@ -500,11 +500,11 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
         f.write('SOLH_VAR_T1(SSS,TTT,AAA) = 0;\n')
 
     ### X.X CALCULATE POTENTIALS
-    exc_points = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmGrid-Urb-GLWD123-WDPA012-MTabove1km.gpkg')
-    VREareas = gpd.read_file(r'.\Data\Shapefiles\BalmorelVRE\BalmorelVREAreas.gpkg')
+    exc_points = gpd.read_file('Data/Shapefiles/BalmorelVRE/BalmGrid-Urb-GLWD123-WDPA012-MTabove1km.gpkg')
+    VREareas = gpd.read_file('Data/Shapefiles/BalmorelVRE/BalmorelVREAreas.gpkg')
     exc_points = exc_points.set_crs(VREareas.crs) # Set CRS
     exc_points_bounds = exc_points.bounds
-    #%%
+    
     for i,row in areas.iloc[10:13].iterrows(): # West-germany and DK in NordpoolReal
         print(row['RRR'])
         
@@ -543,7 +543,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     ## Each marker is 30x30 km
 
 
-    #%% 3.4 Potentials
+    # 3.4 Potentials
     # Format of SOLEFLH and WNDFLH
     # TABLE WND/SOLEFLH(AAA)               "Full load hours for wind/solar power" 
     # /   
@@ -600,7 +600,7 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
         f.write("\nSUBTECHGROUPKPOT(AAA,'WINDTURBINE_OFFSHORE',SUBTECH_GROUP)$(SUBTECHGROUPKPOT(AAA,'WINDTURBINE_OFFSHORE',SUBTECH_GROUP) = 0) = EPS;")
 
         
-    #%% ------------------------------- ###
+    ### ------------------------------- ###
     ###          4. Analysis            ###
     ### ------------------------------- ###
 
