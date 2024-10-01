@@ -118,8 +118,8 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     cutout_bounds_x = (3, 33) # Longitude
     cutout_bounds_y = (47, 73) # Latitude
     # DK + Nordsøen
-    cutout_bounds_x = (2.2, 17.4) # Longitude
-    cutout_bounds_y = (53.7, 59) # Latitude
+    cutout_bounds_x = (6.37, 17) # Longitude
+    cutout_bounds_y = (53.7, 58.5) # Latitude
 
 
     ### 0.4 What time to load?
@@ -157,6 +157,8 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     areas.index = areas.id
     the_index='id'
     # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
+
+    areas = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
 
     # Read homemade offshore potentials for DK
     OFFWNDPOT = gpd.read_file(r'.\Data\RandomOffWindPot\DK.gpkg')
