@@ -33,8 +33,24 @@ def convert_parameter(db: gams.GamsDatabase,
     symbol_columns = list(df.columns)
 
     # How to define this? Search for _, if that exists then its areas otherwise regions assumed? What about CCCRRRAAA
-    old_column = 'RRR'
-    new_column = 'RRR_new'
+    if 'RRR' in symbol_columns:
+        old_column = 'RRR'
+        new_column = 'RRR_new'
+    elif 'IRRRE' in symbol_columns:
+        old_column = 'IRRRE'
+        new_column = 'IRRRE_new'
+        # Need to handle IRRRI as well
+    elif 'CCCRRRAAA' in symbol_columns:
+        old_column = 'CCCRRRAAA'
+        new_column = 'CCCRRRAAA_new'
+        # Need to handle the fact that this might be areas or countries
+    elif 'AAA' in symbol_columns:
+        old_column = 'AAA'
+        new_column = 'AAA_new'
+        # Need to make function that strips the _suffix'es, and add them back again after the merge (what if there are different suffix'?)
+    else:
+        raise 'No geographic data in here'
+        
     aggfunc = 'sum'
 
     # Aggregate and convert names
@@ -50,7 +66,7 @@ def convert_parameter(db: gams.GamsDatabase,
     
     # Make IncFile
     prefix = '\n'.join([
-        "TABLE DE(RRR,YYY,DEUSER) '%s'"%db[symbol].text,
+        "TABLE %s(%s) '%s'"%(symbol, ", ".join(symbol_columns[:-1]), db[symbol].text),
         ""
     ])
     suffix = '\n;'
@@ -73,7 +89,8 @@ def convert_parameter(db: gams.GamsDatabase,
 @click.command()
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
-def main(model_path: str, scenario: str):
+@click.option('--param', type=str, required=True, help='The parameter to aggregate')
+def main(model_path: str, scenario: str, param: str):
     
     # Load files
     m = Balmorel(model_path)
@@ -87,7 +104,7 @@ def main(model_path: str, scenario: str):
         clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
         
     convert_parameter(m.input_data[scenario],
-                      'DE', clusters[['index', 'cluster_name']])
+                      param, clusters[['index', 'cluster_name']])
 
 if __name__ == '__main__':
     main()
