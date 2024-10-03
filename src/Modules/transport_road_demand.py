@@ -96,7 +96,7 @@ class FlexDem():
         # Create Normalised Max Limit on Charging
         FLEXDEM_MAXCONS = IncFile(name='FLEXDEM_FLEXMAXLIMIT',
                                 path='Output',
-                                prefix='',
+                                prefix="TABLE FLEXMAXLIMIT1(SSS,TTT,FLEXUSER) 'Maximum flexible consumption wrt. season and term (%)'\n",
                                 suffix="\n;\nFLEXMAXLIMIT(FLEXUSER, RRR, SSS, TTT) = FLEXMAXLIMIT1('S01',TTT,FLEXUSER);\nFLEXMAXLIMIT1(SSS,TTT,FLEXUSER)=0;\n\n* Scale charger capacities to regions:\n")
 
         # Make correct index
