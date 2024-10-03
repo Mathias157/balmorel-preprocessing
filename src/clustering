@@ -43,7 +43,15 @@ rule convert_demands:
     input:
         [
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
-            f"{out_path}clustering.gpkg"
+            f"{out_path}clustering.gpkg",
+            f"{modules_path}convert_demands.py"
         ]
+    params:
+        model_path = balmorel_path,
+        scenario = scenario
     output:
         f"{out_path}DE.inc"
+    shell:
+        """
+        python {modules_path}convert_demands.py --model-path={params.model_path} --scenario={params.scenario}
+        """
