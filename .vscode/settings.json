@@ -1,3 +1,7 @@
 { 
     "terminal.integrated.cwd": "src",
+    "files.associations": {
+        "clustering": "snakemake",
+        "preprocessing": "snakemake",
+    }
 }
