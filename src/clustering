@@ -22,7 +22,7 @@ rule collect_balmorel_input:
         model = Balmorel(balmorel_path)
         model.load_incfiles(scenario)
 
-rule clustering:
+rule cluster:
     input:
         [
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
