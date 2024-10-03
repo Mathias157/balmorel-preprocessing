@@ -138,9 +138,15 @@ def aggregate_parameter(db: gams.GamsDatabase,
     f.body = df
     
     # Use N-1 sets as index, and the last as columns, where N = length of columns without 'Value' column
-    index = symbol_columns[:-2]
-    columns = symbol_columns[-2]
-    f.body_prepare(index=index, columns=columns, values='Value')
+    if len(symbol_columns) > 2:
+        index = symbol_columns[:-2]
+        columns = symbol_columns[-2]
+        f.body_prepare(index=index, columns=columns, values='Value')
+    else:
+        f.body.columns = ['']
+        f.body.index.name = ''
+        f.body = f.body.to_string()
+    
     f.save()
     
     
