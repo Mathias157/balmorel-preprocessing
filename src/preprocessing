@@ -136,7 +136,7 @@ rule transport_road_demand:
         f'{data_path}Gas, Transport and Industry Data/gdf_all_ETISplus.geojson']
     output:
         [f'{out_path}FLEXDEM_FLEXYDEMAND.inc',
-        f'{out_path}FLEXDEM_MAXLIMIT.inc']
+        f'{out_path}FLEXDEM_FLEXMAXLIMIT.inc']
     script: 
         f"{modules_path}transport_road_demand.py"
 

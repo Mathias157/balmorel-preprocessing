@@ -1,8 +1,7 @@
-
 """
-TITLE
+Spatial Aggregation of Balmorel
 
-Description
+Loads Balmorel input and aggregates them based on a gis file that includes cluster categories for each of the old region names 
 
 Created on 01.10.2024
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
@@ -11,7 +10,7 @@ Created on 01.10.2024
 ###        0. Script Settings       ###
 ### ------------------------------- ###
 
-import matplotlib.pyplot as plt
+import os 
 import pandas as pd
 import numpy as np
 import geopandas as gpd
@@ -124,18 +123,36 @@ def convert_parameter(db: gams.GamsDatabase,
 @click.command()
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
-def main(model_path: str, scenario: str):
+@click.option('--exceptions', type=str, required=False, help='.inc files that should NOT be generated')
+def main(model_path: str, scenario: str, exceptions: str = '', incfile_folder: str = 'Output'):
     
     # Load files
     m = Balmorel(model_path)
     m.load_incfiles(scenario)
 
-    # Naming of clusters
+    # Naming of clusters - SHOULD BE AN INPUT?
     clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
     clusters['cluster_name'] = ''
     for cluster in clusters.cluster_group.unique():
         idx = clusters.query('cluster_group == @cluster').index 
         clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
+        
+    # Get .inc-files to regenerate based on folder content
+    incfiles = pd.DataFrame({'files' : os.listdir(incfile_folder)}).query('files.str.contains(".inc")')
+    ## Get unique symbols (i.e., remove addon prefix from symbol names)
+    symbols = (
+        incfiles.files
+        .str.replace('INDUSTRY_', '')
+        .str.replace('HYDROGEN_', '')
+        .str.replace('INDIVUSERS_', '')
+        .str.replace('TRANSPORT_', '')
+        .str.replace('OFFSHORE_', '')
+        .str.replace('FLEXDEM_', '')
+        .str.replace('.inc', '')
+        .unique()
+    )
+    ## Remove exceptions
+    symbols = [symbol for symbol in symbols if symbol not in exceptions]
         
     # Converting parameters
     param = 'TRANSDEMAND_Y'

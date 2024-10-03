@@ -94,10 +94,9 @@ class FlexDem():
         
         ### Create Charging Profiles
         # Create Normalised Max Limit on Charging
-        FLEXDEM_MAXCONS = IncFile(name='FLEXDEM_MAXLIMIT',
+        FLEXDEM_MAXCONS = IncFile(name='FLEXDEM_FLEXMAXLIMIT',
                                 path='Output',
                                 prefix='',
-                                # prefix=read_lines('FLEXDEM_MAXLIMIT_prefix.inc', r'Data\IncFilePreSuf'),
                                 suffix="\n;\nFLEXMAXLIMIT(FLEXUSER, RRR, SSS, TTT) = FLEXMAXLIMIT1('S01',TTT,FLEXUSER);\nFLEXMAXLIMIT1(SSS,TTT,FLEXUSER)=0;\n\n* Scale charger capacities to regions:\n")
 
         # Make correct index

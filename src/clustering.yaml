@@ -7,3 +7,6 @@ clustering:
   data_for_clustering: "DE, DH, WNDFLH, SOLEFLH"
   aggregation_functions: "sum, sum, mean, mean"
   cluster_size: 20
+
+aggregation:
+  exceptions: "DH_VAR_T2, DH_VAR_T3"

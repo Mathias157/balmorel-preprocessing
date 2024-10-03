@@ -48,10 +48,11 @@ rule aggregate_parameters:
         ]
     params:
         model_path = balmorel_path,
-        scenario = scenario
+        scenario = scenario,
+        exceptions = config['aggregation']['exceptions']
     output:
         f"{out_path}TRANSDEMAND_Y.inc"
     shell:
         """
-        python {modules_path}aggregate_parameters.py --model-path={params.model_path} --scenario={params.scenario} 
+        python {modules_path}aggregate_parameters.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}"
         """
