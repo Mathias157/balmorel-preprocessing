@@ -16,6 +16,7 @@ import matplotlib.colors as mcol
 from pybalmorel import Balmorel
 from pybalmorel.utils import symbol_to_df
 from Submodules.utils import convert_names
+from typing import Tuple
 import click
 import pandas as pd
 import numpy as np
@@ -83,7 +84,7 @@ def correct_VRE_data(path_to_file, generation_name: str):
     return vredata
     
 def convert_municipal_code_to_name(to_be_converted: pd.DataFrame,
-                                    column_to_convert: (str, int),
+                                    column_to_convert: Tuple[str, int],
                                     pivot_table: bool = False,
                                     exclude_regions: list = ['Herlev', 'Christiansø'],
                                     muni_geofile_path: str = r'C:\Users\mberos\gitRepos\balmorel-preprocessing\src\Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp'):
