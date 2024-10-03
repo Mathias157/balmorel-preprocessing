@@ -1,3 +1,4 @@
+Logs
 src/Data/*
 src/Output/*
 !src/Data/IncFilePreSuf/README.md
@@ -7,9 +8,13 @@ __pycache__
 .new_env/*
 prebalm
 *.pyc
-snakemake_dag
-snakemake_dag.*
-!snakemake_dag.pdf
+
+clusteroutput
+clustering_dot_source.txt
+clustering_dag
+preprocessing_dot_source.txt
+preprocessing_dag
+
 gurobi.log
 
 exo_elec_dem_conversion_dictionaries.pkl

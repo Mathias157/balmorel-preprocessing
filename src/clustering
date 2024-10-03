@@ -1,0 +1,49 @@
+# Load the config file at the top
+configfile: "clustering.yaml"
+
+out_path     = "ClusterOutput/"
+data_path    = "Data/"
+modules_path = "Modules/"
+submod_path  = "Modules/Submodules/"
+balmorel_path = config['balmorel_input']['model_path']
+scenario = config['balmorel_input']['scenario']
+balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
+
+# 1. General Purpose
+rule all:
+    input:
+        [f"{out_path}DE.inc"]
+
+rule collect_balmorel_input:
+    output:
+        f"{balmorel_sc_folder}{scenario}_input_data.gdx"
+    run:
+        from pybalmorel import Balmorel
+        model = Balmorel(balmorel_path)
+        model.load_incfiles(scenario)
+
+rule clustering:
+    input:
+        [
+            f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+            f"{modules_path}clustering.py"
+        ]
+    params:
+        cluster_params=config['clustering']['data_for_clustering'],
+        aggregation_functions=config['clustering']['aggregation_functions'],
+        cluster_size=config['clustering']['cluster_size']
+    output:
+        [f"{out_path}clustering.gpkg"]
+    shell:
+        """
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size}
+        """
+
+rule convert_demands:
+    input:
+        [
+            f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+            f"{out_path}clustering.gpkg"
+        ]
+    output:
+        f"{out_path}DE.inc"

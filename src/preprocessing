@@ -1,10 +1,10 @@
 # Load the config file at the top
 configfile: "assumptions.yaml"
 
-out_path     = "Output/"
-data_path    = "Data/"
+out_path = "Output/"
+data_path = "Data/"
 modules_path = "Modules/"
-submod_path  = "Modules/Submodules/"
+submod_path = "Modules/Submodules/"
 
 # 1. General Purpose
 rule all:
@@ -68,7 +68,7 @@ rule format_vpdk21_data:
 
 rule format_dkstat_industry_data:
     input:
-        [r"Data\Danmarks Statistik\Industriforbrug Type.xlsx",
+        [f"{data_path}Danmarks Statistik/Industriforbrug Type.xlsx",
         f"{modules_path}format_dkstat.py"]
     output:
         f"{data_path}Danmarks Statistik/industry_demand.nc"
@@ -121,7 +121,7 @@ rule exo_heat_demand:
 # 4. Transport Demand
 rule format_dkstat_transport_data:
     input:
-        [r"Data\Danmarks Statistik\Transportforbrug Type.xlsx",
+        [f"{data_path}Danmarks Statistik/Transportforbrug Type.xlsx",
         f"{modules_path}format_dkstat.py"]
     output:
         f"{data_path}Danmarks Statistik/transport_demand.csv"
@@ -213,7 +213,10 @@ rule grids:
 # 7. Other
 rule offshore_wind:
     input:
-        f'{out_path}VRE/2012_offshore_wind.nc'
+        [
+            f'{out_path}VRE/2012_offshore_wind.nc',
+            f"{modules_path}offshore_wind.py"
+        ]
     params:
         weather_year=config['timeseries']['weather_year'],
         total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential']
