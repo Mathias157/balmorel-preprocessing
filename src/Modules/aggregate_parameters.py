@@ -103,31 +103,16 @@ def merge_AAA_names(df: pd.DataFrame,
     old_column = 'AAA'
     new_column = 'AAA_new'
     clustering.columns = [old_column, new_column]
+    clustering = clustering.set_index(old_column)
     
-    # Get amount of suffix'es
-    suffixes = (
-        df.AAA
-        .str.split('_', expand=True)[1]
-        .unique()
-    )
-    
-    new_cluster_df = clustering.copy()
-    new_cluster_df['AAA'] = new_cluster_df.AAA + '_' + suffixes[0]
-    new_cluster_df['AAA_new'] = new_cluster_df.AAA_new + '_' + suffixes[0]
-    if len(suffixes) > 1:
-        for suffix in suffixes[1:]:
-            if suffix != None:
-                temp = clustering.copy()
-                temp['AAA'] = temp.AAA + '_' + suffix
-                temp['AAA_new'] = temp.AAA_new + '_' + suffix
-                new_cluster_df = pd.concat((new_cluster_df, temp))
-                
-    df = (
-        df
-        .merge(new_cluster_df, on=old_column, how='outer')
-        .drop(columns=old_column)
-        .rename(columns={new_column : old_column})
-    )
+    for area in df[old_column].unique():
+        if area == 'Nordsoeen':
+            # Fix this by changing the original name in offshore shapefile
+            continue
+        
+        suffix = area.split('_')[1]
+        new_name = clustering.loc[area.split('_')[0], new_column]
+        df[old_column] = df[old_column].str.replace(area, new_name + '_%s'%suffix)
     
     return df
 
