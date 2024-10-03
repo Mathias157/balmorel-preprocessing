@@ -24,9 +24,27 @@ import gams
 ###        1. 
 ### ------------------------------- ###
 
+def merge_RRR_names(df: pd.DataFrame,
+                    clustering: gpd.GeoDataFrame):
+    
+    old_column = 'RRR'
+    new_column = 'RRR_new'
+
+    clustering.columns = [old_column, new_column]
+
+    df = (
+        df
+        .merge(clustering, on=old_column, how='outer')
+        .drop(columns=old_column)
+        .rename(columns={new_column : old_column})
+    )
+
+    return df
+
 def convert_parameter(db: gams.GamsDatabase, 
                       symbol: str,
-                      clustering: gpd.GeoDataFrame):
+                      clustering: gpd.GeoDataFrame,
+                      aggfunc: str):
     
     # Load dataframe
     df = symbol_to_df(db, symbol)
@@ -34,32 +52,25 @@ def convert_parameter(db: gams.GamsDatabase,
 
     # How to define this? Search for _, if that exists then its areas otherwise regions assumed? What about CCCRRRAAA
     if 'RRR' in symbol_columns:
-        old_column = 'RRR'
-        new_column = 'RRR_new'
+        df = merge_RRR_names(df, clustering)
     elif 'IRRRE' in symbol_columns:
         old_column = 'IRRRE'
         new_column = 'IRRRE_new'
-        # Need to handle IRRRI as well
+        raise "Need to handle IRRRI as well"
     elif 'CCCRRRAAA' in symbol_columns:
         old_column = 'CCCRRRAAA'
         new_column = 'CCCRRRAAA_new'
-        # Need to handle the fact that this might be areas or countries
+        raise "Need to handle the fact that this might be areas or countries"
     elif 'AAA' in symbol_columns:
         old_column = 'AAA'
         new_column = 'AAA_new'
-        # Need to make function that strips the _suffix'es, and add them back again after the merge (what if there are different suffix'?)
+        raise "Need to make function that strips the _suffix'es, and add them back again after the merge (what if there are different suffix'?)"
     else:
         raise 'No geographic data in here'
-        
-    aggfunc = 'sum'
 
     # Aggregate and convert names
-    clustering.columns = [old_column, new_column]
     df = (
         df
-        .merge(clustering, on=old_column, how='outer')
-        .drop(columns=old_column)
-        .rename(columns={new_column : old_column})
         .groupby(symbol_columns[:-1])
         .aggregate({'Value' : aggfunc})
     )
@@ -89,8 +100,7 @@ def convert_parameter(db: gams.GamsDatabase,
 @click.command()
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
-@click.option('--param', type=str, required=True, help='The parameter to aggregate')
-def main(model_path: str, scenario: str, param: str):
+def main(model_path: str, scenario: str):
     
     # Load files
     m = Balmorel(model_path)
@@ -103,8 +113,12 @@ def main(model_path: str, scenario: str, param: str):
         idx = clusters.query('cluster_group == @cluster').index 
         clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
         
+    # Converting parameters
+    param = 'TRANSDEMAND_Y'
     convert_parameter(m.input_data[scenario],
-                      param, clusters[['index', 'cluster_name']])
+                      param, 
+                      clusters[['index', 'cluster_name']],
+                      aggfunc='sum')
 
 if __name__ == '__main__':
     main()
