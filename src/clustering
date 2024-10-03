@@ -49,10 +49,12 @@ rule aggregate_parameters:
     params:
         model_path = balmorel_path,
         scenario = scenario,
-        exceptions = config['aggregation']['exceptions']
+        exceptions = config['aggregation']['exceptions'],
+        mean_aggfuncs = config['aggregation']['mean_aggfuncs'],
+        median_aggfuncs = config['aggregation']['median_aggfuncs']
     output:
         f"{out_path}TRANSDEMAND_Y.inc"
     shell:
         """
-        python {modules_path}aggregate_parameters.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}"
+        python {modules_path}aggregate_parameters.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}"
         """

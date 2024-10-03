@@ -23,6 +23,32 @@ import gams
 ###        1. 
 ### ------------------------------- ###
 
+def get_symbols_to_aggregate(incfile_folder: str,
+                             exceptions: str,
+                             mean_aggfuncs: str,
+                             median_aggfuncs: str): 
+
+    incfiles = pd.DataFrame({'files' : os.listdir(incfile_folder)}).query('files.str.contains(".inc")')
+    ## Get unique symbols (i.e., remove addon prefix from symbol names)
+    symbols = (
+        incfiles.files
+        .str.replace('INDUSTRY_', '')
+        .str.replace('HYDROGEN_', '')
+        .str.replace('INDIVUSERS_', '')
+        .str.replace('TRANSPORT_', '')
+        .str.replace('OFFSHORE_', '')
+        .str.replace('FLEXDEM_', '')
+        .str.replace('.inc', '')
+        .unique()
+    )
+    ## Remove exceptions
+    symbols = [symbol for symbol in symbols if symbol not in exceptions]
+    
+    ## Determine aggregation functions
+    aggfuncs = {symbol : 'mean' if symbol in mean_aggfuncs else 'median' if symbol in median_aggfuncs else 'sum' for symbol in symbols}
+        
+    return symbols, aggfuncs
+
 def merge_RRR_names(df: pd.DataFrame,
                     clustering: gpd.GeoDataFrame):
     
@@ -124,7 +150,9 @@ def convert_parameter(db: gams.GamsDatabase,
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
 @click.option('--exceptions', type=str, required=False, help='.inc files that should NOT be generated')
-def main(model_path: str, scenario: str, exceptions: str = '', incfile_folder: str = 'Output'):
+@click.option('--mean-aggfuncs', type=str, required=False, help='Parameters that should be aggregated with an average')
+@click.option('--median-aggfuncs', type=str, required=False, help='Parameters that should be aggregated using the median value')
+def main(model_path: str, scenario: str, exceptions: str = '', mean_aggfuncs: str = '', median_aggfuncs: str = '', incfile_folder: str = 'Output'):
     
     # Load files
     m = Balmorel(model_path)
@@ -138,22 +166,8 @@ def main(model_path: str, scenario: str, exceptions: str = '', incfile_folder: s
         clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
         
     # Get .inc-files to regenerate based on folder content
-    incfiles = pd.DataFrame({'files' : os.listdir(incfile_folder)}).query('files.str.contains(".inc")')
-    ## Get unique symbols (i.e., remove addon prefix from symbol names)
-    symbols = (
-        incfiles.files
-        .str.replace('INDUSTRY_', '')
-        .str.replace('HYDROGEN_', '')
-        .str.replace('INDIVUSERS_', '')
-        .str.replace('TRANSPORT_', '')
-        .str.replace('OFFSHORE_', '')
-        .str.replace('FLEXDEM_', '')
-        .str.replace('.inc', '')
-        .unique()
-    )
-    ## Remove exceptions
-    symbols = [symbol for symbol in symbols if symbol not in exceptions]
-        
+    symbols, aggfuncs = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs)
+
     # Converting parameters
     param = 'TRANSDEMAND_Y'
     convert_parameter(m.input_data[scenario],

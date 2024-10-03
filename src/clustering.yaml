@@ -10,3 +10,5 @@ clustering:
 
 aggregation:
   exceptions: "DH_VAR_T2, DH_VAR_T3"
+  mean_aggfuncs: "XINVCOST, XCOST, XLOSS, XH2INVCOST, XH2LOSS, XH2COST, DISLOSS_E, DISLOSS_E_AG, DISCOST_E, WNDFLH, SOLEFLH"
+  median_aggfuncs: "WND_VAR_T, SOLE_VAR_T, DE_VAR_T, DH_VAR_T"
