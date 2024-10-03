@@ -92,7 +92,7 @@ def merge_IRRRI_names(df: pd.DataFrame,
 
     return df
 
-def convert_parameter(db: gams.GamsDatabase, 
+def aggregate_parameter(db: gams.GamsDatabase, 
                       symbol: str,
                       clustering: gpd.GeoDataFrame,
                       aggfunc: str):
@@ -107,15 +107,18 @@ def convert_parameter(db: gams.GamsDatabase,
     elif 'IRRRE' in symbol_columns:
         df = merge_IRRRI_names(df, clustering)
     elif 'CCCRRRAAA' in symbol_columns:
-        old_column = 'CCCRRRAAA'
-        new_column = 'CCCRRRAAA_new'
-        raise "Need to handle the fact that this might be areas or countries"
+        print("Passed %s, need to handle the fact that this might be areas or countries"%symbol)
+        return
     elif 'AAA' in symbol_columns:
-        old_column = 'AAA'
-        new_column = 'AAA_new'
-        raise "Need to make function that strips the _suffix'es, and add them back again after the merge (what if there are different suffix'?)"
+        print("Passed %s, need to make function that strips the _suffix'es, and add them back again after the merge (what if there are different suffix'?)"%symbol)
+        return
     else:
-        raise 'No geographic data in here'
+        print("No geographic data in here", "\nPassed %s"%symbol)
+        return
+    
+    if type(db[symbol]) == gams.GamsSet:
+        print('Passed %s, this is a set, use another function'%symbol)
+        return
 
     # Aggregate and convert names
     df = (
@@ -165,21 +168,16 @@ def main(model_path: str, scenario: str, exceptions: str = '', mean_aggfuncs: st
         idx = clusters.query('cluster_group == @cluster').index 
         clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
         
-    # Get .inc-files to regenerate based on folder content
+    # Get .inc-files to regenerate based on folder content and configurations
     symbols, aggfuncs = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs)
 
     # Converting parameters
-    param = 'TRANSDEMAND_Y'
-    convert_parameter(m.input_data[scenario],
-                      param, 
-                      clusters[['index', 'cluster_name']],
-                      aggfunc='sum')
+    print('Will attempt to aggregate..\n%s\n'%(','.join(symbols)))
+    for symbol in symbols:
+        aggregate_parameter(m.input_data[scenario],
+                        symbol, 
+                        clusters[['index', 'cluster_name']],
+                        aggfunc=aggfuncs[symbol])
     
-    param = 'XH2INVCOST'
-    convert_parameter(m.input_data[scenario],
-                      param, 
-                      clusters[['index', 'cluster_name']],
-                      aggfunc='mean')
-
 if __name__ == '__main__':
     main()
