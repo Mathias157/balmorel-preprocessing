@@ -18,6 +18,7 @@ import click
 from pybalmorel import Balmorel, IncFile
 from pybalmorel.utils import symbol_to_df
 import gams
+from typing import Tuple
 
 #%% ------------------------------- ###
 ###        1. 
@@ -26,7 +27,8 @@ import gams
 def get_symbols_to_aggregate(incfile_folder: str,
                              exceptions: str,
                              mean_aggfuncs: str,
-                             median_aggfuncs: str): 
+                             median_aggfuncs: str,
+                             zero_fillnas: str): 
 
     incfiles = pd.DataFrame({'files' : os.listdir(incfile_folder)}).query('files.str.contains(".inc")')
     ## Get unique symbols (i.e., remove addon prefix from symbol names)
@@ -47,7 +49,10 @@ def get_symbols_to_aggregate(incfile_folder: str,
     ## Determine aggregation functions
     aggfuncs = {symbol : 'mean' if symbol in mean_aggfuncs else 'median' if symbol in median_aggfuncs else 'sum' for symbol in symbols}
         
-    return symbols, aggfuncs
+    ## Determine fillna types
+    fillnas = {symbol : 0 if symbol in zero_fillnas else 'EPS' for symbol in symbols}
+        
+    return symbols, aggfuncs, fillnas
 
 def merge_RRR_names(df: pd.DataFrame,
                     clustering: gpd.GeoDataFrame):
@@ -92,10 +97,45 @@ def merge_IRRRI_names(df: pd.DataFrame,
 
     return df
 
+def merge_AAA_names(df: pd.DataFrame,
+                    clustering: gpd.GeoDataFrame):
+    
+    old_column = 'AAA'
+    new_column = 'AAA_new'
+    clustering.columns = [old_column, new_column]
+    
+    # Get amount of suffix'es
+    suffixes = (
+        df.AAA
+        .str.split('_', expand=True)[1]
+        .unique()
+    )
+    
+    new_cluster_df = clustering.copy()
+    new_cluster_df['AAA'] = new_cluster_df.AAA + '_' + suffixes[0]
+    new_cluster_df['AAA_new'] = new_cluster_df.AAA_new + '_' + suffixes[0]
+    if len(suffixes) > 1:
+        for suffix in suffixes[1:]:
+            if suffix != None:
+                temp = clustering.copy()
+                temp['AAA'] = temp.AAA + '_' + suffix
+                temp['AAA_new'] = temp.AAA_new + '_' + suffix
+                new_cluster_df = pd.concat((new_cluster_df, temp))
+                
+    df = (
+        df
+        .merge(new_cluster_df, on=old_column, how='outer')
+        .drop(columns=old_column)
+        .rename(columns={new_column : old_column})
+    )
+    
+    return df
+
 def aggregate_parameter(db: gams.GamsDatabase, 
                       symbol: str,
                       clustering: gpd.GeoDataFrame,
-                      aggfunc: str):
+                      aggfunc: str,
+                      fillna: Tuple[float, int, str] = 'EPS'):
     
     # Load dataframe
     df = symbol_to_df(db, symbol)
@@ -110,8 +150,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
         print("Passed %s, need to handle the fact that this might be areas or countries"%symbol)
         return
     elif 'AAA' in symbol_columns:
-        print("Passed %s, need to make function that strips the _suffix'es, and add them back again after the merge (what if there are different suffix'?)"%symbol)
-        return
+        df = merge_AAA_names(df, clustering)
     else:
         print("No geographic data in here", "\nPassed %s"%symbol)
         return
@@ -125,6 +164,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
         df
         .groupby(symbol_columns[:-1])
         .aggregate({'Value' : aggfunc})
+        .fillna(fillna)
     )
     
     # Make IncFile
@@ -161,7 +201,10 @@ def aggregate_parameter(db: gams.GamsDatabase,
 @click.option('--exceptions', type=str, required=False, help='.inc files that should NOT be generated')
 @click.option('--mean-aggfuncs', type=str, required=False, help='Parameters that should be aggregated with an average')
 @click.option('--median-aggfuncs', type=str, required=False, help='Parameters that should be aggregated using the median value')
-def main(model_path: str, scenario: str, exceptions: str = '', mean_aggfuncs: str = '', median_aggfuncs: str = '', incfile_folder: str = 'Output'):
+@click.option('--zero-fillnas', type=str, required=False, help='NaN values that should be converted to zero instead of EPS')
+def main(model_path: str, scenario: str, exceptions: str = '', 
+         mean_aggfuncs: str = '', median_aggfuncs: str = '', 
+         zero_fillnas: str = '', incfile_folder: str = 'Output'):
     
     # Load files
     m = Balmorel(model_path)
@@ -174,8 +217,8 @@ def main(model_path: str, scenario: str, exceptions: str = '', mean_aggfuncs: st
         idx = clusters.query('cluster_group == @cluster').index 
         clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
         
-    # Get .inc-files to regenerate based on folder content and configurations
-    symbols, aggfuncs = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs)
+    # Get which .inc-files and how to aggregate based on folder content and configurations
+    symbols, aggfuncs, fillnas = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
 
     # Converting parameters
     print('Will attempt to aggregate..\n%s\n'%(','.join(symbols)))
@@ -183,7 +226,8 @@ def main(model_path: str, scenario: str, exceptions: str = '', mean_aggfuncs: st
         aggregate_parameter(m.input_data[scenario],
                         symbol, 
                         clusters[['index', 'cluster_name']],
-                        aggfunc=aggfuncs[symbol])
+                        aggfunc=aggfuncs[symbol],
+                        fillna=fillnas[symbol])
     
 if __name__ == '__main__':
     main()
