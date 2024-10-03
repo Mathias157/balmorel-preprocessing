@@ -41,6 +41,32 @@ def merge_RRR_names(df: pd.DataFrame,
 
     return df
 
+def merge_IRRRI_names(df: pd.DataFrame,
+                    clustering: gpd.GeoDataFrame):
+    
+    old_columns = ['IRRRI', 'IRRRE']
+    new_columns = ['IRRRI_new', 'IRRRE_new']
+
+    for i in range(2):
+        
+        old_column = old_columns[i]
+        new_column = new_columns[i]
+        
+        clustering.columns = [old_column, new_column]
+
+        df = (
+            df
+            .merge(clustering, on=old_column, how='outer')
+            .drop(columns=old_column)
+            .rename(columns={new_column : old_column})
+        )
+        
+    # Make sure that there are no connections to itself
+    idx = df.query('IRRRI == IRRRE').index
+    df.loc[idx, 'Value'] = np.NaN
+
+    return df
+
 def convert_parameter(db: gams.GamsDatabase, 
                       symbol: str,
                       clustering: gpd.GeoDataFrame,
@@ -54,9 +80,7 @@ def convert_parameter(db: gams.GamsDatabase,
     if 'RRR' in symbol_columns:
         df = merge_RRR_names(df, clustering)
     elif 'IRRRE' in symbol_columns:
-        old_column = 'IRRRE'
-        new_column = 'IRRRE_new'
-        raise "Need to handle IRRRI as well"
+        df = merge_IRRRI_names(df, clustering)
     elif 'CCCRRRAAA' in symbol_columns:
         old_column = 'CCCRRRAAA'
         new_column = 'CCCRRRAAA_new'
@@ -119,6 +143,12 @@ def main(model_path: str, scenario: str):
                       param, 
                       clusters[['index', 'cluster_name']],
                       aggfunc='sum')
+    
+    param = 'XH2INVCOST'
+    convert_parameter(m.input_data[scenario],
+                      param, 
+                      clusters[['index', 'cluster_name']],
+                      aggfunc='mean')
 
 if __name__ == '__main__':
     main()
