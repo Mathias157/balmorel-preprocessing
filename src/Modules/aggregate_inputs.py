@@ -125,6 +125,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
                       symbol: str,
                       clustering: gpd.GeoDataFrame,
                       aggfunc: str,
+                      unique_names: dict,
                       fillna: Tuple[float, int, str] = 'EPS'):
     
     # Load dataframe
@@ -155,7 +156,13 @@ def aggregate_parameter(db: gams.GamsDatabase,
     # Make IncFile
     prefix = "TABLE %s(%s) '%s'\n"%(symbol, ", ".join(symbol_columns[:-1]), db[symbol].text)
     suffix = '\n;'
-    f = IncFile(name=symbol, path='ClusterOutput',
+    
+    if symbol in unique_names:
+        symbol_name = unique_names[symbol]
+    else:
+        symbol_name = symbol
+    
+    f = IncFile(name=symbol_name, path='ClusterOutput',
                 prefix=prefix, suffix=suffix)
     f.body = df
     
@@ -165,6 +172,9 @@ def aggregate_parameter(db: gams.GamsDatabase,
         columns = symbol_columns[-2]
         f.body_prepare(index=index, columns=columns, values='Value')
     else:
+        f.prefix = f.prefix.replace('TABLE', 'PARAMETER')
+        f.prefix += '\n/\n'
+        f.suffix = f.suffix.replace(';', '/;\n')
         f.body.columns = ['']
         f.body.index.name = ''
         f.body = f.body.to_string()
@@ -220,16 +230,19 @@ def main(model_path: str, scenario: str, exceptions: str = '',
          mean_aggfuncs: str = '', median_aggfuncs: str = '', 
          zero_fillnas: str = '', incfile_folder: str = 'Output'):
     
+    # Make exceptions a list
+    exceptions = exceptions.replace(' ', '').split(',') # Symbols not to aggregate
+    unique_names = {'TRANSDEMAND_Y' : 'TRANSPORT_TRANSDEMAND_Y',
+                    'XH2INVCOST' : 'HYDROGEN_XH2INVCOST',
+                    'XH2COST' : 'HYDROGEN_XH2COST',
+                    'XH2LOSS' : 'HYDROGEN_XH2LOSS',
+                    'FLEXMAXLIMIT' : 'FLEXDEM_FLEXMAXLIMIT',
+                    'FLEXYDEMAND' : 'FLEXDEM_FLEXYDEMAND'} # Symbols that have a different incfile name
+    
     # Load files
     m = Balmorel(model_path)
     m.load_incfiles(scenario)
-
-    # Naming of clusters - SHOULD BE AN INPUT? But that will also be arbitrary..
     clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
-    clusters['cluster_name'] = ''
-    for cluster in clusters.cluster_group.unique():
-        idx = clusters.query('cluster_group == @cluster').index 
-        clusters.loc[idx, 'cluster_name'] = 'CL%d'%cluster
         
     # Get which .inc-files and how to aggregate based on folder content and configurations
     symbols, aggfuncs, fillnas = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
@@ -242,6 +255,7 @@ def main(model_path: str, scenario: str, exceptions: str = '',
                             symbol, 
                             clusters[['index', 'cluster_name']],
                             aggfunc=aggfuncs[symbol],
+                            unique_names=unique_names,
                             fillna=fillnas[symbol])
         elif type(m.input_data[scenario][symbol] == gams.GamsSet):
             aggregate_sets(m.input_data[scenario],

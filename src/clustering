@@ -12,7 +12,10 @@ balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 # 1. General Purpose
 rule all:
     input:
-        [f"{out_path}TRANSDEMAND_Y.inc"]
+        [   
+            f"{out_path}DE.inc",
+            f"{out_path}HYDROGEN_AGKN.inc",
+        ]
 
 rule collect_balmorel_input:
     output:
@@ -54,8 +57,47 @@ rule aggregate_inputs:
         median_aggfuncs = config['aggregation']['median_aggfuncs'],
         zero_fillnas = config['aggregation']['zero_fillnas']
     output:
-        f"{out_path}TRANSDEMAND_Y.inc"
+        [
+            f"{out_path}CCCRRRAAA.inc",
+            f"{out_path}CCCRRR.inc",
+            f"{out_path}RRRAAA.inc",
+            f"{out_path}RRR.inc",
+            f"{out_path}AAA.inc",
+            f"{out_path}DE.inc",
+            f"{out_path}DH.inc",
+            f"{out_path}XINVCOST.inc",
+            f"{out_path}XLOSS.inc",
+            f"{out_path}XCOST.inc",
+            f"{out_path}HYDROGEN_XH2INVCOST.inc",
+            f"{out_path}HYDROGEN_XH2LOSS.inc",
+            f"{out_path}HYDROGEN_XH2COST.inc",
+            # ...and many more
+        ]
     shell:
         """
         python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}"
         """
+
+rule create_addon_files:
+    input:
+        f"{out_path}clustering.gpkg"
+    output:
+        [
+            f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
+            f"{out_path}INDUSTRY_CCCRRRAAA.inc",
+            f"{out_path}INDUSTRY_RRRAAA.inc",
+            f"{out_path}INDUSTRY_AAA.inc",
+            f"{out_path}INDUSTRY_AGKN.inc",
+            f"{out_path}INDUSTRY_DH.inc",
+            f"{out_path}INDUSTRY_DE.inc",
+            f"{out_path}INDIVUSERS_INDIVUSERS_AAA.inc",
+            f"{out_path}INDIVUSERS_CCCRRRAAA.inc",
+            f"{out_path}INDIVUSERS_RRRAAA.inc",
+            f"{out_path}INDIVUSERS_AAA.inc",
+            f"{out_path}INDIVUSERS_AGKN.inc",
+            f"{out_path}INDIVUSERS_DH.inc",
+            f"{out_path}INDIVUSERS_DE.inc",
+            f"{out_path}HYDROGEN_AGKN.inc",
+        ]
+    script:
+        f"{modules_path}create_addon_files.py"

@@ -352,6 +352,13 @@ def main(model_path: str,
     # Do clustering
     fig, ax, clustering = cluster(collected, cluster_size, connection_remark='', data_remark=cluster_params)
     fig.savefig('ClusterOutput/Figures/clustering.pdf', transparent=True, bbox_inches='tight')
+    
+    # Name clusters
+    clustering['cluster_name'] = ''
+    for cluster_grouping in clustering.cluster_group.unique():
+        idx = clustering.query('cluster_group == @cluster_grouping').index 
+        clustering.loc[idx, 'cluster_name'] = 'CL%d'%cluster_grouping
+    
     clustering.to_file('ClusterOutput/clustering.gpkg')
 
 if __name__ == '__main__':
