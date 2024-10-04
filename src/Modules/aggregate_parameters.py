@@ -106,6 +106,8 @@ def loop_and_replace_names(df: pd.DataFrame,
     clustering = clustering.set_index(old_column)
     
     for area in df[old_column].unique():
+        if area == 'DENMARK':
+            continue
         
         try:
             suffix = '_' + area.split('_')[1]
@@ -151,10 +153,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
     )
     
     # Make IncFile
-    prefix = '\n'.join([
-        "TABLE %s(%s) '%s'"%(symbol, ", ".join(symbol_columns[:-1]), db[symbol].text),
-        ""
-    ])
+    prefix = "TABLE %s(%s) '%s'\n"%(symbol, ", ".join(symbol_columns[:-1]), db[symbol].text)
     suffix = '\n;'
     f = IncFile(name=symbol, path='ClusterOutput',
                 prefix=prefix, suffix=suffix)
@@ -172,6 +171,38 @@ def aggregate_parameter(db: gams.GamsDatabase,
     
     f.save()
     
+def aggregate_sets(db: gams.GamsDatabase, 
+                   symbol: str,
+                   clustering: gpd.GeoDataFrame,):
+     
+    # Load dataframe
+    df = symbol_to_df(db, symbol)
+    symbol_columns = list(df.columns)
+
+    # Convert old names to new cluster names
+    for column in symbol_columns:
+        if column in ['CCCRRRAAA', 'RRR', 'AAA']:
+            df = loop_and_replace_names(df, clustering, column)
+    
+    # Make IncFile
+    prefix = '\n'.join([
+        "SET %s(%s) '%s'\n/"%(symbol, ", ".join(symbol_columns), db[symbol].text),
+        ""
+    ])
+    suffix = '\n/\n;'
+    f = IncFile(name=symbol, path='ClusterOutput',
+                prefix=prefix, suffix=suffix)
+    
+    # Format input
+    df = (
+        df
+        .apply(lambda row: ' . '.join(row.astype(str)), axis=1)
+        .drop_duplicates()
+        .sort_values()
+    )
+    f.body = "\n".join([value for value in df.values])
+    
+    f.save()
     
 
 #%% ------------------------------- ###
@@ -212,8 +243,12 @@ def main(model_path: str, scenario: str, exceptions: str = '',
                             clusters[['index', 'cluster_name']],
                             aggfunc=aggfuncs[symbol],
                             fillna=fillnas[symbol])
+        elif type(m.input_data[scenario][symbol] == gams.GamsSet):
+            aggregate_sets(m.input_data[scenario],
+                           symbol,
+                           clusters[['index', 'cluster_name']])   
         else:
-            print('%s is a set, need to write function'%symbol)    
+            print('%s is not a set or a parameter, not aggregated'%symbol)
 
 if __name__ == '__main__':
     main()

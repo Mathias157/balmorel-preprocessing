@@ -1,7 +1,7 @@
 """
-TITLE
+Exogenous Heat Demands
 
-Description
+Create exogenous heat demands using data from various places
 
 Created on 20.09.2024
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
