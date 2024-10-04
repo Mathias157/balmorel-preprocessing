@@ -28,7 +28,12 @@ def load_profiles(choice: str = 'dkmunicipalities_names', nordsoeen_connection: 
     profiles = xr.load_dataset('Output/VRE/2012_offshore_wind.nc')
     ind, geo, c = prepared_geofiles(choice)
     offshore_geo = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
+    
+    # Change names
     offshore_geo['Name'] = offshore_geo.Name.replace('Nordsoeen', '%s_OFF5'%nordsoeen_connection)
+    names = profiles.coords['Name'].data
+    names[names == 'Nordsoeen'] = '%s_OFF5'%nordsoeen_connection
+    profiles.coords['Name'] = names
 
     if plot:
         fig, ax = plt.subplots()
@@ -38,7 +43,7 @@ def load_profiles(choice: str = 'dkmunicipalities_names', nordsoeen_connection: 
     
     return profiles, geo, offshore_geo
 
-def create_geo_sets(profiles: xr.Dataset, nordsoeen_connection: str):
+def create_geo_sets(profiles: xr.Dataset):
     
     # Get names
     profiles = profiles.to_dataframe().reset_index()
@@ -59,7 +64,6 @@ def create_geo_sets(profiles: xr.Dataset, nordsoeen_connection: str):
                 prefix="SET RRRAAA(RRR,AAA) 'Areas in regions'\n/\n",
                 body="\n".join([area.split('_OFF')[0] + ' . ' + area for area in areas]),
                 suffix='\n/;')
-    f.body = f.body.replace(f'{nordsoeen_connection} . {nordsoeen_connection}_OFF5', f'{nordsoeen_connection} . {nordsoeen_connection}_OFF5')
     f.save()
     
 def create_profiles(profiles: xr.Dataset, year: int = 2012):
@@ -150,7 +154,7 @@ def distribute_offshore_potential(total_potential: float, geofile: gpd.GeoDataFr
 @click.option('--nordsoeen-connection', type=str, required=False, help="Connection point to Nordsøen. Esbjerg or Holstebro")
 def main(weather_year: int, total_offshore_wind_potential: float, nordsoeen_connection: str = 'Esbjerg'):
     profiles, geo, offshore_geo = load_profiles(nordsoeen_connection=nordsoeen_connection, plot=False)
-    create_geo_sets(profiles, nordsoeen_connection)
+    create_geo_sets(profiles)
     create_profiles(profiles, weather_year)
     create_investment_options(profiles)
     distribute_offshore_potential(total_offshore_wind_potential, offshore_geo)

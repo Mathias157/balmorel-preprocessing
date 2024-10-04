@@ -270,7 +270,7 @@ def main(model_path: str, scenario: str, exceptions: str = '',
             print('%s is not a set or a parameter, not aggregated'%symbol)
         t1 = time.time()
         if (t1 - t0) > 60:
-            print('%s took %0.2f minutes!'%((t1 - t0)/60))
+            print('%s took %0.2f minutes!'%(symbol, (t1 - t0)/60))
         
 if __name__ == '__main__':
     main()
