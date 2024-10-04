@@ -28,7 +28,7 @@ def load_profiles(choice: str = 'dkmunicipalities_names', nordsoeen_connection: 
     profiles = xr.load_dataset('Output/VRE/2012_offshore_wind.nc')
     ind, geo, c = prepared_geofiles(choice)
     offshore_geo = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
-    offshore_geo['Name'] = offshore_geo.Name.replace('Nordsoeen', '%s_OFF'%nordsoeen_connection)
+    offshore_geo['Name'] = offshore_geo.Name.replace('Nordsoeen', '%s_OFF5'%nordsoeen_connection)
 
     if plot:
         fig, ax = plt.subplots()

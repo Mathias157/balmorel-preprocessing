@@ -163,7 +163,7 @@ def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False,
 
     if offshore_profiles:
         areas = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
-        areas['Name'] = areas.Name.replace('Nordsoeen', '%s_OFF'%nordsoeen_connection)
+        areas['Name'] = areas.Name.replace('Nordsoeen', '%s_OFF5'%nordsoeen_connection)
 
 
     # Plot
