@@ -38,7 +38,7 @@ import shapely
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.geofiles import prepared_geofiles
+from geofiles import prepared_geofiles
 from scipy.spatial import distance_matrix
 from Submodules.municipal_template import DataContainer
 from Submodules.utils import convert_names

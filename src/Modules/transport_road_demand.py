@@ -16,12 +16,12 @@ import pandas as pd
 import numpy as np
 import geopandas as gpd
 from pybalmorel import IncFile
-from pybalmorel.utils import read_lines
 from geofiles import prepared_geofiles
 from Submodules.municipal_template import DataContainer
 from format_dkstat import load_transport_demand
 import matplotlib.pyplot as plt
 import xarray as xr
+import click
 
 #%% ------------------------------- ###
 ###   1. Temporal Profile for Road  ###
@@ -67,11 +67,14 @@ class FlexDem():
 
     def create_road_demand_from_Nvehicles(self, 
                          demand_pr_vehicle: float = 100*52/1000,
-                         charger_capacity_pr_vehicle: float = 1.5/1000):
+                         charger_capacity_pr_vehicle: float = 1.5):
 
         # Calculate annual demand
         self.annual_demand_from_Nvehicles = self.n_vehicles['Cars 2009']*demand_pr_vehicle # In MWh
         # print(self.annual_demand)
+        
+        # Convert to MW
+        charger_capacity_pr_vehicle = charger_capacity_pr_vehicle / 1000
         
         # Calculate charging capacity pr. region
         self.charge_cap = self.n_vehicles['Cars 2009']*charger_capacity_pr_vehicle # In MW
@@ -87,7 +90,7 @@ class FlexDem():
         # print(self.annual_demand_from_Nvehicles['Denmark'] / self.annual_demand)
 
 
-    def create_flexdem_incfiles(self, area_choice: str = 'dkmunicipalities_names'):
+    def create_flexdem_incfiles(self, road_demand: xr.Dataset, area_choice: str = 'dkmunicipalities_names'):
         
         # Load Areas
         the_index, areas, country_code = prepared_geofiles(area_choice)
@@ -129,7 +132,6 @@ class FlexDem():
                 regions = areas.index
                 N_regions = len(regions) # Making an even distribution
                 for region in regions:
-                    print(region, len(regions))
                     
                     # Uniform distribution of charger capacities
                     FLEXDEM_MAXCONS.suffix += "FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT) = %0.2f*FLEXMAXLIMIT('ELECTRIC_VEHICLES', '%s', SSS, TTT);\n"%(region, self.charge_cap.loc[country]*road_demand.sel({the_index : region}).data / self.annual_demand, region)
@@ -216,9 +218,10 @@ def distribute_dkstat_demand(geo: gpd.GeoDataFrame,
     print(road_demand.sel(NAME_2='Aabenraa').data, ' TWh')
     return road_demand
 
-#%% 
 
-if __name__ == '__main__':
+@click.command()
+@click.option('--chargercap', type=float, required=True, help="Charging capacity in kW pr. vehicle")
+def main(chargercap: float):
     # Distribute road demand to municipalities using the transport study
     geo = distribute_road_flex_electricity_demand()
     road_demand = distribute_dkstat_demand(geo)
@@ -227,6 +230,10 @@ if __name__ == '__main__':
     FD = FlexDem()
     FD.load_traffic_data()
     FD.create_profile(plot=False)
-    FD.create_road_demand_from_Nvehicles()
+    FD.create_road_demand_from_Nvehicles(charger_capacity_pr_vehicle=chargercap)
     FD.create_road_demand_from_dkstat(road_demand)
-    FD.create_flexdem_incfiles()
+    FD.create_flexdem_incfiles(road_demand)
+
+
+if __name__ == '__main__':
+    main()

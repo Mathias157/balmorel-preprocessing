@@ -14,6 +14,7 @@ grid_assumptions:
     industry_technologies: 0.05 # assumed equal to distribution loss
     individual_technologies: 0.05 # assumed equal to distribution loss
     nordsoeen_connection: Esbjerg # Endrup (Esbjerg) or Idomlund (Holstebro)
+    charging_capacity_per_vehicle: 3 # Charging capacity in kW per electric vehicle
   hydrogen:
     investment_cost: 150.0e-03 # €/MW/m repurposed H2 onshore, Kountouries et al. 2024 
     lifetime: 50 # Lifetime of H2 pipes, Kountouries et al. 2024
