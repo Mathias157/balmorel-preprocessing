@@ -21,7 +21,7 @@ import gams
 from typing import Tuple
 
 #%% ------------------------------- ###
-###        1. 
+###          1. Functions           ###
 ### ------------------------------- ###
 
 def get_symbols_to_aggregate(incfile_folder: str,
@@ -97,22 +97,25 @@ def merge_IRRRI_names(df: pd.DataFrame,
 
     return df
 
-def merge_AAA_names(df: pd.DataFrame,
-                    clustering: gpd.GeoDataFrame):
+def loop_and_replace_names(df: pd.DataFrame,
+                    clustering: gpd.GeoDataFrame,
+                    old_column: str):
     
-    old_column = 'AAA'
-    new_column = 'AAA_new'
+    new_column = '%s_new'%old_column
     clustering.columns = [old_column, new_column]
     clustering = clustering.set_index(old_column)
     
     for area in df[old_column].unique():
-        if area == 'Nordsoeen':
-            # Fix this by changing the original name in offshore shapefile
-            continue
         
-        suffix = area.split('_')[1]
-        new_name = clustering.loc[area.split('_')[0], new_column]
-        df[old_column] = df[old_column].str.replace(area, new_name + '_%s'%suffix)
+        try:
+            suffix = '_' + area.split('_')[1]
+            region = area.split('_')[0]
+        except IndexError:
+            suffix = ''
+            region = area
+            
+        new_name = clustering.loc[region, new_column]
+        df[old_column] = df[old_column].str.replace(area, new_name + suffix)
     
     return df
 
@@ -132,16 +135,11 @@ def aggregate_parameter(db: gams.GamsDatabase,
     elif 'IRRRE' in symbol_columns:
         df = merge_IRRRI_names(df, clustering)
     elif 'CCCRRRAAA' in symbol_columns:
-        print("Passed %s, need to handle the fact that this might be areas or countries"%symbol)
-        return
+        df = loop_and_replace_names(df, clustering, 'CCCRRRAAA')
     elif 'AAA' in symbol_columns:
-        df = merge_AAA_names(df, clustering)
+        df = loop_and_replace_names(df, clustering, 'AAA')
     else:
         print("No geographic data in here", "\nPassed %s"%symbol)
-        return
-    
-    if type(db[symbol]) == gams.GamsSet:
-        print('Passed %s, this is a set, use another function'%symbol)
         return
 
     # Aggregate and convert names
@@ -177,7 +175,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
     
 
 #%% ------------------------------- ###
-###            X. Main              ###
+###            2. Main              ###
 ### ------------------------------- ###
 
 @click.command()
@@ -195,7 +193,7 @@ def main(model_path: str, scenario: str, exceptions: str = '',
     m = Balmorel(model_path)
     m.load_incfiles(scenario)
 
-    # Naming of clusters - SHOULD BE AN INPUT?
+    # Naming of clusters - SHOULD BE AN INPUT? But that will also be arbitrary..
     clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
     clusters['cluster_name'] = ''
     for cluster in clusters.cluster_group.unique():
@@ -205,14 +203,17 @@ def main(model_path: str, scenario: str, exceptions: str = '',
     # Get which .inc-files and how to aggregate based on folder content and configurations
     symbols, aggfuncs, fillnas = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
 
-    # Converting parameters
+    # Aggregating parameters and sets
     print('Will attempt to aggregate..\n%s\n'%(','.join(symbols)))
     for symbol in symbols:
-        aggregate_parameter(m.input_data[scenario],
-                        symbol, 
-                        clusters[['index', 'cluster_name']],
-                        aggfunc=aggfuncs[symbol],
-                        fillna=fillnas[symbol])
-    
+        if type(m.input_data[scenario][symbol]) == gams.GamsParameter:
+            aggregate_parameter(m.input_data[scenario],
+                            symbol, 
+                            clusters[['index', 'cluster_name']],
+                            aggfunc=aggfuncs[symbol],
+                            fillna=fillnas[symbol])
+        else:
+            print('%s is a set, need to write function'%symbol)    
+
 if __name__ == '__main__':
     main()
