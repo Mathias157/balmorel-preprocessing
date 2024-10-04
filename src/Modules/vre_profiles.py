@@ -84,8 +84,11 @@ def doLDC(file, cols, idx, r, c, title=''):
 @click.command()
 @click.option('--cutout-path', type=str, required=True, help="The path of a cutout .nc file")
 @click.option('--weather-year', type=int, required=True, help="The weather year")
+@click.option('--offshore-profiles', type=bool, required=False, help="Generate offshore profiles?")
+@click.option('--nordsoeen-connection', type=str, required=False, help="North Sea region connection point, only relevant for offshore regions")
 @click.option('--overwrite-cutout', type=str, required=False, help="Overwrite an existing cutout?")
-def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
+def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, 
+         nordsoeen_connection: str = 'Esbjerg', overwrite_cutout: bool = False):
     ### 0.1 Capacity pr. km for PV and Wind
     cap_per_sqkm_pv = 1.7 # MW/km2
     cap_per_sqkm_wind = 0.67 # MW/km2 According to NREL: 2 MW / 1.5 acres (0.00607028 km2)
@@ -158,10 +161,10 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     the_index='id'
     # areas.loc[:,'GID_2'] = areas.GID_2.str.replace('.', '_')
 
-    areas = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
+    if offshore_profiles:
+        areas = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
+        areas['Name'] = areas.Name.replace('Nordsoeen', '%s_OFF'%nordsoeen_connection)
 
-    # Read homemade offshore potentials for DK
-    OFFWNDPOT = gpd.read_file('Data/RandomOffWindPot/DK.gpkg')
 
     # Plot
     fig, ax = plt.subplots()
@@ -241,7 +244,9 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     # CORINE = 'corine.tif'
     CORINE = 'Data/CORINE/u2018_clc2018_v2020_20u1_raster100m/u2018_clc2018_v2020_20u1_raster100m/DATA/U2018_CLC2018_V2020_20u1.tif'
     excluder = ExclusionContainer()
-    excluder.add_raster(CORINE, codes=range(20))
+    
+    if not(offshore_profiles):
+        excluder.add_raster(CORINE, codes=range(20))
 
     # Convert crs to CORINE map
     A = areas.geometry.to_crs(excluder.crs)
@@ -299,24 +304,25 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
 
     ### 2.6 Calculate PV Potential
-    capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_pv # Converts fraction of weather cells to
-    cutout.prepare()
+    if not(offshore_profiles):
+        capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_pv # Converts fraction of weather cells to
+        cutout.prepare()
 
-    # Sum of matrix is total potential...?
+        # Sum of matrix is total potential...?
 
-    # Get production
-    # pv = cutout.pv(matrix=capacity_matrix, panel=panel,
-    #                 orientation='latitude_optimal', index=A.index)
-    pv = cutout.pv(matrix=capacity_matrix, panel=panel,
-                    orientation={'slope': 30, 'azimuth': 180.}, index=A.index)
-    ax = pv.to_pandas().div(1e3).plot(ylabel='Solar Power [GW]', ls='--', figsize=(15, 4))
-    ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
+        # Get production
+        # pv = cutout.pv(matrix=capacity_matrix, panel=panel,
+        #                 orientation='latitude_optimal', index=A.index)
+        pv = cutout.pv(matrix=capacity_matrix, panel=panel,
+                        orientation={'slope': 30, 'azimuth': 180.}, index=A.index)
+        ax = pv.to_pandas().div(1e3).plot(ylabel='Solar Power [GW]', ls='--', figsize=(15, 4))
+        ax.legend(ncol=8, loc='center', bbox_to_anchor=(.5, 1.5))
 
-    # Getting a specific profile
-    pv.loc[:, getattr(pv, the_index).values[0]]
+        # Getting a specific profile
+        pv.loc[:, getattr(pv, the_index).values[0]]
 
-    # Save profile
-    pv.to_netcdf('pv_%s'%cutout_path.split('/')[-1])
+        # Save profile
+        pv.to_netcdf('pv_%s'%cutout_path.split('/')[-1])
 
     ### 2.7 Calculate Wind Turbine Potential
     capacity_matrix = Amat.stack(spatial=['y', 'x']) * area * cap_per_sqkm_wind
@@ -363,7 +369,8 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     ### 3.1 Convert data
     # .to_pandas() can be used to store profiles from wind or pv
     W = wind.to_pandas()
-    S = pv.to_pandas()
+    if not(offshore_profiles):
+        S = pv.to_pandas()
 
     # Get correct timeseries index for Balmorel
     t = W.index.isocalendar()
@@ -373,7 +380,8 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
     idx = t.index.year == t['year'] 
     t = t[idx]
     W = W[idx]
-    S = S[idx]
+    if not(offshore_profiles):
+        S = S[idx]
 
     # Make seasons
     t['S'] = t['week'].astype(str)
@@ -401,15 +409,17 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
     # Create new index
     W.index = t['S'] + ' . ' + t['T']
-    S.index = t['S'] + ' . ' + t['T']
+    if not(offshore_profiles):
+        S.index = t['S'] + ' . ' + t['T']
 
     # Clean up areas
     W.columns = W.columns.str.replace('.', '_')
     W.columns.name = ''
     W.columns = W.columns + '_A'
-    S.columns = S.columns.str.replace('.', '_')
-    S.columns.name = ''
-    S.columns = S.columns + '_A'
+    if not(offshore_profiles):
+        S.columns = S.columns.str.replace('.', '_')
+        S.columns.name = ''
+        S.columns = S.columns + '_A'
 
     # Clean up values
     # W.iloc[:,:] = W.iloc[:,:].astype(str)
@@ -441,14 +451,15 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
         f.write('\nWND_VAR_T1(SSS,TTT,AAA) = 0;')
 
     # Solar
-    # f = open('SOLE_VAR_T.inc', 'w')
-    with open('./Output/SOLE_VAR_T.inc', 'w') as f:
-        f.write('TABLE SOLE_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
-        dfAsString = S.to_string(header=True, index=True)
-        f.write(dfAsString)
-        f.write('\n;\n')
-        f.write('SOLE_VAR_T(AAA,SSS,TTT) = SOLE_VAR_T1(SSS,TTT,AAA);\n')
-        f.write('SOLE_VAR_T1(SSS,TTT,AAA) = 0;\n')
+    if not(offshore_profiles):
+        # f = open('SOLE_VAR_T.inc', 'w')
+        with open('./Output/SOLE_VAR_T.inc', 'w') as f:
+            f.write('TABLE SOLE_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
+            dfAsString = S.to_string(header=True, index=True)
+            f.write(dfAsString)
+            f.write('\n;\n')
+            f.write('SOLE_VAR_T(AAA,SSS,TTT) = SOLE_VAR_T1(SSS,TTT,AAA);\n')
+            f.write('SOLE_VAR_T1(SSS,TTT,AAA) = 0;\n')
 
 
 
@@ -466,13 +477,14 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
     # Calculating full load hours by sum of normalised timeseries
     FLH_W = W.sum() / W.max() * (8736/len(t))
-    FLH_S = S.sum() / S.max() * (8736/len(t))
-    with open('./Output/SOLEFLH.inc', 'w') as f:
-        f.write('Parameter SOLEFLH(AAA)            "Full load hours for solar power (hours)"\n')
-        f.write('/')
-        dfAsString = FLH_S.to_string(header=True, index=True)
-        f.write(dfAsString)
-        f.write('\n/\n;')
+    if not(offshore_profiles):
+        FLH_S = S.sum() / S.max() * (8736/len(t))
+        with open('./Output/SOLEFLH.inc', 'w') as f:
+            f.write('Parameter SOLEFLH(AAA)            "Full load hours for solar power (hours)"\n')
+            f.write('/')
+            dfAsString = FLH_S.to_string(header=True, index=True)
+            f.write(dfAsString)
+            f.write('\n/\n;')
         
     with open('./Output/WNDFLH.inc', 'w') as f:
         f.write('Parameter WNDFLH(AAA)            "Full load hours for wind power (hours)"\n')
@@ -482,22 +494,23 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
         f.write('\n/\n;')
         
     # Quick fix for solar heating profiles
-    FLH_SH = FLH_S / 5
-    with open('./Output/SOLHFLH.inc', 'w') as f:
-        f.write('Parameter SOLHFLH(AAA)            "Full load hours for solar heat (hours)"\n')
-        f.write('/')
-        dfAsString = FLH_SH.to_string(header=True, index=True)
-        f.write(dfAsString)
-        f.write('\n/\n;')
+    if not(offshore_profiles):
+        FLH_SH = FLH_S / 5
+        with open('./Output/SOLHFLH.inc', 'w') as f:
+            f.write('Parameter SOLHFLH(AAA)            "Full load hours for solar heat (hours)"\n')
+            f.write('/')
+            dfAsString = FLH_SH.to_string(header=True, index=True)
+            f.write(dfAsString)
+            f.write('\n/\n;')
         
         
-    with open('./Output/SOLH_VAR_T.inc', 'w') as f:
-        f.write('TABLE SOLH_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
-        dfAsString = S.to_string(header=True, index=True)
-        f.write(dfAsString)
-        f.write('\n;\n')
-        f.write('SOLH_VAR_T(AAA,SSS,TTT) = SOLH_VAR_T1(SSS,TTT,AAA);\n')
-        f.write('SOLH_VAR_T1(SSS,TTT,AAA) = 0;\n')
+        with open('./Output/SOLH_VAR_T.inc', 'w') as f:
+            f.write('TABLE SOLH_VAR_T1(SSS,TTT,AAA)            "Variation of the solar generation"\n')
+            dfAsString = S.to_string(header=True, index=True)
+            f.write(dfAsString)
+            f.write('\n;\n')
+            f.write('SOLH_VAR_T(AAA,SSS,TTT) = SOLH_VAR_T1(SSS,TTT,AAA);\n')
+            f.write('SOLH_VAR_T1(SSS,TTT,AAA) = 0;\n')
 
     ### X.X CALCULATE POTENTIALS
     exc_points = gpd.read_file('Data/Shapefiles/BalmorelVRE/BalmGrid-Urb-GLWD123-WDPA012-MTabove1km.gpkg')
@@ -556,38 +569,13 @@ def main(cutout_path: str, weather_year: int, overwrite_cutout: bool = False):
 
     # Calculating capacity by maximum power output from atlite series
     CAP_W = W.max()
-    CAP_S = S.max()
-
-    CAP_OFFW = pd.DataFrame({'WINDTURBINE_OFFSHORE.RG1_OFF1' : [0]*len(CAP_W)}, index = CAP_W.index)
-    ### For offshore wind - HACK! Manually created points
-    for i,row in OFFWNDPOT.iterrows():
-        
-        # Assign point to nearest polygon
-        dist = {r[0] : r[1].geometry.distance(row.geometry) for r in areas.iterrows()}
-        
-        # Get index of closest region
-        ind = min(dist, key=dist.get)
-        
-        # Accumulate capacity to closest region and make new offshore area
-        # try:
-        #     CAP_OFFW.loc[ind+'_A_OFF'] = CAP_OFFW.loc[ind+'_A_OFF'] + row['Pot_GW']
-        # except KeyError:
-        #     CAP_OFFW.loc[ind+'_A_OFF'] = row['Pot_GW']
-        # Accumulate capacity to closest region
-        CAP_OFFW.loc[ind+'_A'] = CAP_OFFW.loc[ind+'_A'] + row['Pot_GW']
-            
-        
-        # print(ind)
-        # if choice == 'NUTS3':
-        #     pp.loc[i, 'area'] = areas.loc[ind, 'NUTS_ID']
-        # elif choice == 'DK Municipalities':
-        #     pp.loc[i, 'area'] = areas.loc[ind, 'GID_2']
+    if not(offshore_profiles):
+        CAP_S = S.max()
 
     # Make format
-    CAP = pd.DataFrame({'SOLARPV.RG1' : np.hstack((CAP_S.values, np.zeros(len(CAP_OFFW) - len(CAP_S)))),
-                        'WINDTURBINE_ONSHORE.RG1' : np.hstack((CAP_W.values, np.zeros(len(CAP_OFFW) - len(CAP_S)))),
-                        'WINDTURBINE_OFFSHORE.RG1_OFF1' : CAP_OFFW.values[:,0]*1e3},  # In MW
-                    index=CAP_OFFW.index)
+    CAP = pd.DataFrame({'SOLARPV.RG1' : np.hstack((CAP_S.values, np.zeros(len(CAP_W) - len(CAP_S)))),
+                        'WINDTURBINE_ONSHORE.RG1' : np.hstack((CAP_W.values, np.zeros(len(CAP_W) - len(CAP_S))))},  # In MW
+                    index=CAP_W.index)
 
     with open('./Output/SUBTECHGROUPKPOT.inc', 'w') as f:
         f.write("TABLE SUBTECHGROUPKPOT(CCCRRRAAA,TECH_GROUP,SUBTECH_GROUP)       'SubTechnology group capacity restriction by geography (MW)'\n")

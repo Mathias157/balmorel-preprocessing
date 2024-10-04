@@ -220,12 +220,13 @@ rule offshore_wind:
         ]
     params:
         weather_year=config['timeseries']['weather_year'],
-        total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential']
+        total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential'],
+        nordsoeen_connection=config['grid_assumptions']['nordsoeen_connection']
     output:
         f'{out_path}OFFSHORE_WND_VAR_T.inc'
     shell:
         """
-        python {modules_path}offshore_wind.py --weather-year={params.weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential}
+        python {modules_path}offshore_wind.py --weather-year={params.weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential} --nordsoeen-connection={params.nordsoeen_connection}
         """
 
 rule exo_powerplants:
