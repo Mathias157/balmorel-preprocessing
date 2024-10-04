@@ -19,6 +19,7 @@ from pybalmorel import Balmorel, IncFile
 from pybalmorel.utils import symbol_to_df
 import gams
 from typing import Tuple
+import time
 
 #%% ------------------------------- ###
 ###          1. Functions           ###
@@ -230,8 +231,11 @@ def main(model_path: str, scenario: str, exceptions: str = '',
          mean_aggfuncs: str = '', median_aggfuncs: str = '', 
          zero_fillnas: str = '', incfile_folder: str = 'Output'):
     
-    # Make exceptions a list
+    # Make configuration lists
     exceptions = exceptions.replace(' ', '').split(',') # Symbols not to aggregate
+    mean_aggfuncs = mean_aggfuncs.replace(' ', '').split(',')
+    median_aggfuncs = median_aggfuncs.replace(' ', '').split(',')
+    zero_fillnas = zero_fillnas.replace(' ', '').split(',')
     unique_names = {'TRANSDEMAND_Y' : 'TRANSPORT_TRANSDEMAND_Y',
                     'XH2INVCOST' : 'HYDROGEN_XH2INVCOST',
                     'XH2COST' : 'HYDROGEN_XH2COST',
@@ -250,6 +254,7 @@ def main(model_path: str, scenario: str, exceptions: str = '',
     # Aggregating parameters and sets
     print('Will attempt to aggregate..\n%s\n'%(','.join(symbols)))
     for symbol in symbols:
+        t0 = time.time()
         if type(m.input_data[scenario][symbol]) == gams.GamsParameter:
             aggregate_parameter(m.input_data[scenario],
                             symbol, 
@@ -263,6 +268,9 @@ def main(model_path: str, scenario: str, exceptions: str = '',
                            clusters[['index', 'cluster_name']])   
         else:
             print('%s is not a set or a parameter, not aggregated'%symbol)
-
+        t1 = time.time()
+        if (t1 - t0) > 60:
+            print('%s took %0.2f minutes!'%((t1 - t0)/60))
+        
 if __name__ == '__main__':
     main()
