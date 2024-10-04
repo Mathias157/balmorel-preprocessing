@@ -17,7 +17,8 @@ rule all:
         f"{out_path}XINVCOST.inc",
         f"{out_path}AGKN.inc",
         f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc",
-        f'{out_path}OFFSHORE_WND_VAR_T.inc']
+        f'{out_path}OFFSHORE_WND_VAR_T.inc',
+        f"{out_path}GKFX.inc"]
 
 rule create_conversion_dictionaries:
     output:
@@ -226,3 +227,14 @@ rule offshore_wind:
         """
         python {modules_path}offshore_wind.py --weather-year={params.weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential}
         """
+
+rule exo_powerplants:
+    input:
+        [
+            f'{data_path}Powerplants (Energistyrelsen)/ept2020_anlaeg_stamdata_m_hovedbraensel_og_braendselsfordeling_geoxy_0.xlsx',
+            f'{data_path}Powerplants (Energistyrelsen)/anlaeg.xlsx'
+        ]
+    output:
+        f"{out_path}GKFX.inc"
+    script:
+        f"{modules_path}exo_powerplants.py"

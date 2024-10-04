@@ -12,19 +12,15 @@ It is converted and aggregated to a GKFX.inc file for Balmorel.
 
 Download EPT and datasheet for windturbines here:
 https://ens.dk/service/statistik-data-noegletal-og-kort/data-oversigt-over-energisektoren
-
-
-Works with the environment.yaml distributed in XXX
 """
 
 import pandas as pd
 import geopandas as gpd
 import cartopy.crs as ccrs
-from shapely.geometry import MultiPolygon
 from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.geofiles import prepared_geofiles
+from geofiles import prepared_geofiles
 
 #%% ----------------------------- ###
 ###         0. ASSUMPTIONS        ###
@@ -93,7 +89,7 @@ Ymax = 2050
 
 ### 0.5 Load geodata
 # What areas to load?
-choice = 'DK Municipalities'
+choice = 'DKMunicipalities_names'
 # choice = 'NUTS3'
 # choice = 'NUTS2'
 # choice = 'Nordpool'
