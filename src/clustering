@@ -39,12 +39,12 @@ rule cluster:
         python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size}
         """
 
-rule aggregate_parameters:
+rule aggregate_inputs:
     input:
         [
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
             f"{out_path}clustering.gpkg",
-            f"{modules_path}aggregate_parameters.py"
+            f"{modules_path}aggregate_inputs.py"
         ]
     params:
         model_path = balmorel_path,
@@ -57,5 +57,5 @@ rule aggregate_parameters:
         f"{out_path}TRANSDEMAND_Y.inc"
     shell:
         """
-        python {modules_path}aggregate_parameters.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}"
+        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}"
         """
