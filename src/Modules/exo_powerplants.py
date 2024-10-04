@@ -21,6 +21,7 @@ from pyproj import Proj
 import numpy as np
 import matplotlib.pyplot as plt
 from geofiles import prepared_geofiles
+import copy
 
 #%% ----------------------------- ###
 ###         0. ASSUMPTIONS        ###
@@ -639,23 +640,23 @@ ax.add_geometries(areas.geometry, crs = crs,
                   facecolor=[.9, .9,.9], edgecolor='grey',
                   linewidth=.2)
 
-# # Add power plants according to some type
-# types = 'main_fuel'
-# for typ in pp[types].unique():
-#     idx = pp[types] == typ
-#     ax.plot(pp.loc[idx, 'Lon'],pp.loc[idx, 'Lat'], 'o', markersize=.7, markeredgecolor='None')
+# Add power plants according to some type
+types = 'main_fuel'
+for typ in pp[types].unique():
+    idx = pp[types] == typ
+    ax.plot(pp.loc[idx, 'Lon'],pp.loc[idx, 'Lat'], 'o', markersize=.7, markeredgecolor='None')
 
-# # Formatting the plot
-# lines = ax.get_lines()
-# new_ax = []
-# for line in lines:
-#     new = copy.copy(line)
-#     new.set_markersize(4)
-#     new_ax.append(new)
-# ax.legend(new_ax, pp[types].unique())
-# # ax.set_xlim(7.5,16)      
-# # ax.set_ylim(54.4,58)  
-# # fig.savefig('anlæg.pdf', bbox_inches='tight')
+# Formatting the plot
+lines = ax.get_lines()
+new_ax = []
+for line in lines:
+    new = copy.copy(line)
+    new.set_markersize(4)
+    new_ax.append(new)
+ax.legend(new_ax, pp[types].unique())
+ax.set_xlim(7.5,16)      
+ax.set_ylim(54.4,58)  
+fig.savefig('Output/Figures/anlæg.pdf', bbox_inches='tight')
 
 
 
@@ -756,13 +757,14 @@ with open('./Output/GKFX.inc', 'w') as f:
                                                                                                                                    
 #%% Test cascaded_union
 # Make figure
-# fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": crs},
-#                        dpi=200)
+fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"projection": crs},
+                       dpi=200)
 
-# # Add danish municipalities
-# ax.add_geometries(areas.geometry, crs = crs,
-#                   facecolor=[.9, .9,.9], edgecolor='grey',
-#                   linewidth=.2)
-# ax.plot(temp_pp['Lon'], temp_pp['Lat'], 'k+', markersize=3)
+# Add danish municipalities
+ax.add_geometries(areas.geometry, crs = crs,
+                  facecolor=[.9, .9,.9], edgecolor='grey',
+                  linewidth=.2)
+ax.plot(temp_pp['Lon'], temp_pp['Lat'], 'k+', markersize=3)
+fig.savefig('Output/Figures/exo_powerplants_plot2.png')
 
 # dist = {r[0] : r[1].geometry.distance(areas.geometry.iloc[0]) for r in temp_pp.iterrows()}
