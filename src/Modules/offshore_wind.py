@@ -1,5 +1,5 @@
 """
-TITLE
+Offshore Wind Definition
 
 Loads profiles generated with "createVRE.py"
 
@@ -38,7 +38,7 @@ def load_profiles(choice: str = 'dkmunicipalities_names', nordsoeen_connection: 
     
     return profiles, geo, offshore_geo
 
-def create_geo_sets(profiles: xr.Dataset):
+def create_geo_sets(profiles: xr.Dataset, nordsoeen_connection: str):
     
     # Get names
     profiles = profiles.to_dataframe().reset_index()
@@ -59,7 +59,7 @@ def create_geo_sets(profiles: xr.Dataset):
                 prefix="SET RRRAAA(RRR,AAA) 'Areas in regions'\n/\n",
                 body="\n".join([area.split('_OFF')[0] + ' . ' + area for area in areas]),
                 suffix='\n/;')
-    f.body = f.body.replace('Nordsoeen . Nordsoeen', 'Esbjerg . Nordsoeen')
+    f.body = f.body.replace(f'{nordsoeen_connection} . {nordsoeen_connection}_OFF5', f'{nordsoeen_connection} . {nordsoeen_connection}_OFF5')
     f.save()
     
 def create_profiles(profiles: xr.Dataset, year: int = 2012):
@@ -150,7 +150,7 @@ def distribute_offshore_potential(total_potential: float, geofile: gpd.GeoDataFr
 @click.option('--nordsoeen-connection', type=str, required=False, help="Connection point to Nordsøen. Esbjerg or Holstebro")
 def main(weather_year: int, total_offshore_wind_potential: float, nordsoeen_connection: str = 'Esbjerg'):
     profiles, geo, offshore_geo = load_profiles(nordsoeen_connection=nordsoeen_connection, plot=False)
-    create_geo_sets(profiles)
+    create_geo_sets(profiles, nordsoeen_connection)
     create_profiles(profiles, weather_year)
     create_investment_options(profiles)
     distribute_offshore_potential(total_offshore_wind_potential, offshore_geo)

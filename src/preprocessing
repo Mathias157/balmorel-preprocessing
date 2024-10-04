@@ -208,8 +208,12 @@ rule grids:
             f"{out_path}HYDROGEN_XH2COST.inc",
             f"{out_path}HYDROGEN_XH2LOSS.inc"
         ]
+    params:
+        nordsoeen_connection=config['grid_assumptions']['nordsoeen_connection']
     script:
-        f"{modules_path}grids.py"
+        """
+        python {modules_path}grids.py --nordsoeen-connection={params.nordsoeen_connection}
+        """
 
 # 7. Other
 rule offshore_wind:

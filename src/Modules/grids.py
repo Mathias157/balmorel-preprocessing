@@ -30,6 +30,7 @@ NEED automatic source! (ENTSO-E data)
 Works with the environment.yaml distributed in XXX
 """
 
+import click
 import pickle
 import pandas as pd
 import geopandas as gpd
@@ -177,6 +178,7 @@ def create_grid_incfiles(d: pd.DataFrame,
             f.write('\n/;')
 
 def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
+                                           nordsoeen_connection: str,
                                            industry_loss: float,
                                            individual_loss: float):
     # Offshore wind
@@ -204,7 +206,7 @@ def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
                     ]))
     
     # Add larger loss for Nordsøen
-    f.body += f"\nDISLOSS_E_AG('Nordsoeen', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1) = {wind_offshore_loss['RG3']};"
+    f.body += f"\nDISLOSS_E_AG('{nordsoeen_connection}_OFF5', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1) = {wind_offshore_loss['RG3']};"
     
     f.save()    
 
@@ -245,8 +247,9 @@ def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
     f.save()                                                                                                                                                                                                                                                                      
 
 
-
-def main():
+@click.command()
+@click.option('--nordsoeen-connection', type=str, required=False, help="Connection point to Nordsøen, Esbjerg or Holstebro")
+def main(nordsoeen_connection: str = 'Esbjerg'):
     
     # 1. Load Inputs
     # Load configuration from snakeconfig.yaml
@@ -307,7 +310,7 @@ def main():
     industry_loss = config['grid_assumptions']['electricity']['industry_technologies'] # €/MWh Transmission costs
     individual_loss = config['grid_assumptions']['electricity']['individual_technologies'] # €/MWh Transmission costs
     
-    create_tech_specific_distribution_loss(wind_offshore_loss, industry_loss, individual_loss)
+    create_tech_specific_distribution_loss(wind_offshore_loss, nordsoeen_connection, industry_loss, individual_loss)
 
 if __name__ == '__main__':
     

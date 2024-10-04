@@ -167,7 +167,7 @@ def apply_filters(df: pd.DataFrame, value_name: str, aggfunc: str = 'sum'):
     df = df.pivot_table(index='R', values='Value', aggfunc=aggfunc)
     df.columns = [value_name]
     
-    return df.query('R != "Nordsoeen"')
+    return df
 
 columns = {'DE' : ['Y', 'R', 'DEUSER', 'Value'],
            'DH' : ['Y', 'A', 'DHUSER', 'Value'],
