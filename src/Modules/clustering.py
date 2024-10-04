@@ -27,9 +27,8 @@ from geofiles import prepared_geofiles
 from scipy.sparse import csr_matrix
 from Submodules.municipal_template import DataContainer
 from exo_heat_demand import DistrictHeatAAU
-from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import kneighbors_graph
 try:
     import cmcrameri
     cmap = cmcrameri.cm.cmaps['batlowK']
@@ -315,6 +314,33 @@ def cluster(collected_data: pd.DataFrame,
     
     return fig, ax, clustering
 
+def new_geofile(clustering: gpd.GeoDataFrame, plot: bool = False):
+    
+    new_geofile = gpd.GeoDataFrame(columns=['cluster_name', 'geometry'],
+                                   geometry='geometry',
+                                   index=np.arange(len(clustering.cluster_name.unique())),
+                                   crs=clustering.crs)
+    
+    i = 0
+    for cluster in clustering.cluster_name.unique():
+        new_shape = clustering.query('cluster_name == @cluster').geometry.union_all()
+        new_geofile.loc[i, 'geometry'] = new_shape 
+        new_geofile.loc[i, 'cluster_name'] = cluster 
+        i += 1
+        
+    if plot:     
+        fig, ax = plt.subplots()
+        ax.set_title('Before:')
+        clustering.plot(ax=ax, column='cluster_name', cmap=truncate_colormap(cmap, 0.2, 1))
+        plt.show()
+        
+        fig, ax = plt.subplots()
+        ax.set_title('After:')
+        new_geofile.plot(ax=ax, column='cluster_name', cmap=truncate_colormap(cmap, 0.2, 1))
+        plt.show()
+        
+    return new_geofile
+        
 @click.command()
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
@@ -360,6 +386,12 @@ def main(model_path: str,
         clustering.loc[idx, 'cluster_name'] = 'CL%d'%cluster_grouping
     
     clustering.to_file('ClusterOutput/clustering.gpkg')
+    
+    # Create new geofile
+    gf = new_geofile(clustering)
+    
+    ## Save
+    gf.to_file('ClusterOutput/%s_%dcluster_geofile.gpkg'%('-'.join(cluster_params_list), cluster_size))
 
 if __name__ == '__main__':
     main()

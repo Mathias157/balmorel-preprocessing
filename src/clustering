@@ -36,7 +36,10 @@ rule cluster:
         aggregation_functions=config['clustering']['aggregation_functions'],
         cluster_size=config['clustering']['cluster_size']
     output:
-        [f"{out_path}clustering.gpkg"]
+        [
+            f"{out_path}clustering.gpkg",
+            f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile.gpkg"
+        ]
     shell:
         """
         python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size}
