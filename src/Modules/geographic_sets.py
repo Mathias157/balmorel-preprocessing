@@ -48,9 +48,12 @@ def main():
     for file in ['CCCRRRAAA', 'RRRAAA', 'AAA']:
         with open('Output/%s.inc'%file, 'a+') as f:
             # content = f.read()
-            f.write('\n$onmulti')
-            f.write('\n$include "../data/OFFSHORE_%s.inc"'%file)
-            f.write('\n$offmulti')
+            f.write("\n".join([
+                '$onmulti',
+                f"$if     EXIST '../data/OFFSHORE_{file}.inc'    $INCLUDE '../data/OFFSHORE_{file}.inc';",
+                f"$if not EXIST '../data/OFFSHORE_{file}.inc' $INCLUDE '../../base/data/OFFSHORE_{file}.inc';",                          
+                '$offmulti',
+            ]))
     
     
     # 1.2 Create INDUSTRY sets

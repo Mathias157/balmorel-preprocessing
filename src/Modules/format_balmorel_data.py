@@ -236,7 +236,8 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "WND_VAR_T1(SSS,TTT,AAA) = 0;",
                     "WND_VAR_T('Frederiksberg_A',SSS,TTT) = WND_VAR_T('Koebenhavn_A',SSS,TTT);",
                     "$onmulti",
-                    "$include '../data/OFFSHORE_WND_VAR_T.inc'",
+                    "$if     EXIST '../data/OFFSHORE_WND_VAR_T.inc'      $INCLUDE '../data/OFFSHORE_WND_VAR_T.inc';",
+                    "$if not EXIST '../data/OFFSHORE_WND_VAR_T.inc'      $INCLUDE '../../base/data/OFFSHORE_WND_VAR_T.inc';",
                     "$offmulti"
                 ]))
     incfile.body_prepare(['S', 'T'],
@@ -290,7 +291,8 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "/",
                     ";",
                     "$onmulti",
-                    "$include '../data/OFFSHORE_WNDFLH.inc'",
+                    "$if     EXIST '../data/OFFSHORE_WNDFLH.inc' $INCLUDE '../data/OFFSHORE_WNDFLH.inc';",
+                    "$if not EXIST '../data/OFFSHORE_WNDFLH.inc' $INCLUDE '../../base/data/OFFSHORE_WNDFLH.inc';",
                     "$offmulti"
                 ]))
     incfile.body = incfile.body.pivot_table(index='A', values='Value', aggfunc='sum')
@@ -361,7 +363,8 @@ def main(model_path: str, scenario: str, load_again: bool = False):
                     "",
                     ";",
                     "$onmulti",
-                    "$include '../data/OFFSHORE_SUBTECHGROUPKPOT.inc'",
+                    "$if     EXIST '../data/OFFSHORE_SUBTECHGROUPKPOT.inc' $INCLUDE '../data/OFFSHORE_SUBTECHGROUPKPOT.inc';",
+                    "$if not EXIST '../data/OFFSHORE_SUBTECHGROUPKPOT.inc' $INCLUDE '../../base/data/OFFSHORE_SUBTECHGROUPKPOT.inc';",
                     "$offmulti"
                 ]))
     incfile.body_prepare(['A', 'TECH_GROUP'], 'SUBTECH_GROUP', values='Value')

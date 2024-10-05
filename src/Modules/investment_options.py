@@ -338,7 +338,8 @@ def main(path_to_allendofmodel: str):
                       suffix="\n".join([
                           "",
                           "$onmulti",
-                          "$include '../data/OFFSHORE_AGKN.inc'",
+                          "$if     EXIST '../data/OFFSHORE_AGKN.inc'    $INCLUDE '../data/OFFSHORE_AGKN.inc';",
+                          "$if not EXIST '../data/OFFSHORE_AGKN.inc' $INCLUDE '../../base/data/OFFSHORE_AGKN.inc';",
                           "$offmulti"
                       ]))
     incfile.body = "\n".join(["AGKN('%s',GGG) = BASE_INV_OPTIONS(GGG);"%area for area in base_areas.values()])

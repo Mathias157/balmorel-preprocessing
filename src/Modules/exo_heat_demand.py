@@ -330,8 +330,10 @@ def main(show_difference: bool = False):
                                                "* Collect series to other heat series, if there is a industry heat series",
                                                "DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA))) = DH_VAR_T_IND(SSS,TTT,AAA);",
                                                "DH_VAR_T_IND(SSS,TTT,AAA)=0;",
-                                               "$include ../data/INDUSTRY_DH_VAR_T2.inc",
-                                               "$include ../data/INDUSTRY_DH_VAR_T3.inc"
+                                               "$if     EXIST '../data/INDUSTRY_DH_VAR_T2.inc' $INCLUDE '../data/INDUSTRY_DH_VAR_T2.inc';",
+                                               "$if not EXIST '../data/INDUSTRY_DH_VAR_T2.inc' $INCLUDE '../../base/data/INDUSTRY_DH_VAR_T2.inc';",
+                                               "$if     EXIST '../data/INDUSTRY_DH_VAR_T3.inc' $INCLUDE '../data/INDUSTRY_DH_VAR_T3.inc';",
+                                               "$if not EXIST '../data/INDUSTRY_DH_VAR_T3.inc' $INCLUDE '../../base/data/INDUSTRY_DH_VAR_T3.inc';"
                              ]))
     #### Medium process heat
     create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
