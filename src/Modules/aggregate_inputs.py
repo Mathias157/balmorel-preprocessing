@@ -37,6 +37,7 @@ def get_symbols_to_aggregate(incfile_folder: str,
         incfiles.files
         .str.replace('INDUSTRY_', '')
         .str.replace('HYDROGEN_', '')
+        .str.replace('DH2', 'HYDROGEN_DH2')
         .str.replace('INDIVUSERS_', '')
         .str.replace('TRANSPORT_', '')
         .str.replace('OFFSHORE_', '')
@@ -239,7 +240,7 @@ def main(model_path: str, scenario: str, exceptions: str = '',
     unique_names = {'TRANSDEMAND_Y' : 'TRANSPORT_TRANSDEMAND_Y',
                     'XH2INVCOST' : 'HYDROGEN_XH2INVCOST',
                     'XH2COST' : 'HYDROGEN_XH2COST',
-                    'XH2LOSS' : 'HYDROGEN_XH2LOSS',
+                    'XH2LOSS' : 'HYDROGEN_XH2LOSS', 
                     'FLEXMAXLIMIT' : 'FLEXDEM_FLEXMAXLIMIT',
                     'FLEXYDEMAND' : 'FLEXDEM_FLEXYDEMAND'} # Symbols that have a different incfile name
     
