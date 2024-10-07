@@ -13,6 +13,11 @@ import xarray as xr
 from typing import Tuple
 import pickle
 import numpy as np
+from pybalmorel import Balmorel
+from pybalmorel.utils import symbol_to_df
+import geopandas as gpd
+from gams import GamsWorkspace
+import os
 
 #%% ------------------------------- ###
 ###     1. Conversion Functions     ###
@@ -102,6 +107,52 @@ def transform_xrdata(xarray: xr.Dataset,
     
     return output
 
+
+def store_balmorel_input(symbol: str,
+                         columns: list,
+                         balmorel_model_path: str, 
+                         scenario: str,
+                         load_again: bool = False,
+                         filter_func: Tuple[None, callable] = None,
+                         save: bool = True):
+    
+    balm = Balmorel(balmorel_model_path)
+    
+    # Check if the symbol.gzip exists
+    if '%s.gzip'%symbol in os.listdir('Data/BalmorelData'):
+        print('\n%s.gzip already exists\n'%symbol)
+        f = pd.read_parquet('Data/BalmorelData/%s.gzip'%symbol)
+    else:
+        # Check Balmorel input has been loaded
+        balm_input_path1 = os.path.join(balm.path, scenario, 'model', '%s_input_data.gdx'%scenario)
+        balm_input_path2 = os.path.join('Data', 'BalmorelData', '%s_input_data.gdx'%scenario)
+        if (not(os.path.exists(balm_input_path1)) and not(os.path.exists(balm_input_path2))) or load_again == True:      
+            print('\nLoading results into %s_input_data.gdx...\n'%scenario)
+            balm.load_incfiles(scenario)
+        else:
+            if os.path.exists(balm_input_path2):
+                balm_input_path = balm_input_path2
+            else:
+                balm_input_path = balm_input_path1
+                
+            print('\n%s_input_data.gdx already loaded!'%scenario)
+            print('Loading %s...\n'%(balm_input_path))
+            
+            # Load the input
+            ws = GamsWorkspace()
+            balm.input_data[scenario] = ws.add_database_from_gdx(os.path.abspath(balm_input_path))
+
+        # Get symbol
+        f = symbol_to_df(balm.input_data[scenario], symbol, columns)
+        if filter_func != None:
+            f = filter_func(f)
+            
+        if save:
+            f.to_parquet('Data/BalmorelData/%s.gzip'%symbol)
+        
+    return f
+
+
 #%% ------------------------------- ###
 ###     2. DataFrames and Dicts     ###
 ### ------------------------------- ###
@@ -137,3 +188,21 @@ def combine_dicts(dict_list: list):
     for key in dict_list[0]:
         combined[key] = [dict0[key] for dict0 in dict_list]
     return combined
+
+
+def join_to_gpd(df: pd.DataFrame,
+                left_col: str,
+                gpd: gpd.GeoDataFrame,
+                right_col: str,
+                new_col: list, 
+                suffix: Tuple[None, str] = None):
+    if suffix != None:
+        df[left_col] = df[left_col].str.replace(suffix, '')
+    df.index = df[left_col]
+    df = df.join(gpd[right_col])
+    df.columns = new_col
+    df.index = range(len(df))
+    if suffix != None:
+        df[left_col] = df[left_col] + suffix
+    
+    return df 

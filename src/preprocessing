@@ -86,7 +86,7 @@ rule format_dkstat_industry_data:
 rule heat_profiles:
     input:
         [
-            f"{modules_path}format_balmorel_data.py",
+            f"{modules_path}heat_profiles_func.py",
             f"{data_path}BalmorelData/muni_input_data.gdx"
         ]
     params:
@@ -100,13 +100,13 @@ rule heat_profiles:
         ]
     shell:
         """
-        python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} heat-profiles
+        python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} heat-profiles
         """
 
 rule onshore_vre:
     input:
         [
-            f"{modules_path}format_balmorel_data.py",
+            f"{modules_path}onshore_vre_func.py",
             f"{data_path}BalmorelData/muni_input_data.gdx"
         ]
     params:
@@ -122,7 +122,7 @@ rule onshore_vre:
         ]
     shell:
         """
-        python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} onshore-vre
+        python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} onshore-vre
         """
 
 rule exo_heat_demand:
