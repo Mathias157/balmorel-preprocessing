@@ -17,7 +17,7 @@ from Submodules.utils import store_balmorel_input
 from onshore_vre_func import onshore_vre_func
 from heat_profiles_func import heat_profiles_func
 import numpy as np
-import xarray as xr
+from pybalmorel import IncFile
 import pandas as pd
 import click
 import os
@@ -134,8 +134,41 @@ def biomass_availability(ctx):
     """Get biomass availability from Bramstoft, Rasmus, Amalia Pizarro-Alonso, Ida Græsted Jensen, Hans Ravn, and Marie Münster. “Modelling of Renewable Gas and Renewable Liquid Fuels in Future Integrated Energy Systems.” Applied Energy 268 (June 15, 2020): 114869. https://doi.org/10.1016/j.apenergy.2020.114869."""
     
     # File from Bramstoft et al 2020
-    f = pd.read_excel('Data/BalmorelData/DKBiomassAvailability.xlsx')
-    # print(f)
+    df = pd.read_excel('Data/BalmorelData/DKBiomassAvailability.xlsx').drop(columns='Flow')
+    df.columns = ['Y', 'CRA', 'F', 'Value']
+    
+    ## Format
+    df['Y'] = (
+        df.Y
+        .astype(str)
+        .str.replace('2020', '2050')
+    )
+    df['CRA'] = (
+        df.CRA
+        .str.replace('Hoeje_Taastrup', 'Hoeje-Taastrup')
+    )
+    df['F'] = (
+        df.F
+        .str.replace('_Gen', '')
+        .str.replace('WOOD_PELLETS', 'WOODPELLETS')
+    ) 
+    df['Value'] = (
+        df.Value
+        .astype(str)
+        .str.replace('EPS', '0')
+        .astype(float)
+    )
+    
+    # Make .inc-file
+    f = IncFile(name='GMAXF', path='Output',
+                prefix="TABLE GMAXF(YYY, CCCRRRAAA, FFF) 'Maximum fuel use (GJ) per year'\n",
+                suffix='\n;', body=df)
+    f.body_prepare(index=['Y', 'CRA'], columns='F', values='Value')
+    
+    ## Zeros have to be EPS
+    idx = f.body.values == 0
+    f.body[idx] = 'EPS'
+    f.save()
 
 if __name__ == '__main__':
     main()
