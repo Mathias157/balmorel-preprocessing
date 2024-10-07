@@ -129,9 +129,17 @@ def grids(ctx):
 
 
 @main.command()
+@click.option('--woodpot', type=float, required=True, help="Domestic potential of woody biomass")
+@click.option('--strawpot', type=float, required=True, help="Domestic potential of agricultural biomass")
+@click.option('--biogaspot', type=float, required=True, help="Domestic potential of biogas")
+@click.option('--woodimport', type=bool, required=True, help="Allow import of woodpellets to large cities?")
 @click.pass_context
-def biomass_availability(ctx):
-    """Get biomass availability from Bramstoft, Rasmus, Amalia Pizarro-Alonso, Ida Græsted Jensen, Hans Ravn, and Marie Münster. “Modelling of Renewable Gas and Renewable Liquid Fuels in Future Integrated Energy Systems.” Applied Energy 268 (June 15, 2020): 114869. https://doi.org/10.1016/j.apenergy.2020.114869."""
+def biomass_availability(ctx, woodpot: float, strawpot: float, biogaspot: float, woodimport: bool):
+    """Get biomass distribution key from Bramstoft et al 2020, assume total availability.
+    
+    Distribution potentials:
+    Bramstoft, Rasmus, Amalia Pizarro-Alonso, Ida Græsted Jensen, Hans Ravn, and Marie Münster. “Modelling of Renewable Gas and Renewable Liquid Fuels in Future Integrated Energy Systems.” Applied Energy 268 (June 15, 2020): 114869. https://doi.org/10.1016/j.apenergy.2020.114869.
+    """
     
     # File from Bramstoft et al 2020
     df = pd.read_excel('Data/BalmorelData/DKBiomassAvailability.xlsx').drop(columns='Flow')
@@ -162,7 +170,26 @@ def biomass_availability(ctx):
     # Make .inc-file
     f = IncFile(name='GMAXF', path='Output',
                 prefix="TABLE GMAXF(YYY, CCCRRRAAA, FFF) 'Maximum fuel use (GJ) per year'\n",
-                suffix='\n;', body=df)
+                suffix='\n;\n', 
+                body=df)
+    
+    ## Set national levels
+    f.suffix += "\n".join([
+        "GMAXF('2050', 'DENMARK', 'BIOGAS') = %0.2f;"%(biogaspot*1e6),
+        "GMAXF('2050', 'DENMARK', 'WOODCHIPS') = EPS;",
+        "GMAXF('2050', 'DENMARK', 'WOODWASTE') = EPS;",
+        "GMAXF('2050', 'DENMARK', 'STRAW') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "STRAW"')['Value'].sum()),
+        "GMAXF('2050', 'DENMARK', 'WOOD') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOOD"')['Value'].sum()),
+        "* Use existing potentials as distribution key for input potentials for straw and wood, defined below",
+        "GMAXF('2050', CCCRRRAAA, 'STRAW') = GMAXF('2050', CCCRRRAAA, 'STRAW') / GMAXF('2050', 'DENMARK', 'STRAW') * %0.2f;"%(strawpot*1e6), # From PJ to GJ
+        "GMAXF('2050', CCCRRRAAA, 'WOOD') = GMAXF('2050', CCCRRRAAA, 'WOOD') / GMAXF('2050', 'DENMARK', 'WOOD') * %0.2f;"%(woodpot*1e6), # From PJ to GJ
+    ])
+    
+    if not(woodimport):
+        f.suffix += "\n* Disallow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = EPS;"
+    else:
+        f.suffix += "\n* Allow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOODPELLETS"')['Value'].sum())
+    
     f.body_prepare(index=['Y', 'CRA'], columns='F', values='Value')
     
     ## Zeros have to be EPS

@@ -27,4 +27,10 @@ fuel_assumptions:
 
 timeseries:
   weather_year: 2012
+
+resources:
   total_offshore_wind_potential: 40000 # MW
+  woodpot: 7.3   # PJ, potential of woody biomass for energy, ENS_Med_ForestBaU scenario from Ruiz, Pablo (2019): ENSPRESO - BIOMASS. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/74ed5a04-7d74-4807-9eab-b94774309d9f
+  strawpot: 22   # PJ, potential of agro waste for energy, ENS_Med_ForestBaU scenario from Ruiz, Pablo (2019): ENSPRESO - BIOMASS. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/74ed5a04-7d74-4807-9eab-b94774309d9f
+  biogaspot: 43.3   # PJ, potential of biogas for energy, ENS_Med_ForestBaU scenario from Ruiz, Pablo (2019): ENSPRESO - BIOMASS. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/74ed5a04-7d74-4807-9eab-b94774309d9f
+  woodimport: False # Allow import of woody biomass to major cities?

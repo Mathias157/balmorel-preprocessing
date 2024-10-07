@@ -260,7 +260,7 @@ rule offshore_wind:
         ]
     params:
         weather_year=config['timeseries']['weather_year'],
-        total_offshore_wind_potential=config['timeseries']['total_offshore_wind_potential'],
+        total_offshore_wind_potential=config['resources']['total_offshore_wind_potential'],
         nordsoeen_connection=config['grid_assumptions']['electricity']['nordsoeen_connection']
     output:
         f'{out_path}OFFSHORE_WND_VAR_T.inc'
@@ -289,12 +289,16 @@ rule biomass_availability:
     params:
         model_path=config["balmorel_input"]["model_path"],
         scenario=config["balmorel_input"]["scenario"],
-        load_again=config["balmorel_input"]["load_again"]
+        load_again=config["balmorel_input"]["load_again"],
+        woodpot=config['resources']['woodpot'],
+        strawpot=config['resources']['strawpot'],
+        biogaspot=config['resources']['biogaspot'],
+        woodimport=config['resources']['woodimport']
     output:
         [
             f"{out_path}GMAXF.inc"
         ]
     shell:
         """
-        python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} biomass-availability
+        python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} biomass-availability --woodpot={params.woodpot} --strawpot={params.strawpot} --biogaspot={params.biogaspot} --woodimport={params.woodimport}
         """
