@@ -13,13 +13,12 @@ Created on 24.09.2024
 from Submodules.municipal_template import DataContainer
 from clustering import convert_municipal_code_to_name
 from geofiles import prepared_geofiles
-from Submodules.utils import store_balmorel_input, join_to_gpd
+from Submodules.utils import store_balmorel_input
 from onshore_vre_func import onshore_vre_func
 from heat_profiles_func import heat_profiles_func
 import numpy as np
 import xarray as xr
 import pandas as pd
-from pybalmorel import IncFile
 import click
 import os
 
@@ -34,10 +33,11 @@ import os
     
 @click.group()
 @click.pass_context
-@click.option("--model-path", type=str, required=True, help="Path of the Balmorel model")
-@click.option("--scenario", type=str, required=True, help="Scenario to load results from")
+@click.option("--model-path", type=str, required=False, default='.', help="Path of the Balmorel model")
+@click.option("--scenario", type=str, required=False, default='base', help="Scenario to load results from")
 @click.option("--load-again", type=bool, required=False, help="Load scenario results again and overwrite previously loaded .gdx?")
 def main(ctx, model_path: str, scenario: str, load_again: bool = False):
+    """CLI to convert Balmorel data from previous studies"""
     
     # Load Geodataframe with municipal codes and names
     ind, mun, country = prepared_geofiles('DK Municipalities')
@@ -62,35 +62,27 @@ def main(ctx, model_path: str, scenario: str, load_again: bool = False):
      
     
 
-    
-    
 @main.command()
 @click.pass_context
 def heat_profiles(ctx):
+    """Get heat profiles from Bramstoft, Rasmus, Amalia Pizarro-Alonso, Ida Græsted Jensen, Hans Ravn, and Marie Münster. “Modelling of Renewable Gas and Renewable Liquid Fuels in Future Integrated Energy Systems.” Applied Energy 268 (June 15, 2020): 114869. https://doi.org/10.1016/j.apenergy.2020.114869."""
     return heat_profiles_func(ctx)
     
     
 @main.command()
 @click.pass_context
 def onshore_vre(ctx):
+    """Get onshore VRE profiles from previous study presented at EGU24, https://github.com/Mathias157/balmorel-preprocessing/releases/tag/egu24-poster"""
     return onshore_vre_func(ctx)
 
 @main.command()
 @click.pass_context
 def grids(ctx):
-    """A different way to merge the names through xarray
-
-    Args:
-        balmorel_model_path (str): _description_
-        scenario (str): _description_
-        load_again (bool): _description_
-    """
+    """Create the connectivity matrix from previous Balmorel run"""
         
     # Load Model
     file = 'Data/BalmorelData/municipal_connectivity.nc'
-    if os.path.exists(file):
-        y = xr.load_dataset(file)
-    else:
+    if not(os.path.exists(file)):
         XINVCOST = store_balmorel_input('XINVCOST',
                             ['Y', 'RE', 'RI', 'connection'],
                             ctx.obj['balmorel_model_path'], ctx.obj['scenario'], ctx.obj['load_again'],
@@ -139,6 +131,7 @@ def grids(ctx):
 @main.command()
 @click.pass_context
 def biomass_availability(ctx):
+    """Get biomass availability from Bramstoft, Rasmus, Amalia Pizarro-Alonso, Ida Græsted Jensen, Hans Ravn, and Marie Münster. “Modelling of Renewable Gas and Renewable Liquid Fuels in Future Integrated Energy Systems.” Applied Energy 268 (June 15, 2020): 114869. https://doi.org/10.1016/j.apenergy.2020.114869."""
     
     # File from Bramstoft et al 2020
     f = pd.read_excel('Data/BalmorelData/DKBiomassAvailability.xlsx')
