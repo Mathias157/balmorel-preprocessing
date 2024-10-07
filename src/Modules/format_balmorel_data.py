@@ -45,16 +45,23 @@ def store_balmorel_input(symbol: str,
         f = pd.read_parquet('Data/BalmorelData/%s.gzip'%symbol)
     else:
         # Check Balmorel input has been loaded
-        if not('%s_input_data.gdx'%scenario in os.listdir(os.path.join(balm.path, scenario, 'model'))) or load_again == True:      
+        balm_input_path1 = os.path.join(balm.path, scenario, 'model', '%s_input_data.gdx'%scenario)
+        balm_input_path2 = os.path.join('Data', 'BalmorelData', '%s_input_data.gdx'%scenario)
+        if (not(os.path.exists(balm_input_path1)) and not(os.path.exists(balm_input_path2))) or load_again == True:      
             print('\nLoading results into %s_input_data.gdx...\n'%scenario)
             balm.load_incfiles(scenario)
         else:
+            if os.path.exists(balm_input_path2):
+                balm_input_path = balm_input_path2
+            else:
+                balm_input_path = balm_input_path1
+                
             print('\n%s_input_data.gdx already loaded!'%scenario)
-            print('Loading %s_input_data.gdx...\n'%(os.path.join(balm.path, scenario, 'model', scenario)))
+            print('Loading %s...\n'%(balm_input_path))
             
             # Load the input
             ws = GamsWorkspace()
-            balm.input_data[scenario] = ws.add_database_from_gdx(os.path.join(balm.path, scenario, 'model', '%s_input_data.gdx'%scenario))
+            balm.input_data[scenario] = ws.add_database_from_gdx(os.path.abspath(balm_input_path))
 
         # Get symbol
         f = symbol_to_df(balm.input_data[scenario], symbol, columns)
