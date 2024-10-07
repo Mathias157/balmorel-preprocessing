@@ -402,8 +402,11 @@ def grids(ctx):
 
 @main.command()
 @click.pass_context
-def biomass(ctx):
-    pass
+def biomass_availability(ctx):
+    
+    # File from Bramstoft et al 2020
+    f = pd.read_excel('Data/BalmorelData/DKBiomassAvailability.xlsx')
+    print(f.to_string())
 
 if __name__ == '__main__':
     main()
