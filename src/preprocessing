@@ -17,6 +17,7 @@ rule all:
         f"{out_path}XINVCOST.inc",
         f"{out_path}AGKN.inc",
         f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc",
+        f"{out_path}WND_VAR_T.inc",
         f'{out_path}OFFSHORE_WND_VAR_T.inc',
         f"{out_path}GKFX.inc"]
 
@@ -78,25 +79,47 @@ rule format_dkstat_industry_data:
         python {input[1]} --get-industry-demand
         """
 
-rule format_balmorel_data:
+
+rule heat_profiles:
     input:
-        f"{modules_path}format_balmorel_data.py"
+        [
+            f"{modules_path}format_balmorel_data.py",
+            f"{data_path}BalmorelData/muni_input_data.gdx"
+        ]
     params:
         model_path=config["balmorel_input"]["model_path"],
         scenario=config["balmorel_input"]["scenario"],
         load_again=config["balmorel_input"]["load_again"]
     output:
-        [f"{out_path}DH_VAR_T.inc",
-        f"{out_path}INDIVUSERS_DH_VAR_T.inc",
-        f"{out_path}WND_VAR_T.inc",
-        f"{out_path}SOLE_VAR_T.inc",
-        f"{out_path}WNDFLH.inc",
-        f"{out_path}SOLEFLH.inc",
-        f"{data_path}BalmorelData/municipal_connectivity.nc"
+        [
+            f"{out_path}DH_VAR_T.inc",
+            f"{out_path}INDIVUSERS_DH_VAR_T.inc"
         ]
     shell:
         """
-        python {input} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again}
+        python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} heat-profiles
+        """
+
+rule onshore_vre:
+    input:
+        [
+            f"{modules_path}format_balmorel_data.py",
+            f"{data_path}BalmorelData/muni_input_data.gdx"
+        ]
+    params:
+        model_path=config["balmorel_input"]["model_path"],
+        scenario=config["balmorel_input"]["scenario"],
+        load_again=config["balmorel_input"]["load_again"]
+    output:
+        [
+            f"{out_path}WND_VAR_T.inc",
+            f"{out_path}SOLE_VAR_T.inc",
+            f"{out_path}WNDFLH.inc",
+            f"{out_path}SOLEFLH.inc",
+        ]
+    shell:
+        """
+        python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} onshore-vre
         """
 
 rule exo_heat_demand:
@@ -199,9 +222,17 @@ rule investment_options:
 # 6. Grids
 rule grids:
     input:
-        [f"{data_path}BalmorelData/municipal_connectivity.nc",
-        f"{submod_path}exo_grid_conversion_dictionaries.pkl",
-        f"assumptions.yaml"]
+        [
+            f"{modules_path}format_balmorel_data.py",
+            f"{data_path}BalmorelData/muni_input_data.gdx",
+            f"{submod_path}exo_grid_conversion_dictionaries.pkl",
+            f"assumptions.yaml"
+        ]
+    params:
+        model_path=config["balmorel_input"]["model_path"],
+        scenario=config["balmorel_input"]["scenario"],
+        load_again=config["balmorel_input"]["load_again"],
+        nordsoeen_connection=config['grid_assumptions']['electricity']['nordsoeen_connection']
     output:
         [
             f"{out_path}XINVCOST.inc",
@@ -215,12 +246,10 @@ rule grids:
             f"{out_path}HYDROGEN_XH2COST.inc",
             f"{out_path}HYDROGEN_XH2LOSS.inc"
         ]
-    params:
-        nordsoeen_connection=config['grid_assumptions']['electricity']['nordsoeen_connection']
-    shell:
-        """
-        python {modules_path}grids.py --nordsoeen-connection={params.nordsoeen_connection}
-        """
+    run:
+        shell("python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} grids")
+        shell("python {modules_path}grids.py --nordsoeen-connection={params.nordsoeen_connection}")
+        
 
 # 7. Other
 rule offshore_wind:
