@@ -95,136 +95,195 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         'GNR_H2S_H2-CAVERN_Y-2050',
         'GNR_STEAM-REFORMING_E-70_Y-2020',
         'GNR_STEAM-REFORMING-CCS_E-70_Y-2020',
+        "GNR_TG-MeOH-2050_H2", 
+        "GNR_TG-MeOH-2050",    
+        "GNR_eNH3-2050"
     ]
     
     # Small scale investments
     small_scale = [
-        "GNR_CC_NGAS_BP_E-51_SS-10-MW_Y-2020",
-        "GNR_CC_NGAS_BP_E-53_SS-10-MW_Y-2030",
-        "GNR_CC_NGAS_BP_E-54_SS-10-MW_Y-2040",
-        "GNR_CC_NGAS_BP_E-55_SS-10-MW_Y-2050",
-        "GNR_GT_NGAS_BP_E-37_SS-5-MW_Y-2020",
-        "GNR_GT_NGAS_BP_E-39_SS-5-MW_Y-2030",
-        "GNR_GT_NGAS_BP_E-40_SS-5-MW_Y-2040",
-        "GNR_GT_NGAS_BP_E-40_SS-5-MW_Y-2050",
-        "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2020",
-        "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2030",
-        "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2040",
+        "GNR_HS_HEAT_PIT_L-DEC_E-70_Y-2050",
+        "GNR_HS_HEAT_WTR-TANK_SS_E-95_Y-2010",
+        "GNR_ES_ELEC_BAT-LITHIO-PEAK_E-86_Y-2050",
+        "GNR_ES_ELEC_BAT-LITHIO-GRID_E-86_Y-2050",
+        "GNR_PV_SUN_LS-8-MW_RG1_Y-2050",
+        "GNR_WT-SP277-HH100_ONS_LS_L-RG1_Y-2050",
+        "GNR_HP_ELEC_AIR-WTR_COP-365_SS-4-KW_Y-2050",
+        "GNR_HP_ELEC_GROUND-WTR_COP-400_SS-10-KW_Y-2050",
+        # "GNR_CC_NGAS_BP_E-51_SS-10-MW_Y-2020",
+        # "GNR_CC_NGAS_BP_E-53_SS-10-MW_Y-2030",
+        # "GNR_CC_NGAS_BP_E-54_SS-10-MW_Y-2040",
+        # "GNR_CC_NGAS_BP_E-55_SS-10-MW_Y-2050",
+        # "GNR_CC_NGASCCS_BP_E-51_SS-10-MW_Y-2020", 
+        # "GNR_CC_NGASCCS_BP_E-53_SS-10-MW_Y-2030",
+        "GNR_BO_ELEC_E-100_SS-3-KW-FEED_Y-2050", 
+        # "GNR_CC_NGASCCS_BP_E-54_SS-10-MW_Y-2040", 
+        "GNR_CC_NGASCCS_BP_E-55_SS-10-MW_Y-2050",
+        # "GNR_CC_NGASCCS_CND_E-51_SS-10-MW_Y-2020",
+        # "GNR_CC_NGASCCS_CND_E-53_SS-10-MW_Y-2030",
+        # "GNR_CC_NGASCCS_CND_E-54_SS-10-MW_Y-2040",
+        "GNR_CC_NGASCCS_CND_E-55_SS-10-MW_Y-2050",
+        # "GNR_GT_NGAS_BP_E-37_SS-5-MW_Y-2020",
+        # "GNR_GT_NGAS_BP_E-39_SS-5-MW_Y-2030",
+        # "GNR_GT_NGAS_BP_E-40_SS-5-MW_Y-2040",
+        "GNR_ST_MSW_CND_E-24_SS-35-MW-FEED_Y-2050",
+        "GNR_ST_MSW_BP_E-24_SS-35-MW-FEED_Y-2050",
+        # "GNR_GT_NGAS_BP_E-40_SS-5-MW_Y-2050",
+        # "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2020",
+        # "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2030",
+        # "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2040",
         "GNR_ST_STRW_BP_E-17_SS-20-MW-FEED_Y-2050",
-        "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2020",
-        "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2030",
-        "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2040",
+        "GNR_ST_STRW_CND_E-17_SS-20-MW-FEED_Y-2050",
+        # "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2020",
+        # "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2030",
+        # "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2040",
         "GNR_ST_WOODCHI_BP_E-16_SS-20-MW-FEED_Y-2050",
-        "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2020",
-        "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2030",
-        "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2040",
-        "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2050",
+        # "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2020",
+        # "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2030",
+        # "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2040",
+        # "GNR_ST_WOODPEL_BP_E-17_SS-20-MW-FEED_Y-2050",
+        # "GNR_ST_WOODCHI_CND_E-16_SS-20-MW-FEED_Y-2020", 
+        # "GNR_ST_WOODCHI_CND_E-16_SS-20-MW-FEED_Y-2030", 
+        # "GNR_ST_WOODCHI_CND_E-16_SS-20-MW-FEED_Y-2040", 
+        "GNR_ST_WOODCHI_CND_E-16_SS-20-MW-FEED_Y-2050", 
+        # "GNR_ST_STRW_CND_E-17_SS-20-MW-FEED_Y-2020",
+        # "GNR_ST_STRW_CND_E-17_SS-20-MW-FEED_Y-2030",
+        "GNR_BO_WOODPEL_E-85_SS-8-KW-FEED_Y-2050",
+        # "GNR_ST_STRW_CND_E-17_SS-20-MW-FEED_Y-2040",
     ]
     
     medium_scale = [
-        "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2020",
-        "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2030",
-        "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2040",
+        "GNR_HS_HEAT_PIT_L-DEC_E-70_Y-2050",
+        "GNR_HS_HEAT_WTR-TANK_SS_E-95_Y-2010",
+        "GNR_ES_ELEC_BAT-LITHIO-PEAK_E-86_Y-2050",
+        "GNR_ES_ELEC_BAT-LITHIO-GRID_E-86_Y-2050",
+        "GNR_PV_SUN_LS-8-MW_RG1_Y-2050",
+        "GNR_WT-SP277-HH100_ONS_LS_L-RG1_Y-2050",
+        "GNR_HP_ELEC_AIR-WTR_COP-365_SS-4-KW_Y-2050",
+        "GNR_HP_ELEC_GROUND-WTR_COP-400_SS-10-KW_Y-2050",
+        # "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2020",
+        # "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2030",
+        # "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2040",
         "GNR_BO_ELEC_E-99_MS-1-MW-FEED_Y-2050",
-        "GNR_BO_NGAS_E-105_MS-5-MW_Y-2020",
-        "GNR_BO_NGAS_E-106_MS-5-MW_Y-2030",
-        "GNR_BO_NGAS_E-106_MS-5-MW_Y-2040",
-        "GNR_BO_NGAS_E-106_MS-5-MW_Y-2050",
-        "GNR_ST_MSW_BP_E-23_MS-80-MW-FEED_Y-2020",
-        "GNR_ST_MSW_BP_E-24_MS-80-MW-FEED_Y-2030",
-        "GNR_ST_MSW_BP_E-24_MS-80-MW-FEED_Y-2040",
+        # "GNR_BO_NGAS_E-105_MS-5-MW_Y-2020",
+        # "GNR_BO_NGAS_E-106_MS-5-MW_Y-2030",
+        # "GNR_BO_NGAS_E-106_MS-5-MW_Y-2040",
+        # "GNR_BO_NGAS_E-106_MS-5-MW_Y-2050",
+        # "GNR_ST_MSW_BP_E-23_MS-80-MW-FEED_Y-2020",
+        # "GNR_ST_MSW_BP_E-24_MS-80-MW-FEED_Y-2030",
+        # "GNR_ST_MSW_BP_E-24_MS-80-MW-FEED_Y-2040",
         "GNR_ST_MSW_BP_E-24_MS-80-MW-FEED_Y-2050",
-        "GNR_ST_NGAS_BP_E-7_MS-15-MW_Y-2020",
-        "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2020",
-        "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2030",
-        "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2040",
+        "GNR_ST_MSW_CND_E-24_MS-80-MW-FEED_Y-2050", 
+        "GNR_CC_NGASCCS_CND_E-55_SS-10-MW_Y-2050",
+        "GNR_ST_NGASCCS_BP_E-7_MS-15-MW_Y-2020",
+        # "GNR_ST_NGAS_BP_E-7_MS-15-MW_Y-2020",
+        # "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2020",
+        # "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2030",
+        # "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2040",
         "GNR_ST_STRW_BP_E-25_MS-80-MW-FEED_Y-2050",
-        "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2020",
-        "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2030",
-        "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2040",
+        "GNR_ST_STRW_CND_E-25_MS-80-MW-FEED_Y-2050",
+        # "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2020",
+        # "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2030",
+        # "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2040",
         "GNR_ST_WOODCHI_BP_E-29_MS-80-MW-FEED_Y-2050",
-        "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2020",
-        "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2030",
-        "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2040",
-        "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2050",
+        "GNR_ST_WOODCHI_CND_E-29_MS-80-MW-FEED_Y-2050",
+        # "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2020",
+        # "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2030",
+        # "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2040",
+        # "GNR_ST_WOODPEL_BP_E-30_MS-80-MW-FEED_Y-2050",
+        # "GNR_ST_WOODCHI_CND_E-29_MS-80-MW-FEED_Y-2020",
+        # "GNR_ST_WOODCHI_CND_E-29_MS-80-MW-FEED_Y-2030",
+        # "GNR_ST_WOODCHI_CND_E-29_MS-80-MW-FEED_Y-2040",
+        # "GNR_ST_STRW_CND_E-25_MS-80-MW-FEED_Y-2020",
+        # "GNR_ST_STRW_CND_E-25_MS-80-MW-FEED_Y-2030",
+        # "GNR_ST_STRW_CND_E-25_MS-80-MW-FEED_Y-2040",
     ]
         
     large_scale = [
-        "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2030",
-        "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2040",
-        "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2050",
-        "GNR_ST_MSW_CND_E-23_LS-220-MW-FEED_Y-2020",
-        "GNR_ST_MSW_CND_E-24_LS-220-MW-FEED_Y-2030",
-        "GNR_ST_MSW_CND_E-25_LS-220-MW-FEED_Y-2040",
+        # "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2030",
+        # "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2040",
+        # "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2050",
+        "GNR_HP_ELEC_AIR-WTR_COP-360_LS_Y-2050",
+        "GNR_HP_ELEC_GROUND-WTR_COP-410_LS-4-MW_Y-2050",
+        "GNR_HS_HEAT_PIT_L-CEN_E-70_Y-2050",
+        "GNR_HS_HEAT_WTR-TANK_LS_E-95_Y-2010",
+        "GNR_BO_ELEC_E-99_LS-10-MW-FEED_Y-2050",
+        "GNR_ES_ELEC_BAT-LITHIO-PEAK_E-86_Y-2050",
+        "GNR_ES_ELEC_BAT-LITHIO-GRID_E-86_Y-2050",
+        "GNR_PV_SUN_LS-8-MW_RG1_Y-2050",
+        "GNR_WT-SP277-HH100_ONS_LS_L-RG1_Y-2050",
+        # "GNR_ST_MSW_CND_E-23_LS-220-MW-FEED_Y-2020",
+        # "GNR_ST_MSW_CND_E-24_LS-220-MW-FEED_Y-2030",
+        # "GNR_ST_MSW_CND_E-25_LS-220-MW-FEED_Y-2040",
         "GNR_ST_MSW_CND_E-25_LS-220-MW-FEED_Y-2050",
-        "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2020",
-        "GNR_ST_MSW_BP_E-23_LS-220-MW-FEED_Y-2020",
-        "GNR_ST_MSW_BP_E-24_LS-220-MW-FEED_Y-2030",
-        "GNR_ST_MSW_BP_E-25_LS-220-MW-FEED_Y-2040",
+        # "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2020",
+        # "GNR_ST_MSW_BP_E-23_LS-220-MW-FEED_Y-2020",
+        # "GNR_ST_MSW_BP_E-24_LS-220-MW-FEED_Y-2030",
+        # "GNR_ST_MSW_BP_E-25_LS-220-MW-FEED_Y-2040",
         "GNR_ST_MSW_BP_E-25_LS-220-MW-FEED_Y-2050",
-        "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2020",
-        "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2030",
-        "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2040",
+        # "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2020",
+        # "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2030",
+        # "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2040",
         "GNR_ST_WOODCHI_CND_E-29_LS-600-MW-FEED_Y-2050",
-        "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2020",
-        "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2030",
-        "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2040",
-        "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2050",
-        "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2020",
-        "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2030",
-        "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2040",
+        # "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2020",
+        # "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2030",
+        # "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2040",
+        # "GNR_ST_WOODPEL_CND_E-33_LS-800-MW-FEED_Y-2050",
+        # "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2020",
+        # "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2030",
+        # "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2040",
         "GNR_ST_STRW_CND_E-31_LS-132-MW-FEED_Y-2050",
-        "GNR_ST_NGAS_CND_E-47_LS-400-MW_Y-2020",
-        "GNR_ST_NGASCCS_CND_E-47_LS-400-MW_Y-2020",
-        "GNR_GT_NGAS_CND_E-42_LS-40-MW_Y-2020",
-        "GNR_GT_NGAS_CND_E-43_LS-40-MW_Y-2030",
-        "GNR_GT_NGAS_CND_E-44_LS-40-MW_Y-2040",
-        "GNR_GT_NGAS_CND_E-44_LS-40-MW_Y-2050",
-        "GNR_CC_NGAS_CND_E-59_LS-100-MW_Y-2020",
-        "GNR_CC_NGAS_CND_E-61_LS-100-MW_Y-2030",
-        "GNR_CC_NGAS_CND_E-62_LS-100-MW_Y-2040",
-        "GNR_CC_NGAS_CND_E-63_LS-100-MW_Y-2050",
-        "GNR_CC_NGASCCS_CND_E-59_LS-100-MW_Y-2020",
-        "GNR_CC_NGASCCS_CND_E-61_LS-100-MW_Y-2030",
-        "GNR_CC_NGASCCS_CND_E-62_LS-100-MW_Y-2040",
+        # "GNR_ST_NGAS_CND_E-47_LS-400-MW_Y-2020",
+        # "GNR_ST_NGASCCS_CND_E-47_LS-400-MW_Y-2020",
+        # "GNR_GT_NGAS_CND_E-42_LS-40-MW_Y-2020",
+        # "GNR_GT_NGAS_CND_E-43_LS-40-MW_Y-2030",
+        # "GNR_GT_NGAS_CND_E-44_LS-40-MW_Y-2040",
+        # "GNR_GT_NGAS_CND_E-44_LS-40-MW_Y-2050",
+        # "GNR_CC_NGAS_CND_E-59_LS-100-MW_Y-2020",
+        # "GNR_CC_NGAS_CND_E-61_LS-100-MW_Y-2030",
+        # "GNR_CC_NGAS_CND_E-62_LS-100-MW_Y-2040",
+        # "GNR_CC_NGAS_CND_E-63_LS-100-MW_Y-2050",
+        # "GNR_CC_NGASCCS_CND_E-59_LS-100-MW_Y-2020",
+        # "GNR_CC_NGASCCS_CND_E-61_LS-100-MW_Y-2030",
+        # "GNR_CC_NGASCCS_CND_E-62_LS-100-MW_Y-2040",
         "GNR_CC_NGASCCS_CND_E-63_LS-100-MW_Y-2050",
-        "GNR_ST_NGAS_EXT_E-47_LS-400-MW_Y-2020",
-        "GNR_ST_NGASCCS_EXT_E-47_LS-400-MW_Y-2020",
-        "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2020",
-        "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2030",
-        "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2040",
+        # "GNR_ST_NGAS_EXT_E-47_LS-400-MW_Y-2020",
+        # "GNR_ST_NGASCCS_EXT_E-47_LS-400-MW_Y-2020",
+        # "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2020",
+        # "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2030",
+        # "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2040",
         "GNR_ST_STRW_BP_E-31_LS-132-MW-FEED_Y-2050",
-        "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2020",
-        "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2030",
-        "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2040",
+        # "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2020",
+        # "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2030",
+        # "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2040",
         "GNR_ST_WOODCHI_BP_E-29_LS-600-MW-FEED_Y-2050",
-        "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2020",
-        "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2030",
-        "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2040",
-        "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2050",
-        "GNR_GT_NGAS_BP_E-42_LS-40-MW_Y-2020",
-        "GNR_GT_NGAS_BP_E-43_LS-40-MW_Y-2030",
-        "GNR_GT_NGAS_BP_E-44_LS-40-MW_Y-2040",
-        "GNR_GT_NGAS_BP_E-44_LS-40-MW_Y-2050",
-        "GNR_BO_STRW_E-102_LS-6-MW_Y-2020",
-        "GNR_BO_STRW_E-102_LS-6-MW_Y-2030",
-        "GNR_BO_STRW_E-102_LS-6-MW_Y-2040",
+        # "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2020",
+        # "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2030",
+        # "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2040",
+        # "GNR_ST_WOODPEL_BP_E-33_LS-800-MW-FEED_Y-2050",
+        # "GNR_GT_NGAS_BP_E-42_LS-40-MW_Y-2020",
+        # "GNR_GT_NGAS_BP_E-43_LS-40-MW_Y-2030",
+        # "GNR_GT_NGAS_BP_E-44_LS-40-MW_Y-2040",
+        # "GNR_GT_NGAS_BP_E-44_LS-40-MW_Y-2050",
+        # "GNR_BO_STRW_E-102_LS-6-MW_Y-2020",
+        # "GNR_BO_STRW_E-102_LS-6-MW_Y-2030",
+        # "GNR_BO_STRW_E-102_LS-6-MW_Y-2040",
         "GNR_BO_STRW_E-102_LS-6-MW_Y-2050",
-        "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2020",
-        "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2030",
-        "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2040",
+        # "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2020",
+        # "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2030",
+        # "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2040",
         "GNR_BO_WOODCHI_E-115_LS-7-MW_Y-2050",
-        "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2020",
-        "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2030",
-        "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2040",
-        "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2050",
-        "GNR_CC_NGAS_EXT_E-59_LS-100-MW_Y-2020",
-        "GNR_CC_NGAS_EXT_E-61_LS-100-MW_Y-2030",
-        "GNR_CC_NGAS_EXT_E-62_LS-100-MW_Y-2040",
-        "GNR_CC_NGAS_EXT_E-63_LS-100-MW_Y-2050",
-        "GNR_CC_NGASCCS_EXT_E-59_LS-100-MW_Y-2020",
-        "GNR_CC_NGASCCS_EXT_E-61_LS-100-MW_Y-2030",
-        "GNR_CC_NGASCCS_EXT_E-62_LS-100-MW_Y-2040",
+        # "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2020",
+        # "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2030",
+        # "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2040",
+        # "GNR_BO_WOODPEL_E-100_LS-6-MW_Y-2050",
+        # "GNR_CC_NGAS_EXT_E-59_LS-100-MW_Y-2020",
+        # "GNR_CC_NGAS_EXT_E-61_LS-100-MW_Y-2030",
+        # "GNR_CC_NGAS_EXT_E-62_LS-100-MW_Y-2040",
+        # "GNR_CC_NGAS_EXT_E-63_LS-100-MW_Y-2050",
+        # "GNR_CC_NGASCCS_EXT_E-59_LS-100-MW_Y-2020",
+        # "GNR_CC_NGASCCS_EXT_E-61_LS-100-MW_Y-2030",
+        # "GNR_CC_NGASCCS_EXT_E-62_LS-100-MW_Y-2040",
         "GNR_CC_NGASCCS_EXT_E-63_LS-100-MW_Y-2050",
     ]
     
@@ -233,16 +292,30 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         "~A.str.contains('IDVU') and ~A.str.contains('IND')"
     )
     
-    # Get base investment options and remove elements in wind_off_G from base_options (add hydrogen when the error arrives)
-    base_options = [option for option in temp.G.unique() if option not in other_vre + hydrogen_options + solar_heating + medium_scale + large_scale]
+    # Get options from previous study's AGKN
+    # unique_options = pd.Series(list(temp.G) + small_scale).unique() # Get unique options from previous study
+    # exclude_options = other_vre + hydrogen_options + solar_heating + medium_scale + large_scale
+    # base_small_options = [option for option in unique_options if option not in exclude_options]
+    # # unique_options = pd.Series(list(temp.G) + medium_scale).unique() # Get unique options from previous study
+    # exclude_options = other_vre + hydrogen_options + solar_heating + small_scale + large_scale
+    # base_medium_options = [option for option in unique_options if option not in exclude_options]
+    # # unique_options = pd.Series(list(temp.G) + large_scale).unique() # Get unique options from previous study
+    # exclude_options = other_vre + hydrogen_options + solar_heating + medium_scale + small_scale
+    # base_large_options = [option for option in unique_options if option not in exclude_options]
+    # Get chosen options
+    exclude_options = other_vre + hydrogen_options + solar_heating
+    base_small_options = [option for option in small_scale if option not in exclude_options]
+    base_medium_options = [option for option in medium_scale if option not in exclude_options]
+    base_large_options = [option for option in large_scale if option not in exclude_options]
+    
     
     # Use this to inspect offshore and hydrogen investment options
     if print_options:
         print('\nCaptured areas:\n%s'%('\n'.join(temp.A.unique())))
         print('Investment options here:\n%s'%('\n'.join(temp.G.unique())))
-        print('\nBase options without offshore or hydrogen:\n%s'%('\n'.join(base_options)))
+        print('\nBase options without offshore or hydrogen:\n%s'%('\n'.join(base_small_options)))
 
-    # Remove cavern, will 
+    # Remove cavern
     h2_caverns = [
         'GNR_H2S_H2-CAVERN_Y-2030',
         'GNR_H2S_H2-CAVERN_Y-2040',
@@ -251,7 +324,7 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     hydrogen_options_without_caverns = [option for option in hydrogen_options if option not in h2_caverns]
 
 
-    return base_options, hydrogen_options_without_caverns, h2_caverns
+    return base_small_options, hydrogen_options_without_caverns, h2_caverns, base_medium_options, base_large_options
 
 def industry_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     
@@ -307,20 +380,25 @@ def individual_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
 ### ------------------------------- ###
 
 @click.command()
+@click.option('--large-munis', type=str, required=True, help="The municipalities, where large scale investment options are allowed")
+@click.option('--medium-munis', type=str, required=True, help="The municipalities, where medium scale investment options are allowed")
 @click.option('--path-to-allendofmodel', type=str, required=False, help='A parameter')
-def main(path_to_allendofmodel: str):
+def main(large_munis: str, medium_munis: str, path_to_allendofmodel: str):
     
     # Create file
     if not(os.path.exists(r'Data\BalmorelData\AGKN_fromKountouris2024.gzip')):
         save_symbol_from_all_endofmodel('AGKN', ['A', 'G'], 'set', r'C:\Users\mathi\gitRepos\Balmorel\all_endofmodel.gdx')
     
-    # Load file
+    # Load files
     f = pd.read_parquet(r'Data\BalmorelData\AGKN_fromKountouris2024.gzip')
     f = f.query('A.str.contains("DK")')
 
+    # Make list of munis
+    large_munis = large_munis.replace(' ', '').split(',')
+    medium_munis = medium_munis.replace(' ', '').split(',')
 
     # 2.1 Get base options
-    base_options, hydrogen_options, h2_caverns = base_AGKN(f)
+    base_small_options, hydrogen_options, h2_caverns, base_medium_options, base_large_options = base_AGKN(f)
     
     ## Load base areas
     base_areas = pickle.load(open('Modules/Submodules/districtheat_sets.pkl', 'rb'))
@@ -328,11 +406,26 @@ def main(path_to_allendofmodel: str):
     ## Make table for base
     incfile = IncFile(name='AGKN', path='Output',
                       prefix='\n'.join([
-                          "* Defining base investment options",
+                          "* Defining small base investment options",
                           "SET BASE_INV_OPTIONS(GGG)",
                           "/",
-                          "\n".join(base_options),
+                          "\n".join(base_small_options),
                           "/;",
+                          "",
+                          "",
+                          "* Defining medium base investment options",
+                          "SET MEDIUM_INV_OPTIONS(GGG)",
+                          "/",
+                          "\n".join(base_medium_options),
+                          "/;",
+                          "",
+                          "",
+                          "* Defining large base investment options",
+                          "SET LARGE_INV_OPTIONS(GGG)",
+                          "/",
+                          "\n".join(base_large_options),
+                          "/;",
+                          "",
                           ""
                       ]),
                       suffix="\n".join([
@@ -342,7 +435,9 @@ def main(path_to_allendofmodel: str):
                           "$if not EXIST '../data/OFFSHORE_AGKN.inc' $INCLUDE '../../base/data/OFFSHORE_AGKN.inc';",
                           "$offmulti"
                       ]))
-    incfile.body = "\n".join(["AGKN('%s',GGG) = BASE_INV_OPTIONS(GGG);"%area for area in base_areas.values()])
+    incfile.body = "\n* Small scale options\n" + "\n".join(["AGKN('%s',GGG) = BASE_INV_OPTIONS(GGG);"%area for area in base_areas.values() if area not in medium_munis + large_munis]) + "\n"
+    incfile.body += "\n* Medium scale options\n" + "\n".join(["AGKN('%s',GGG) = MEDIUM_INV_OPTIONS(GGG);"%area for area in base_areas.values() if area in medium_munis]) + "\n"
+    incfile.body += "\n* Large scale options\n" + "\n".join(["AGKN('%s',GGG) = LARGE_INV_OPTIONS(GGG);"%area for area in base_areas.values() if area in large_munis]) + "\n"
     incfile.save()
     
     # 2.2 Get hydrogen options

@@ -127,11 +127,13 @@ rule onshore_vre:
 
 rule exo_heat_demand:
     input:
-        [f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
-        f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
-        f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc",
-        f"{data_path}Danmarks Statistik/industry_demand.nc",
-        f"{data_path}Timeseries/energinet_eldem.nc"]
+        [
+            f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
+            f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
+            f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc",
+            f"{data_path}Danmarks Statistik/industry_demand.nc",
+            f"{data_path}Timeseries/energinet_eldem.nc",
+        ]
     output:
         [f"{submod_path}districtheat_sets.pkl",
         f"{submod_path}individual_sets.pkl",
@@ -207,20 +209,29 @@ rule geographic_sets:
 rule investment_options:
     input:
         [
+            f"{modules_path}investment_options.py",
             f"{submod_path}districtheat_sets.pkl",
             f"{submod_path}individual_sets.pkl",
             f"{submod_path}ind-lt_sets.pkl",
             f"{submod_path}ind-mt_sets.pkl",
             f"{submod_path}ind-ht_sets.pkl", 
+            f"{data_path}Timeseries/energinet_eldem.nc",
+            f"{data_path}AAU Kommuneplan/districtheat_exo_heatdem.nc", 
+            f"{data_path}AAU Kommuneplan/industry_exo_heatdem.nc",
         ]
+    params:
+        large_munis=config['zones']['large_munis'],
+        medium_munis=config['zones']['medium_munis']
     output:
         [
             f"{out_path}AGKN.inc",
             f"{out_path}HYDROGEN_AGKN.inc",
             f"{out_path}INDUSTRY_AGKN.inc",
         ]
-    script:
-        f"{modules_path}investment_options.py"
+    shell:
+        """
+        python {modules_path}investment_options.py --large-munis="{params.large_munis}" --medium-munis="{params.medium_munis}"
+        """
 
 # 6. Grids
 rule grids:

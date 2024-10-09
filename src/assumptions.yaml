@@ -3,6 +3,10 @@ balmorel_input:
   scenario: "muni"
   load_again: False
   
+zones:
+  large_munis: "Koebenhavn_A, Aalborg_A, Odense_A, Aarhus_A"
+  medium_munis: "Esbjerg_A, Vejle_A, Frederiksberg_A, Randers_A, Kolding_A"
+
 grid_assumptions:
   electricity:
     investment_cost: 3.1 # €/MW/m DEA high bound

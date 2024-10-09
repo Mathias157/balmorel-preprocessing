@@ -49,8 +49,9 @@ def main():
         with open('Output/%s.inc'%file, 'a+') as f:
             # content = f.read()
             f.write("\n".join([
+                "",
                 '$onmulti',
-                f"$if     EXIST '../data/OFFSHORE_{file}.inc'    $INCLUDE '../data/OFFSHORE_{file}.inc';",
+                f"$if     EXIST '../data/OFFSHORE_{file}.inc' $INCLUDE '../data/OFFSHORE_{file}.inc';",
                 f"$if not EXIST '../data/OFFSHORE_{file}.inc' $INCLUDE '../../base/data/OFFSHORE_{file}.inc';",                          
                 '$offmulti',
             ]))

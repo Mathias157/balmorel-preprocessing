@@ -190,6 +190,9 @@ def biomass_availability(ctx, woodpot: float, strawpot: float, biogaspot: float,
     else:
         f.suffix += "\n* Allow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOODPELLETS"')['Value'].sum())
     
+    # Municipal waste
+    f.suffix += "\nGMAXF(Y,'DENMARK','MUNIWASTE') = 763308;"
+    
     f.body_prepare(index=['Y', 'CRA'], columns='F', values='Value')
     
     ## Zeros have to be EPS
