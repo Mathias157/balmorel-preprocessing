@@ -1,0 +1,19 @@
+heat_profiles_func
+==================
+
+.. py:module:: heat_profiles_func
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   heat_profiles_func.heat_profiles_func
+
+
+Module Contents
+---------------
+
+.. py:function:: heat_profiles_func(ctx)
+

@@ -1,0 +1,65 @@
+read_futuregas_profiles
+=======================
+
+.. py:module:: read_futuregas_profiles
+
+.. autoapi-nested-parse::
+
+   Generate heat profiles from futuregas data
+
+   Assumes that the distribution of heat profiles that i made using FutureGas data is in the Balmorel/muni/data folder
+
+   Created on 10.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   read_futuregas_profiles.m
+   read_futuregas_profiles.profiles
+   read_futuregas_profiles.profiles
+   read_futuregas_profiles.correct_names
+   read_futuregas_profiles.DK_profiles
+   read_futuregas_profiles.areas2
+   read_futuregas_profiles.converter
+   read_futuregas_profiles.DK_profiles
+   read_futuregas_profiles.temp
+   read_futuregas_profiles.DK_profiles
+   read_futuregas_profiles.DK_profiles
+   read_futuregas_profiles.X
+   read_futuregas_profiles.max_vals
+
+
+Module Contents
+---------------
+
+.. py:data:: m
+
+.. py:data:: profiles
+
+.. py:data:: profiles
+
+.. py:data:: correct_names
+
+.. py:data:: DK_profiles
+
+.. py:data:: areas2
+
+.. py:data:: converter
+
+.. py:data:: DK_profiles
+
+.. py:data:: temp
+
+.. py:data:: DK_profiles
+
+.. py:data:: DK_profiles
+
+.. py:data:: X
+
+.. py:data:: max_vals
+
