@@ -199,12 +199,8 @@ def cluster(collected_data: pd.DataFrame,
             n_clusters: int,
             use_connectivity: bool = True,
             manual_corrections: list = [
-                ['Bornholm', 'Christiansoe', 1],
-                ['Bornholm', 'Dragoer', 1],
-                ['Esbjerg', 'Fanoe', 1],
                 ['Roedovre', 'Frederiksberg', 1],
                 ['Slagelse', 'Nyborg', 0],
-                ['Samsoe', 'Kalundborg', 0]
             ],
             linkage: str = 'Ward',
             connection_remark: str = 'connec. included + artifical',
