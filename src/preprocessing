@@ -32,12 +32,6 @@ rule create_conversion_dictionaries:
     script:
         f"{submod_path}create_conversion_dictionaries.py"
 
-rule do_clustering:
-    input:
-        f"{data_path}Power Grid/municipal_connectivity.nc"
-    script:
-        f"{modules_path}clustering.py"
-
 # 2. Exogenous Electricity Demands
 rule format_energinet_data:
     input:
@@ -101,28 +95,6 @@ rule heat_profiles:
     shell:
         """
         python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} heat-profiles
-        """
-
-rule onshore_vre:
-    input:
-        [
-            f"{modules_path}onshore_vre_func.py",
-            f"{data_path}BalmorelData/muni_input_data.gdx"
-        ]
-    params:
-        model_path=config["balmorel_input"]["model_path"],
-        scenario=config["balmorel_input"]["scenario"],
-        load_again=config["balmorel_input"]["load_again"]
-    output:
-        [
-            f"{out_path}WND_VAR_T.inc",
-            f"{out_path}SOLE_VAR_T.inc",
-            f"{out_path}WNDFLH.inc",
-            f"{out_path}SOLEFLH.inc",
-        ]
-    shell:
-        """
-        python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} onshore-vre
         """
 
 rule exo_heat_demand:
@@ -263,11 +235,33 @@ rule grids:
         
 
 # 7. Other
+rule onshore_vre:
+    input:
+        [
+            f"{modules_path}onshore_vre_func.py",
+            f"{data_path}BalmorelData/muni_input_data.gdx"
+        ]
+    params:
+        model_path=config["balmorel_input"]["model_path"],
+        scenario=config["balmorel_input"]["scenario"],
+        load_again=config["balmorel_input"]["load_again"]
+    output:
+        [
+            f"{out_path}WND_VAR_T.inc",
+            f"{out_path}SOLE_VAR_T.inc",
+            f"{out_path}WNDFLH.inc",
+            f"{out_path}SOLEFLH.inc",
+        ]
+    shell:
+        """
+        python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} onshore-vre
+        """
+
 rule offshore_wind:
     input:
         [
-            f'{out_path}VRE/2012_offshore_wind.nc',
-            f"{modules_path}offshore_wind.py"
+            f"{modules_path}offshore_wind.py",
+            f"{data_path}BalmorelData/muni_input_data.gdx"
         ]
     params:
         weather_year=config['timeseries']['weather_year'],
