@@ -26,15 +26,16 @@ grid_assumptions:
     transmission_cost: 1.0e-06
 
 fuel_assumptions:
-  h2_demand_per_shipfuel_mwh: 0.412  # Assuming TG-MeOH
-  h2_demand_per_jetfuel_mwh:  0.614  # Assuming TG-FT-H2
+  meoh_per_jetfuel: 0.65  # Based on Rosendal et al. 2024, Renewable fuels and the impact of hydrogen infrastructure 
+  jetfuel_demand: 11e6 # MWh, Based on IDA Klimasvar
+  shipping_demand: 4e6 # MWh, Based on IDA Klimasvar
 
 timeseries:
   weather_year: 2012
 
 resources:
   total_offshore_wind_potential: 40000 # MW
-  woodpot: 7.3   # PJ, potential of woody biomass for energy, ENS_Med_ForestBaU scenario from Ruiz, Pablo (2019): ENSPRESO - BIOMASS. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/74ed5a04-7d74-4807-9eab-b94774309d9f
-  strawpot: 22   # PJ, potential of agro waste for energy, ENS_Med_ForestBaU scenario from Ruiz, Pablo (2019): ENSPRESO - BIOMASS. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/74ed5a04-7d74-4807-9eab-b94774309d9f
-  biogaspot: 43.3   # PJ, potential of biogas for energy, ENS_Med_ForestBaU scenario from Ruiz, Pablo (2019): ENSPRESO - BIOMASS. European Commission, Joint Research Centre (JRC) [Dataset] PID: http://data.europa.eu/89h/74ed5a04-7d74-4807-9eab-b94774309d9f
+  woodpot: 40   # PJ, potential of woody biomass for energy, Bramstoft et al. 2020
+  strawpot: 54   # PJ, potential of agro waste for energy, Bramstoft et al. 2020
+  biogaspot: 10.56  # PJ, potential of biogas for energy assuming 60% conversion efficiency (DEA tech catalogue of biogas plant) and manure potential (Bramstoft et al. 2020) 
   woodimport: False # Allow import of woody biomass to major cities?

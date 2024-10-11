@@ -17,7 +17,7 @@ rule all:
             f"{out_path}CCC.inc",
             f"{out_path}XINVCOST.inc",
             f"{out_path}AGKN.inc",
-            f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc",
+            f"{out_path}HYDROGEN_SYNFUELDEMAND.inc",
             f"{out_path}WND_VAR_T.inc",
             f'{out_path}OFFSHORE_WND_VAR_T.inc',
             f"{out_path}GKFX.inc",
@@ -148,19 +148,20 @@ rule transport_road_demand:
         python {modules_path}transport_road_demand.py --chargercap={params.charging_capacity_per_vehicle}
         """
 
-rule transport_h2_demand:
+rule transport_heavy_demand:
     input:
         [
             f"{data_path}Danmarks Statistik/transport_demand.csv"
         ]
     params:
-        h2dem_per_ship=config["fuel_assumptions"]["h2_demand_per_shipfuel_mwh"],
-        h2dem_per_jet=config["fuel_assumptions"]["h2_demand_per_jetfuel_mwh"]
+        meoh_per_jetfuel=config["fuel_assumptions"]["meoh_per_jetfuel"],
+        jetfuel_demand=config["fuel_assumptions"]["jetfuel_demand"],
+        shipping_demand=config["fuel_assumptions"]["shipping_demand"]
     output:
-        f"{out_path}TRANSPORT_TRANSDEMAND_Y.inc" 
+        f"{out_path}HYDROGEN_SYNFUELDEMAND.inc" 
     shell:
         """
-        python {modules_path}transport_h2_demand.py --h2-demand-per-jetfuel-mwh={params.h2dem_per_jet} --h2-demand-per-shipfuel-mwh={params.h2dem_per_ship}
+        python {modules_path}transport_heavy_demand.py --meoh-per-jetfuel={params.meoh_per_jetfuel} --shipping-demand={params.shipping_demand} --jetfuel-demand={params.jetfuel_demand}
         """
 
 # 5. Sets
