@@ -103,8 +103,8 @@ def loop_and_replace_names(df: pd.DataFrame,
                     clustering: gpd.GeoDataFrame,
                     old_column: str):
     
-    new_column = '%s_new'%old_column
-    clustering.columns = [old_column, new_column]
+    new_column = '%s_new'%old_column # The column containing the new cluster names
+    clustering.columns = [old_column, new_column] # old_column: name to be replaced by cluster name, new_column: cluster name
     clustering = clustering.set_index(old_column)
     
     for area in df[old_column].unique():
@@ -119,8 +119,15 @@ def loop_and_replace_names(df: pd.DataFrame,
             region = area
             
         new_name = clustering.loc[region, new_column]
-        df[old_column] = df[old_column].str.replace(area, new_name + suffix)
-    
+        
+        # Make sure to aggregate offshore regions (otherwise, some with same OFF-numbers will be aggregated, while others won't)
+        if 'OFF' in suffix:
+            suffix = '_OFF'
+        
+        # Replace names
+        idx = df[old_column].str.find(area) != -1
+        df.loc[idx, old_column] = new_name + suffix
+
     return df
 
 def aggregate_parameter(db: gams.GamsDatabase, 
