@@ -21,7 +21,8 @@ rule all:
             f"{out_path}WND_VAR_T.inc",
             f'{out_path}OFFSHORE_WND_VAR_T.inc',
             f"{out_path}GKFX.inc",
-            f"{out_path}GMAXF.inc"
+            f"{out_path}GMAXF.inc",
+            f"{out_path}FUELTRANSPORT_COST.inc"
         ]
 
 rule create_conversion_dictionaries:
@@ -234,6 +235,17 @@ rule grids:
         python {modules_path}grids.py --nordsoeen-connection={params.nordsoeen_connection}"
         """
         
+rule biomass_transport:
+    input: 
+        f"{data_path}BalmorelData/municipal_connectivity.nc"
+    output:
+        f"{out_path}FUELTRANSPORT_COST.inc"
+    params:
+        transport_cost=config['resources']['biotransportcost']
+    shell:
+        """
+        python {modules_path}biomass_transport.py transport {params.transport_cost}
+        """
 
 # 7. Other
 rule onshore_vre:
