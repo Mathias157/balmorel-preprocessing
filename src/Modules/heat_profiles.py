@@ -262,8 +262,12 @@ def load_profiles_from_balmorel(ctx):
     return df
 
 @click.pass_context
-def heat_profiles_func(ctx, df):
+def heat_profiles_func(df):
+    """Generates heat profiles from previous Balmorel input data 
     
+    Args:
+            df (_type_): The previous profiles input data
+    """
         
     ### Save DH_VAR_T.inc
     incfile = IncFile(name='DH_VAR_T', path='Output',

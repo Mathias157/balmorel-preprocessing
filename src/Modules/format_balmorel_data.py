@@ -15,7 +15,6 @@ from clustering import convert_municipal_code_to_name
 from geofiles import prepared_geofiles
 from Submodules.utils import store_balmorel_input
 from onshore_vre_func import onshore_vre_func
-from heat_profiles_func import heat_profiles_func
 import numpy as np
 from pybalmorel import IncFile
 import pandas as pd
@@ -60,14 +59,6 @@ def main(ctx, model_path: str, scenario: str, load_again: bool = False):
     ctx.obj['load_again'] = load_again
     ctx.obj['mun'] = mun
      
-    
-
-@main.command()
-@click.pass_context
-def heat_profiles(ctx):
-    """Get heat profiles from Bramstoft, Rasmus, Amalia Pizarro-Alonso, Ida Græsted Jensen, Hans Ravn, and Marie Münster. “Modelling of Renewable Gas and Renewable Liquid Fuels in Future Integrated Energy Systems.” Applied Energy 268 (June 15, 2020): 114869. https://doi.org/10.1016/j.apenergy.2020.114869."""
-    return heat_profiles_func(ctx)
-    
     
 @main.command()
 @click.pass_context
