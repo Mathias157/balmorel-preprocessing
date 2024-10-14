@@ -52,7 +52,7 @@ def CLI(ctx, dark_style: bool, plot_ext: str):
 @click.argument('cutout', type=str)
 @click.option('--weather-year', type=int, required=False, default=2012, help="The weather year")
 @click.option('--plot', is_flag=True, required=False, help="Plot the average temperatures on a map?")
-def cmd1(ctx, cutout: str, weather_year: int, plot: bool):
+def generate(ctx, cutout: str, weather_year: int, plot: bool):
         "A command in the CLI"
         
         # Get files
