@@ -1,7 +1,9 @@
 """
-TITLE
+Generate Heat Demand Timeseries
 
-Description
+Will use temperature coordinates to 1) find average temperatures within polygons, 
+2) use heating degree days assumption from Eurostat to generate heat demand profiles based on these timeseries
+3) aggregate this profile with a flat profile for hot water consumption, being 25% of the total profile
 
 Created on 14.10.2024
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
@@ -12,8 +14,7 @@ Created on 14.10.2024
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from shapely import Point
-import numpy as np
+from pybalmorel import IncFile
 import geopandas as gpd
 import xarray as xr
 import click
@@ -49,14 +50,56 @@ def CLI(ctx, dark_style: bool, plot_ext: str):
 @CLI.command()
 @click.pass_context
 @click.argument('cutout', type=str)
-def cmd1(ctx, cutout: str):
+@click.option('--weather-year', type=int, required=False, default=2012, help="The weather year")
+@click.option('--plot', is_flag=True, required=False, help="Plot the average temperatures on a map?")
+def cmd1(ctx, cutout: str, weather_year: int, plot: bool):
         "A command in the CLI"
         
+        # Get files
         temperature = xr.load_dataset(cutout).temperature
         the_index, geofile, c = prepared_geofiles('DKmunicipalities_names')
 
+        # Aggregate temperature for coordinates inside municipality polygons
         agg_temperatures = aggregate_temperatures(temperature, geofile)
-        print(agg_temperatures)
+        
+        plot_data(agg_temperatures, 'temperature')
+        
+        # Make heat demand profile
+        ## Convert temperatures to C
+        agg_temperatures['heat_demand'] = agg_temperatures.temperature.copy() - 273.15        
+        ## Apply heat degree hour function
+        agg_temperatures['heat_demand'] = xr.where(agg_temperatures.heat_demand <= 15, 18 - agg_temperatures.heat_demand, 0)
+        ## Add constant profile for hot water consumption
+        agg_temperatures['heat_demand'] = 0.75*agg_temperatures.heat_demand/agg_temperatures.heat_demand.sum('time') + 0.25 / len(agg_temperatures.time.data)
+        
+        plot_data(agg_temperatures, 'heat_demand')
+        
+        
+        # Format data for Balmorel input
+        df = (
+                agg_temperatures.heat_demand
+                .to_dataframe()
+                .reset_index()
+                .pivot_table(index='time', columns=['municipality'], values='heat_demand', aggfunc='sum')
+        )
+        
+        iso = pd.Series(df.index).dt.isocalendar()
+        
+        ## Sort away week 52 from last year 
+        idx1 = iso.query('index < 672 and week == 52 and year == @weather_year-1').index
+        ## Sort away week 1 from next year 
+        idx2 = iso.query('index > 8088 and week == 1 and year == @weather_year+1').index 
+        
+        ## Check if there are exactly 8736 timeslices
+        iso = (
+                iso
+                .drop(index=idx1)
+                .drop(index=idx2)
+        )
+        assert len(iso) == 8736, 'Timeseries does not contain 52*168 slices!'
+        
+        df = df.iloc[iso.index]
+                
 
 #%% ------------------------------- ###
 ###            2. Utils             ###
@@ -77,7 +120,7 @@ def aggregate_temperatures(temperature: xr.DataArray,
                 
                 # Get the coordinates inside the municipality
                 snapshot = (
-                        temperature.loc[:, y0:y1+0.25, x0:x1+0.25] # Order of coordinates: time, latitude, longitude. Add buffer equal to grid resolution to ensure the snapshot is not empty
+                        temperature.loc[:, y0-0.25:y1+0.25, x0-0.25:x1+0.25] # Order of coordinates: time, latitude, longitude. Add buffer equal to grid resolution to ensure the snapshot is not empty
                         .isel(time=0)                    # A snapshot in time, we just need coordinates at this point
                         .to_dataframe() 
                         .reset_index()
@@ -109,7 +152,28 @@ def aggregate_temperatures(temperature: xr.DataArray,
                 meanstd = temperature.loc[:, coords.y, coords.x].std(dim=['x', 'y']).mean()
                 print('Mean standard deviation of temperature data inside %s:'%municipality, float(meanstd))
                 
+        # Add polygons for plotting
+        geo = geofile['geometry']
+        geo.index.name = 'municipality'
+        
+        agg_temperatures = xr.Dataset({'temperature' : agg_temperatures, 'geometry' : geo})
+        agg_temperatures.geometry.attrs['crs'] = 'EPSG:4326'
+                
         return agg_temperatures
+
+@click.pass_context
+def plot_data(ctx, 
+                aggregated_temperatures: xr.Dataset,
+                data: str):
+        fig, ax = plt.subplots()
+        
+        geo = gpd.GeoDataFrame(aggregated_temperatures.geometry.to_dataframe(),
+                               geometry='geometry', 
+                               crs=aggregated_temperatures.geometry.crs)
+        geo['data'] = aggregated_temperatures['data'].mean('time').to_dataframe()
+        
+        geo.plot(column='data', ax=ax)
+        fig, ax = plot_style(fig, ax, 'Output/data')
 
 @click.pass_context
 def plot_style(ctx, fig: plt.figure, ax: plt.axes, name: str):
