@@ -75,30 +75,45 @@ def cmd1(ctx, cutout: str, weather_year: int, plot: bool):
         plot_data(agg_temperatures, 'heat_demand')
         
         
-        # Format data for Balmorel input
-        df = (
-                agg_temperatures.heat_demand
-                .to_dataframe()
-                .reset_index()
-                .pivot_table(index='time', columns=['municipality'], values='heat_demand', aggfunc='sum')
+        # Make Balmorel input
+        df = format_data(agg_temperatures, weather_year)
+        
+        ## Create IncFiles
+        f = IncFile(name='DH_VAR_T', path='Output',
+                    prefix="\n".join([
+                        "PARAMETER DH_VAR_T(AAA,DHUSER,SSS,TTT) 'Variation in heat demand';",
+                        "TABLE DH_VAR_T1(SSS,TTT,AAA,DHUSER)",
+                        "",
+                    ]),
+                    suffix="\n".join([
+                        "",
+                        ";",
+                        "DH_VAR_T(AAA,'RESH',SSS,TTT) = DH_VAR_T1(SSS,TTT,AAA,'RESH');",
+                        "DH_VAR_T1(SSS,TTT,AAA,DHUSER) = 0;",
+                    ]))
+        ### Make _A suffix
+        dfA = df.copy()
+        dfA.columns = pd.Series(dfA.columns) + '_A' + ' . RESH'
+        f.body = dfA
+        f.save()
+        
+        dfA.columns = pd.Series(dfA.columns).str.replace('_A', '_IDVU-SPACEHEAT').str.replace('RESH', 'RESIDENTIAL')
+        f = IncFile(
+                name = 'INDIVUSERS_DH_VAR_T',
+                path = 'Output',
+                prefix='\n'.join([
+                    "TABLE DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER)",
+                    ""
+                ]),
+                body= dfA,
+                suffix='\n'.join([
+                                "",
+                                ";",
+                                "DH_VAR_T(AAA,DHUSER,SSS,TTT)$(SUM((S,T), DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER))) = DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER);",
+                                "DH_VAR_T_INDIVHEATING(SSS,TTT,AAA,DHUSER) = 0;"
+                ])
         )
-        
-        iso = pd.Series(df.index).dt.isocalendar()
-        
-        ## Sort away week 52 from last year 
-        idx1 = iso.query('index < 672 and week == 52 and year == @weather_year-1').index
-        ## Sort away week 1 from next year 
-        idx2 = iso.query('index > 8088 and week == 1 and year == @weather_year+1').index 
-        
-        ## Check if there are exactly 8736 timeslices
-        iso = (
-                iso
-                .drop(index=idx1)
-                .drop(index=idx2)
-        )
-        assert len(iso) == 8736, 'Timeseries does not contain 52*168 slices!'
-        
-        df = df.iloc[iso.index]
+        f.save()        
                 
 
 #%% ------------------------------- ###
@@ -161,6 +176,53 @@ def aggregate_temperatures(temperature: xr.DataArray,
                 
         return agg_temperatures
 
+
+def format_data(agg_temperatures: xr.Dataset, weather_year: int) -> pd.DataFrame:
+        """Format timeseries to format expected by Balmorel 
+
+        Args:
+            agg_temperatures (xr.Dataset): The dataset with heat demands per municipality
+
+        Returns:
+            pd.DataFrame: The formatted dataframe, ready for the IncFile class
+        """
+        df = (
+                agg_temperatures.heat_demand
+                .to_dataframe()
+                .reset_index()
+                .pivot_table(index='time', columns=['municipality'], values='heat_demand', aggfunc='sum')
+        )
+
+        iso = pd.Series(df.index).dt.isocalendar()
+
+        ## Sort away week 52 from last year 
+        idx1 = iso.query('index < 672 and week == 52 and year == @weather_year-1').index
+        ## Sort away week 1 from next year 
+        idx2 = iso.query('index > 8088 and week == 1 and year == @weather_year+1').index 
+
+        ## Check if there are exactly 8736 timeslices
+        iso = (
+                iso
+                .drop(index=idx1)
+                .drop(index=idx2)
+        )
+        
+        assert len(iso) == 8736, 'Timeseries does not contain 52*168 slices!'
+
+        df = df.iloc[iso.index]
+        
+        ## Make S and T index
+        S = ['S0%d'%i for i in range(1, 10)] + ['S%d'%i for i in range(10, 53)]
+        T = ['T00%d'%i for i in range(1, 10)] + ['T0%d'%i for i in range(10, 100)] + ['T%d'%i for i in range(100, 169)]
+        index = pd.MultiIndex.from_product((S, T))  
+        index = index.get_level_values(0) + ' . ' + index.get_level_values(1)      
+        
+        df.index = index
+        df.index.name = ''
+        df.columns.name = ''
+        
+        return df
+
 @click.pass_context
 def plot_data(ctx, 
                 aggregated_temperatures: xr.Dataset,
@@ -170,16 +232,18 @@ def plot_data(ctx,
         geo = gpd.GeoDataFrame(aggregated_temperatures.geometry.to_dataframe(),
                                geometry='geometry', 
                                crs=aggregated_temperatures.geometry.crs)
-        geo['data'] = aggregated_temperatures['data'].mean('time').to_dataframe()
+        geo[data] = aggregated_temperatures[data].mean('time').to_dataframe()
         
-        geo.plot(column='data', ax=ax)
-        fig, ax = plot_style(fig, ax, 'Output/data')
+        geo.plot(column=data, ax=ax)
+        fig, ax = plot_style(fig, ax, 'Output/Figures/%s'%data, False)
 
 @click.pass_context
-def plot_style(ctx, fig: plt.figure, ax: plt.axes, name: str):
+def plot_style(ctx, fig: plt.figure, ax: plt.axes, name: str, legend: bool):
         
         ax.set_facecolor(ctx.obj['fc'])
-        ax.legend(loc='center', bbox_to_anchor=(.5, 1.15), ncol=3)
+        
+        if legend:
+                ax.legend(loc='center', bbox_to_anchor=(.5, 1.15), ncol=3)
         
         fig.savefig(name + ctx.obj['plot_ext'], bbox_inches='tight', transparent=True)
         
