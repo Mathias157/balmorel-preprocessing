@@ -211,7 +211,8 @@ rule grids:
         [
             f"{data_path}BalmorelData/municipal_connectivity.nc",
             f"{submod_path}exo_grid_conversion_dictionaries.pkl",
-            f"assumptions.yaml"
+            f"assumptions.yaml",
+            f"{modules_path}grids.py"
         ]
     params:
         nordsoeen_connection=config['grid_assumptions']['electricity']['nordsoeen_connection']

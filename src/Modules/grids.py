@@ -102,7 +102,7 @@ def create_grid_incfiles(d: pd.DataFrame,
     XE.index.name = ''
 
     # Add year
-    XE.index = '2016 . ' + XE.index
+    XE.index = '2050 . ' + XE.index
 
     # Delete zeros
     XE = XE.replace(0, '')
@@ -113,7 +113,6 @@ def create_grid_incfiles(d: pd.DataFrame,
         dfAsString = XE.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
-        f.write("\n%sINVCOST(YYY,IRRRE,IRRRI) = %sINVCOST('2016',IRRRE,IRRRI);"%(carrier_symbol, carrier_symbol))
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
             
     ### 4.3 Energy losses
@@ -589,14 +588,13 @@ if __name__ == '__main__':
         ### 2.6 Save XKFX
         XKFX.columns.name = ''
         XKFX.index.name = ''
-        XKFX.index = '2016 . ' + XKFX.index 
+        XKFX.index = '2050 . ' + XKFX.index 
         XKFX = XKFX.astype(str).replace('0', '')
         with open('./Output/XKFX.inc', 'w') as f:
             f.write("TABLE XKFX(YYY,IRRRE,IRRRI)  'Initial transmission capacity between regions'\n")
             dfAsString = XKFX.to_string(header=True, index=True)
             f.write(dfAsString)
             f.write('\n;\n')
-            f.write("XKFX(YYY,IRRRE,IRRRI)$(YYY.VAL GT 2016) = XKFX('2016',IRRRE,IRRRI);")
 
         """
         What's missing in the municipality model, due to lacking method of connecting overseas regions:
@@ -655,7 +653,7 @@ if __name__ == '__main__':
         XE.index.name = ''
 
         # Add year
-        XE.index = '2016 . ' + XE.index
+        XE.index = '2050 . ' + XE.index
 
         # Delete zeros
         XE = XE.replace(0, '')
@@ -665,7 +663,6 @@ if __name__ == '__main__':
             dfAsString = XE.to_string(header=True, index=True)
             f.write(dfAsString)
             f.write('\n;')
-            f.write("\nXINVCOST(YYY,IRRRE,IRRRI) = XINVCOST('2016',IRRRE,IRRRI);")
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
                 
         ### 4.3 Energy losses
