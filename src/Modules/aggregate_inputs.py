@@ -40,6 +40,7 @@ def get_symbols_to_aggregate(incfile_folder: str,
         .str.replace('DH2', 'HYDROGEN_DH2')
         .str.replace('INDIVUSERS_', '')
         .str.replace('TRANSPORT_', '')
+        .str.replace('FUELCOST', 'FUELTRANSPORT_COST')
         .str.replace('OFFSHORE_', '')
         .str.replace('FLEXDEM_', '')
         .str.replace('.inc', '')
