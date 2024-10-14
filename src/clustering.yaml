@@ -1,6 +1,6 @@
 balmorel_input:  
   model_path: "../../Balmorel"
-  scenario: "new_muni"
+  scenario: "base"
   load_again: False
 
 clustering:
