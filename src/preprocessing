@@ -81,13 +81,11 @@ rule format_dkstat_industry_data:
 rule heat_profiles:
     input:
         [
-            f"{modules_path}heat_profiles_func.py",
-            f"{data_path}BalmorelData/muni_input_data.gdx"
+            f"{modules_path}heat_profiles.py",
+            f"M:/Project/RQII/DK+Surrounding2012.nc"
         ]
     params:
-        model_path=config["balmorel_input"]["model_path"],
-        scenario=config["balmorel_input"]["scenario"],
-        load_again=config["balmorel_input"]["load_again"]
+        weather_year=config["timeseries"]["weather_year"]
     output:
         [
             f"{out_path}DH_VAR_T.inc",
@@ -95,7 +93,7 @@ rule heat_profiles:
         ]
     shell:
         """
-        python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} heat-profiles
+        python {modules_path}heat_profiles.py generate {input[1]} --weather-year={params.weather_year} --plot
         """
 
 rule exo_heat_demand:
