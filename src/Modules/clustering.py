@@ -198,12 +198,11 @@ def gather_data(db: gams.GamsDatabase,
 def cluster(collected_data: pd.DataFrame,
             n_clusters: int,
             use_connectivity: bool = True,
-            manual_corrections: list = [
-                ['Roedovre', 'Frederiksberg', 1],
-            ],
+            manual_corrections: list = [],
             linkage: str = 'Ward',
             connection_remark: str = 'connec. included + artifical',
-            data_remark: str = 'all combined + xy coords'):
+            data_remark: str = 'all combined + xy coords',
+            include_coordinates: bool = True):
 
     # collected_data = collected_data.drop_sel(IRRRE='Christiansoe')
 
@@ -219,6 +218,7 @@ def cluster(collected_data: pd.DataFrame,
             connectivity.connection.loc[manual_connection[1], manual_connection[0]] = manual_connection[2]
             
         print('Is matrix symmetric?', np.all(connectivity.connection.data == connectivity.connection.data.T))
+        
         ## Make symmetric index, so the indices fit
         collected_data = collected_data.assign_coords(IRRRI=collected_data.coords['IRRRE'].data)
         
@@ -236,15 +236,27 @@ def cluster(collected_data: pd.DataFrame,
     else:
         knn_graph = None # don't apply connectivity constraints
         X = collected_data
-
+    
+    ## Combine with polygons for plotting and possible coordinate data
+    the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
+    geofiles.index.name = 'IRRRE'
+    X = X.merge(geofiles['geometry'].to_xarray())
+    
+    if include_coordinates:
+        ## Get coordinates 
+        coords = gpd.GeoDataFrame(geometry=X.geometry.data).centroid
+        X['lon'] = xr.DataArray(data=coords.x, coords={'IRRRE' : X.coords['IRRRE'].data})
+        X['lat'] = xr.DataArray(data=coords.y, coords={'IRRRE' : X.coords['IRRRE'].data})
+    
     # Prepare data for clustering
-    Y = np.vstack([X.get(variable).data for variable in X.data_vars]).T
+    Y = np.vstack([X.get(variable).data for variable in X.data_vars if variable != 'geometry']).T
     Y = np.nan_to_num(Y)
     Y = StandardScaler().fit_transform(Y) # Normalise dataset
     
     ## Make higher weighting of certain coordinates..?
     # X[:,0] = X[:,0]*10000
     # X[:,1] = X[:,1]*10000
+    
     
     # Perform Clustering
     agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage.lower(),
@@ -255,10 +267,6 @@ def cluster(collected_data: pd.DataFrame,
     X['cluster_groups'] = (['IRRRE'], agg.labels_)
     
     # Plot the different clustering techniques
-    ## Get geofiles
-    the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
-    geofiles.index.name = 'IRRRE'
-    X = X.merge(geofiles['geometry'].to_xarray())
     
 
     # Plot clustering

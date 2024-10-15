@@ -257,7 +257,8 @@ def plot_transmission_invcost(symbol: str,
         
         exclusion.append((line[1], line[0]))
     # print(df.drop)
-    plt.show()
+    
+    fig.savefig('ClusterOutput/Figures/%s.png')
 
 
 #%% ------------------------------- ###
@@ -271,11 +272,11 @@ def plot_transmission_invcost(symbol: str,
 @click.option('--mean-aggfuncs', type=str, required=False, default='', help='Parameters that should be aggregated with an average')
 @click.option('--median-aggfuncs', type=str, required=False, default='', help='Parameters that should be aggregated using the median value')
 @click.option('--zero-fillnas', type=str, required=False, default='', help='NaN values that should be converted to zero instead of EPS')
-@click.option('--only-symbols', type=str, required=False, help="Only aggregate the symbols, input as comma-separated string")
+@click.option('--only-symbols', type=str, required=False, default=None, help="Only aggregate the symbols, input as comma-separated string")
 def main(model_path: str, scenario: str, exceptions: str, 
          mean_aggfuncs: str, median_aggfuncs: str, 
-         zero_fillnas: str, incfile_folder: str = 'Output',
-         only_symbols: Union[str, None] = None):
+         zero_fillnas: str, only_symbols: Union[str, None], 
+         incfile_folder: str = 'Output'):
     
     # Make configuration lists
     exceptions = exceptions.replace(' ', '').split(',') # Symbols not to aggregate
