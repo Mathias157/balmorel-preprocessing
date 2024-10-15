@@ -200,7 +200,6 @@ def cluster(collected_data: pd.DataFrame,
             use_connectivity: bool = True,
             manual_corrections: list = [
                 ['Roedovre', 'Frederiksberg', 1],
-                ['Slagelse', 'Nyborg', 0],
             ],
             linkage: str = 'Ward',
             connection_remark: str = 'connec. included + artifical',
@@ -219,7 +218,7 @@ def cluster(collected_data: pd.DataFrame,
             connectivity.connection.loc[manual_connection[0], manual_connection[1]] = manual_connection[2]
             connectivity.connection.loc[manual_connection[1], manual_connection[0]] = manual_connection[2]
             
-        
+        print('Is matrix symmetric?', np.all(connectivity.connection.data == connectivity.connection.data.T))
         ## Make symmetric index, so the indices fit
         collected_data = collected_data.assign_coords(IRRRI=collected_data.coords['IRRRE'].data)
         
@@ -229,6 +228,7 @@ def cluster(collected_data: pd.DataFrame,
         
         ## Make symmetric connectivity graph 
         knn_graph = X.connection.data # get numpy array
+        print('Is matrix still symmetric?', np.all(knn_graph == knn_graph.T))
         knn_graph = csr_matrix(knn_graph) # make dense format
         
         ## Drop the connection variable again
@@ -272,7 +272,7 @@ def cluster(collected_data: pd.DataFrame,
     clustering.plot(ax=ax, column='cluster_group',
                     cmap=truncate_colormap(cmap, 0.2, 1))
             
-    if knn_graph == None:
+    if knn_graph is None:
         connection_remark = 'no connectivity'
 
     plot_title = '%s, %d clusters, %s\ndata: %s'%(linkage, 
