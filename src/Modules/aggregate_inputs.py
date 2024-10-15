@@ -126,7 +126,7 @@ def loop_and_replace_names(df: pd.DataFrame,
             suffix = '_OFF'
         
         # Replace names
-        idx = df[old_column].str.find(area) != -1
+        idx = df[old_column] == area 
         df.loc[idx, old_column] = new_name + suffix
 
     return df
@@ -188,7 +188,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
         f.body.columns = ['']
         f.body.index.name = ''
         f.body = f.body.to_string()
-    
+        
     f.save()
     
 def aggregate_sets(db: gams.GamsDatabase, 
