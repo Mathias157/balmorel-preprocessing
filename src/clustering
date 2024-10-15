@@ -58,7 +58,9 @@ rule aggregate_inputs:
         exceptions = config['aggregation']['exceptions'],
         mean_aggfuncs = config['aggregation']['mean_aggfuncs'],
         median_aggfuncs = config['aggregation']['median_aggfuncs'],
-        zero_fillnas = config['aggregation']['zero_fillnas']
+        zero_fillnas = config['aggregation']['zero_fillnas'],
+        cluster_params=config['clustering']['data_for_clustering'],
+        cluster_size=config['clustering']['cluster_size']
     output:
         [
             f"{out_path}CCCRRRAAA.inc",
@@ -78,7 +80,7 @@ rule aggregate_inputs:
         ]
     shell:
         """
-        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}"
+        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size}
         """
 
 rule create_addon_files:

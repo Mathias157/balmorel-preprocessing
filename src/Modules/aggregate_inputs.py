@@ -230,13 +230,15 @@ def aggregate_sets(db: gams.GamsDatabase,
     
     f.save()
     
-def plot_transmission_invcost(symbol: str,
+@click.pass_context
+def plot_transmission_invcost(ctx, symbol: str,
                               df: pd.DataFrame,
                               year: int = 2050):
     print('Plotting connection costs for %s'%symbol)
     
+    cluster_file = 'ClusterOutput/%s_%dcluster_geofile.gpkg'%('-'.join(ctx.obj['cluster_params']), ctx.obj['cluster_size'])
     # f = gpd.read_file('ClusterOutput/%s_%dcluster_geofile.gpkg'%('-'.join(cluster_params_list), cluster_size))
-    geo_union = gpd.read_file('ClusterOutput/DE-DH-WNDFLH-SOLEFLH_30cluster_geofile.gpkg')
+    geo_union = gpd.read_file(cluster_file)
     geo_union['coord'] = geo_union.centroid
     
     fig, ax = plt.subplots()
@@ -249,6 +251,7 @@ def plot_transmission_invcost(symbol: str,
             continue
         
         coords = geo_union.query('cluster_name == @line[0] or cluster_name == @line[1]')['coord']
+
         x1, x2 = coords.x
         y1, y2 = coords.y
         
@@ -258,7 +261,7 @@ def plot_transmission_invcost(symbol: str,
         exclusion.append((line[1], line[0]))
     # print(df.drop)
     
-    fig.savefig('ClusterOutput/Figures/%s.png')
+    fig.savefig('ClusterOutput/Figures/%s.png'%symbol)
 
 
 #%% ------------------------------- ###
@@ -266,6 +269,7 @@ def plot_transmission_invcost(symbol: str,
 ### ------------------------------- ###
 
 @click.command()
+@click.pass_context
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
 @click.option('--exceptions', type=str, required=False, default='', help='.inc files that should NOT be generated')
@@ -273,12 +277,19 @@ def plot_transmission_invcost(symbol: str,
 @click.option('--median-aggfuncs', type=str, required=False, default='', help='Parameters that should be aggregated using the median value')
 @click.option('--zero-fillnas', type=str, required=False, default='', help='NaN values that should be converted to zero instead of EPS')
 @click.option('--only-symbols', type=str, required=False, default=None, help="Only aggregate the symbols, input as comma-separated string")
-def main(model_path: str, scenario: str, exceptions: str, 
+@click.option('--cluster-size', type=int, required=True, help='How many clusters?')
+@click.option('--cluster-params', type=str, required=True, help='Comma-separated list of Balmorel input data to cluster (use the symbol names, e.g. DE for annual electricity demand)')
+def main(ctx, model_path: str, scenario: str, exceptions: str, 
          mean_aggfuncs: str, median_aggfuncs: str, 
          zero_fillnas: str, only_symbols: Union[str, None], 
+         cluster_size: int,
+         cluster_params: str,
          incfile_folder: str = 'Output'):
     
     # Make configuration lists
+    ctx.ensure_object(dict)
+    ctx.obj['cluster_params'] = cluster_params.replace(' ', '').split(',')
+    ctx.obj['cluster_size'] = cluster_size
     exceptions = exceptions.replace(' ', '').split(',') # Symbols not to aggregate
     mean_aggfuncs = mean_aggfuncs.replace(' ', '').split(',')
     median_aggfuncs = median_aggfuncs.replace(' ', '').split(',')
