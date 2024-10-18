@@ -1,0 +1,25 @@
+plot_dag
+========
+
+.. py:module:: plot_dag
+
+.. autoapi-nested-parse::
+
+   This requires an installation of graphviz on top of the python package
+   https://graphviz.org/download/
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   plot_dag.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main(workflow: str, view: bool = False)
+
