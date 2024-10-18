@@ -165,6 +165,13 @@ def aggregate_parameter(db: gams.GamsDatabase,
         .fillna(fillna)
     )
     
+    # Writing eps if fillna == EPS
+    if fillna == 'EPS':
+        idx = df.query('Value <= 1e-9').index
+        df = df.astype('object')
+        df.loc[idx, 'Value'] = 'EPS'
+    
+    
     # Make IncFile
     prefix = "TABLE %s(%s) '%s'\n"%(symbol, ", ".join(symbol_columns[:-1]), db[symbol].text)
     suffix = '\n;'
