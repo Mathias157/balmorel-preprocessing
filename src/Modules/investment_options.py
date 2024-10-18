@@ -102,7 +102,7 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     
     # Small scale investments
     small_scale = [
-        "GNR_HS_HEAT_PIT_L-DEC_E-70_Y-2050",
+        "GNR_HS_HEAT_PIT_L-CEN_E-70_Y-2050",
         "GNR_HS_HEAT_WTR-TANK_SS_E-95_Y-2010",
         "GNR_ES_ELEC_BAT-LITHIO-PEAK_E-86_Y-2050",
         "GNR_ES_ELEC_BAT-LITHIO-GRID_E-86_Y-2050",
@@ -153,7 +153,7 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
     ]
     
     medium_scale = [
-        "GNR_HS_HEAT_PIT_L-DEC_E-70_Y-2050",
+        "GNR_HS_HEAT_PIT_L-CEN_E-70_Y-2050",
         "GNR_HS_HEAT_WTR-TANK_SS_E-95_Y-2010",
         "GNR_ES_ELEC_BAT-LITHIO-PEAK_E-86_Y-2050",
         "GNR_ES_ELEC_BAT-LITHIO-GRID_E-86_Y-2050",
@@ -205,7 +205,7 @@ def base_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
         # "GNR_BO_MSW_E-106_LS-35-MW-FEED_Y-2050",
         "GNR_HP_ELEC_AIR-WTR_COP-360_LS_Y-2050",
         "GNR_HP_ELEC_GROUND-WTR_COP-410_LS-4-MW_Y-2050",
-        "GNR_HS_HEAT_PIT_L-CEN_E-70_Y-2050",
+        "GNR_HS_HEAT_PIT_L-DEC_E-70_Y-2050",
         "GNR_HS_HEAT_WTR-TANK_LS_E-95_Y-2010",
         "GNR_BO_ELEC_E-99_LS-10-MW-FEED_Y-2050",
         "GNR_ES_ELEC_BAT-LITHIO-PEAK_E-86_Y-2050",
