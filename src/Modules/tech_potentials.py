@@ -12,6 +12,7 @@ Created on 21.10.2024
 
 import matplotlib.pyplot as plt
 from pybalmorel import IncFile
+import pandas as pd
 import click
 from geofiles import prepared_geofiles
 
@@ -60,7 +61,7 @@ def ptes(frac: float):
     geo = geo.to_crs(6933) # To a projected crs
     
     # Areas in m2
-    areas = geo.area
+    areas = pd.DataFrame({'PIT' : geo.area})
     
     # Potential in MWh
     potential = areas / land_use * frac
@@ -68,8 +69,8 @@ def ptes(frac: float):
     # Print or return the potential
     print(potential)
     
-    return potential
-
+    create_subtechgroupkpot(potential, land_use)
+    
 #%% ------------------------------- ###
 ###            2. Utils             ###
 ### ------------------------------- ###
@@ -87,6 +88,20 @@ def plot_style(ctx, fig: plt.figure, ax: plt.axes, name: str, legend: bool = Tru
     return fig, ax
 
 V_truncated_pyramid = lambda a, b, h: h/3*(a**2 + b**2 + a*b) 
+
+def create_subtechgroupkpot(df: pd.DataFrame, PTES_land_use: float):
+    """Create subtechgroupkpot dataframe based on df with CCCRRRAAA in index and technology groups in the columns
+
+    Args:
+        df (pd.DataFrame): Dataframe containing MW/MWh potentials for capacity expansion of technologies (columns) per CCCRRRAAA (index) 
+    """
+    
+    f = IncFile(name='SUBTECHGROUPKPOT2', path='Output',
+                prefix="TABLE SUBTECHGROUPKPOT(CCCRRRAAA, TECH_GROUP, SUBTECH_GROUP)  'Subtechnology group capacity restriction by geography (MWh)'\n* A %0.2f m2/MWh for PTES was assumed with 1 pct of municipal regions available for capacity expansion\n"%(PTES_land_use),
+                body=df,
+                suffix='\n;')
+    f.body.index.name = ''
+    f.save()
 
 #%% ------------------------------- ###
 ###             3. Main             ###

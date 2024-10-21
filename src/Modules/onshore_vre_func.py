@@ -148,6 +148,10 @@ def onshore_vre_func(ctx):
                     "",
                     ";",
                     "$onmulti",
+                    "$if     EXIST '../data/SUBTECHGROUPKPOT2.inc' $INCLUDE '../data/SUBTECHGROUPKPOT2.inc';",
+                    "$if not EXIST '../data/SUBTECHGROUPKPOT2.inc' $INCLUDE '../../base/data/SUBTECHGROUPKPOT2.inc';",
+                    "$offmulti",
+                    "$onmulti",
                     "$if     EXIST '../data/OFFSHORE_SUBTECHGROUPKPOT.inc' $INCLUDE '../data/OFFSHORE_SUBTECHGROUPKPOT.inc';",
                     "$if not EXIST '../data/OFFSHORE_SUBTECHGROUPKPOT.inc' $INCLUDE '../../base/data/OFFSHORE_SUBTECHGROUPKPOT.inc';",
                     "$offmulti"

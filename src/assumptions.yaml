@@ -40,3 +40,4 @@ resources:
   biogaspot: 10.56  # PJ, potential of biogas for energy assuming 60% conversion efficiency (DEA tech catalogue of biogas plant) and manure potential (Bramstoft et al. 2020) 
   woodimport: False # Allow import of woody biomass to major cities?
   biotransportcost: 0.0153 # Cost of biomass transport in €/GJ/km, Rosendal et al 2024 
+  available_land_for_PTES: 0.01 # %

@@ -22,7 +22,8 @@ rule all:
             f'{out_path}OFFSHORE_WND_VAR_T.inc',
             f"{out_path}GKFX.inc",
             f"{out_path}GMAXF.inc",
-            f"{out_path}FUELTRANSPORT_COST.inc"
+            f"{out_path}FUELTRANSPORT_COST.inc",
+            f"{out_path}SUBTECHGROUPKPOT2.inc"
         ]
 
 rule create_conversion_dictionaries:
@@ -318,4 +319,14 @@ rule biomass_availability:
     shell:
         """
         python {input[0]} --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} biomass-availability --woodpot={params.woodpot} --strawpot={params.strawpot} --biogaspot={params.biogaspot} --woodimport={params.woodimport}
+        """
+
+rule technology_potentials:
+    params:
+        land_for_PTES=config['resources']['available_land_for_PTES']
+    output:
+        f"{out_path}SUBTECHGROUPKPOT2.inc"
+    shell:
+        """
+        python {modules_path}tech_potentials.py ptes {params.land_for_PTES}
         """
