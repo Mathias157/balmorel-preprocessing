@@ -1,0 +1,42 @@
+transport_heavy_demand
+======================
+
+.. py:module:: transport_heavy_demand
+
+.. autoapi-nested-parse::
+
+   Creating input for transport hydrogen demand
+
+   Simple assumptions:
+   - Just assuming that there's a hydrogen demand where ports are (but will jet fuel be produced here as well? Will shipping fuel?)
+   - Making a fixed assumption on H2/fuel efficiency from my 2024 paper
+       E.g. for jet fuel:
+           TG-FT:      No hydrogen demand (need to account for bio consumption!)
+           TG-FT-H2:   34/55.4=0.614 MWh hydrogen / MWh jet fuel (need to account for bio consumption!)
+           eFT:        100/42 =2.381 MWh hydrogen / MWh jet fuel (need to account for CCU consumption!)
+       For shipping fuel:
+           TG-MeOH:    33.8/82=0.412 MWh hydrogen / MWh MeOH (need to account for bio consumption!)
+           eMeOH:      100/119=0.840 MWh hydrogen / MWh MeOH (need to account for CCU consumption!)
+           eNH3:       100/86 =1.163 MWh hydrogen / MWh NH3
+
+   Created on 27.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   transport_heavy_demand.simple_assumptions
+   transport_heavy_demand.main
+
+
+Module Contents
+---------------
+
+.. py:function:: simple_assumptions(meoh_per_jetfuel: float, year: int)
+
+.. py:function:: main(meoh_per_jetfuel: float, jetfuel_demand: float, shipping_demand: float, use_dkstat: bool, year: int)
+
