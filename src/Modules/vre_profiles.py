@@ -85,10 +85,8 @@ def doLDC(file, cols, idx, r, c, title=''):
 @click.option('--cutout-path', type=str, required=True, help="The path of a cutout .nc file")
 @click.option('--weather-year', type=int, required=True, help="The weather year")
 @click.option('--offshore-profiles', type=bool, required=False, help="Generate offshore profiles?")
-@click.option('--nordsoeen-connection', type=str, required=False, help="North Sea region connection point, only relevant for offshore regions")
 @click.option('--overwrite-cutout', type=str, required=False, help="Overwrite an existing cutout?")
-def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, 
-         nordsoeen_connection: str = 'Esbjerg', overwrite_cutout: bool = False):
+def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, overwrite_cutout: bool = False):
     ### 0.1 Capacity pr. km for PV and Wind
     cap_per_sqkm_pv = 1.7 # MW/km2
     cap_per_sqkm_wind = 0.67 # MW/km2 According to NREL: 2 MW / 1.5 acres (0.00607028 km2)
@@ -163,7 +161,6 @@ def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False,
 
     if offshore_profiles:
         areas = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
-        areas['Name'] = areas.Name.replace('Nordsoeen', '%s_OFF5'%nordsoeen_connection)
 
 
     # Plot

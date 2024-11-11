@@ -23,17 +23,11 @@ import matplotlib.pyplot as plt
 ###        1. Offshore Wind         ###
 ### ------------------------------- ###
 
-def load_profiles(choice: str = 'dkmunicipalities_names', nordsoeen_connection: str = 'Esbjerg', plot: bool = False):
+def load_profiles(choice: str = 'dkmunicipalities_names', weather_year: int = 2012, plot: bool = False):
     # Load files
-    profiles = xr.load_dataset('Output/VRE/2012_offshore_wind.nc')
+    profiles = xr.load_dataset('Output/VRE/%d_offshore_wind.nc'%weather_year)
     ind, geo, c = prepared_geofiles(choice)
     offshore_geo = gpd.read_file('Data/Shapefiles/Offshore/OffshoreRegions.gpkg')
-    
-    # Change names
-    offshore_geo['Name'] = offshore_geo.Name.replace('Nordsoeen', '%s_OFF5'%nordsoeen_connection)
-    names = profiles.coords['Name'].data
-    names[names == 'Nordsoeen'] = '%s_OFF5'%nordsoeen_connection
-    profiles.coords['Name'] = names
 
     if plot:
         fig, ax = plt.subplots()
@@ -151,9 +145,8 @@ def distribute_offshore_potential(total_potential: float, geofile: gpd.GeoDataFr
 @click.command()
 @click.option('--weather-year', type=int, required=True, help='The weather year chosen for wind profiles')
 @click.option('--total-offshore-wind-potential', type=int, required=True, help='The weather year chosen for wind profiles')
-@click.option('--nordsoeen-connection', type=str, required=False, help="Connection point to Nordsøen. Esbjerg or Holstebro")
-def main(weather_year: int, total_offshore_wind_potential: float, nordsoeen_connection: str = 'Esbjerg'):
-    profiles, geo, offshore_geo = load_profiles(nordsoeen_connection=nordsoeen_connection, plot=False)
+def main(weather_year: int, total_offshore_wind_potential: float):
+    profiles, geo, offshore_geo = load_profiles(weather_year=weather_year, plot=False)
     create_geo_sets(profiles)
     create_profiles(profiles, weather_year)
     create_investment_options(profiles)
