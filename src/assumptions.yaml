@@ -30,9 +30,10 @@ fuel_assumptions:
   shipping_demand: 4e6 # MWh, Based on IDA Klimasvar
 
 timeseries:
-  weather_year: 2012
+  weather_year: 2023
 
 resources:
+  cutout_path: Output/VRE/2023_DK.nc
   total_offshore_wind_potential: 40000 # MW
   woodpot: 40   # PJ, potential of woody biomass for energy, Bramstoft et al. 2020
   strawpot: 54   # PJ, potential of agro waste for energy, Bramstoft et al. 2020

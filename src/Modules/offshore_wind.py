@@ -64,16 +64,24 @@ def create_profiles(profiles: xr.Dataset, year: int = 2012):
     
     # Get 00:00 first monday to 23:00 last sunday (hardcoded for 2012)
     profiles = profiles.to_dataframe().reset_index().pivot_table(index='time', columns='Name', values='specific generation')
-    t0 = 24
-    t1 = 24
+    
+    if year == 2012:
+        t0 = 24
+        t1 = 24
+    elif year == 2023:
+        t0 = 24
+        t1 = 0
     
     # To check
-    # time = pd.Series(profiles.index).iloc[t0:-t1].dt.isocalendar()
-    # print('\nCheck if first time is week 1, day 1, and last time is week 52, day 7\n', time)
-    assert year == 2012, 'Change hardcoding to obtain correct 1st monday to last sunday in timeseries'
-    
-    # Select profile 
-    profiles = profiles.iloc[t0:-t1] 
+    if t1 != 0:
+        time = pd.Series(profiles.index).iloc[t0:-t1].dt.isocalendar()
+        profiles = profiles.iloc[t0:-t1] 
+    else:
+        time = pd.Series(profiles.index).iloc[t0:].dt.isocalendar()
+        profiles = profiles.iloc[t0:] 
+        
+    print('\nCheck if first time is week 1, day 1, and last time is week 52, day 7\n', time)
+    assert year == 2012 or year == 2023, 'Change hardcoding to obtain correct 1st monday to last sunday in timeseries'
     
     S = ['S0%d'%i for i in range(1, 10)] + ['S%d'%i for i in range(10, 53)]
     T = ['T00%d'%i for i in range(1, 10)] + ['T0%d'%i for i in range(10, 100)] + ['T%d'%i for i in range(100, 169)]

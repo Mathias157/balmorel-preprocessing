@@ -5,6 +5,7 @@ out_path = "Output/"
 data_path = "Data/"
 modules_path = "Modules/"
 submod_path = "Modules/Submodules/"
+weather_year=config['timeseries']['weather_year']
 
 # 1. General Purpose
 rule all:
@@ -246,42 +247,42 @@ rule biomass_transport:
         """
 
 # 7. Other
-rule onshore_vre:
+rule vre_profiles:
     input:
         [
-            f"{modules_path}onshore_vre_func.py",
-            f"{data_path}BalmorelData/muni_input_data.gdx"
+            f"{modules_path}vre_profiles.py",
         ]
     params:
-        model_path=config["balmorel_input"]["model_path"],
-        scenario=config["balmorel_input"]["scenario"],
-        load_again=config["balmorel_input"]["load_again"]
+        cutout_path=config["resources"]["cutout_path"],
+        weather_year=config["timeseries"]["weather_year"]
     output:
         [
             f"{out_path}WND_VAR_T.inc",
             f"{out_path}SOLE_VAR_T.inc",
             f"{out_path}WNDFLH.inc",
             f"{out_path}SOLEFLH.inc",
+            f'Output/VRE/{weather_year}_offshore_wind.nc'
         ]
     shell:
         """
-        python {modules_path}format_balmorel_data.py --model-path={params.model_path} --scenario={params.scenario} --load-again={params.load_again} onshore-vre
+        python {modules_path}vre_profiles.py --cutout-path={params.cutout_path} --weather-year={params.weather_year} && \
+        python {modules_path}vre_profiles.py --cutout-path={params.cutout_path} --weather-year={params.weather_year} --offshore-profiles=True
         """
 
 rule offshore_wind:
     input:
         [
             f"{modules_path}offshore_wind.py",
-            f"{data_path}BalmorelData/muni_input_data.gdx"
+            f'Output/VRE/{weather_year}_offshore_wind.nc'
         ]
     params:
-        weather_year=config['timeseries']['weather_year'],
-        total_offshore_wind_potential=config['resources']['total_offshore_wind_potential']
+        total_offshore_wind_potential=config['resources']['total_offshore_wind_potential'],
+        weather_year=config["timeseries"]["weather_year"]
     output:
         f'{out_path}OFFSHORE_WND_VAR_T.inc'
     shell:
         """
-        python {modules_path}offshore_wind.py --weather-year={params.weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential} 
+        python {modules_path}offshore_wind.py --weather-year={weather_year} --total-offshore-wind-potential={params.total_offshore_wind_potential} 
         """
 
 rule exo_powerplants:
