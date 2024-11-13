@@ -251,6 +251,7 @@ rule vre_profiles:
     input:
         [
             f"{modules_path}vre_profiles.py",
+            f"{data_path}Shapefiles/Offshore/OffshoreRegions.gpkg"
         ]
     params:
         cutout_path=config["resources"]["cutout_path"],
@@ -273,7 +274,8 @@ rule offshore_wind:
     input:
         [
             f"{modules_path}offshore_wind.py",
-            f'Output/VRE/{weather_year}_offshore_wind.nc'
+            f'Output/VRE/{weather_year}_offshore_wind.nc',
+            f"{data_path}Shapefiles/Offshore/OffshoreRegions.gpkg"
         ]
     params:
         total_offshore_wind_potential=config['resources']['total_offshore_wind_potential'],
@@ -320,6 +322,8 @@ rule biomass_availability:
         """
 
 rule technology_potentials:
+    input:
+        f'{modules_path}tech_potentials.py'
     params:
         land_for_PTES=config['resources']['available_land_for_PTES']
     output:
