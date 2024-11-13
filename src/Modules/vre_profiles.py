@@ -442,6 +442,7 @@ def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, o
             f.write('\nWND_VAR_T(AAA,SSS,TTT) = WND_VAR_T1(SSS,TTT,AAA);')
             f.write('\nWND_VAR_T1(SSS,TTT,AAA) = 0;')
             f.write("\n".join([
+                "",
                 "$onmulti",
                 "$if     EXIST '../data/OFFSHORE_WND_VAR_T.inc'      $INCLUDE '../data/OFFSHORE_WND_VAR_T.inc';",
                 "$if not EXIST '../data/OFFSHORE_WND_VAR_T.inc'      $INCLUDE '../../base/data/OFFSHORE_WND_VAR_T.inc';",
@@ -491,6 +492,7 @@ def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, o
             f.write(dfAsString)
             f.write('\n/\n;')
             f.write("\n".join([
+                "",
                 "$onmulti",
                 "$if     EXIST '../data/OFFSHORE_WNDFLH.inc' $INCLUDE '../data/OFFSHORE_WNDFLH.inc';",
                 "$if not EXIST '../data/OFFSHORE_WNDFLH.inc' $INCLUDE '../../base/data/OFFSHORE_WNDFLH.inc';",
@@ -589,6 +591,7 @@ def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, o
             f.write("\nSUBTECHGROUPKPOT(AAA,'WINDTURBINE_ONSHORE',SUBTECH_GROUP)$(SUBTECHGROUPKPOT(AAA,'WINDTURBINE_ONSHORE',SUBTECH_GROUP) = 0) = EPS;")
             f.write("\nSUBTECHGROUPKPOT(AAA,'WINDTURBINE_OFFSHORE',SUBTECH_GROUP)$(SUBTECHGROUPKPOT(AAA,'WINDTURBINE_OFFSHORE',SUBTECH_GROUP) = 0) = EPS;")
             f.write("\n".join([
+                "",
                 "$onmulti",
                 "$if     EXIST '../data/SUBTECHGROUPKPOT2.inc' $INCLUDE         '../data/SUBTECHGROUPKPOT2.inc';",
                 "$if not EXIST '../data/SUBTECHGROUPKPOT2.inc' $INCLUDE '../../base/data/SUBTECHGROUPKPOT2.inc';",
