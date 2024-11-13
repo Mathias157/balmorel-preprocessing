@@ -204,8 +204,8 @@ def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
                     ]))
     
     # Add larger loss for Nordsøen
-    f.body += f"\nDISLOSS_E_AG('Ringkoebing-Skjern_OFF5', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1) = {wind_offshore_loss['RG3']};"
-    f.body += f"\nDISLOSS_E_AG('Esbjerg_OFF5', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1) = {wind_offshore_loss['RG3']};"
+    f.body += f"\nDISLOSS_E_AG('Holstebro_OFF5', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1_OFF1) = {wind_offshore_loss['RG3']};"
+    f.body += f"\nDISLOSS_E_AG('Esbjerg_OFF5', G)$(GDATA(G,'GDSUBTECHGROUP') EQ RG1_OFF1) = {wind_offshore_loss['RG3']};"
     
     f.save()    
 

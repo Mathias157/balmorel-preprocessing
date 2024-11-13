@@ -61,7 +61,7 @@ def ptes(frac: float):
     geo = geo.to_crs(6933) # To a projected crs
     
     # Areas in m2
-    areas = pd.DataFrame({'PIT' : geo.area})
+    areas = pd.DataFrame({'PIT . PTES' : geo.area})
     
     # Potential in MWh
     potential = areas / land_use * frac
