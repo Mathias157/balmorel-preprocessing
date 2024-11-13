@@ -127,7 +127,8 @@ def create_investment_options(profiles: xr.Dataset):
     
     f = IncFile(name='OFFSHORE_AGKN', path='Output',
                 prefix='', suffix='')
-    f.body = "\n".join(["AGKN('%s','%s') = YES;"%(area, option) for area in areas for option in options])
+    f.body = "\n".join(["AGKN('%s','%s') = YES;"%(area, option) for area in areas for option in options if 'OFF5' not in area])      # 'Nearshore' offshore turbines
+    f.body += "\n" + "\n".join(["AGKN('%s','%s') = YES;"%(area, 'DK1-OFF1_WT_WIND_OFF_L-RG2_Y-2050') for area in areas if 'OFF5' in area])  # Far offshore turbines
     f.save()
     
 def distribute_offshore_potential(total_potential: float, geofile: gpd.GeoDataFrame):
