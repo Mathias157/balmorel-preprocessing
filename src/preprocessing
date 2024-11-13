@@ -84,7 +84,7 @@ rule heat_profiles:
     input:
         [
             f"{modules_path}heat_profiles.py",
-            f"M:/Project/RQII/DK+Surrounding2012.nc"
+            f"Output/VRE/{weather_year}_DK.nc"
         ]
     params:
         weather_year=config["timeseries"]["weather_year"]

@@ -196,9 +196,9 @@ def format_data(agg_temperatures: xr.Dataset, weather_year: int) -> pd.DataFrame
         iso = pd.Series(df.index).dt.isocalendar()
 
         ## Sort away week 52 from last year 
-        idx1 = iso.query('index < 672 and week == 52 and year == @weather_year-1').index
+        idx1 = iso.query('index < 672 and week == 52').index
         ## Sort away week 1 from next year 
-        idx2 = iso.query('index > 8088 and week == 1 and year == @weather_year+1').index 
+        idx2 = iso.query('index > 8088 and week == 1').index 
 
         ## Check if there are exactly 8736 timeslices
         iso = (
@@ -207,7 +207,7 @@ def format_data(agg_temperatures: xr.Dataset, weather_year: int) -> pd.DataFrame
                 .drop(index=idx2)
         )
         
-        assert len(iso) == 8736, 'Timeseries does not contain 52*168 slices!'
+        assert len(iso) == 8736, print('Timeseries does not contain 52*168 slices! It contains: %d'%len(iso), iso)
 
         df = df.iloc[iso.index]
         
