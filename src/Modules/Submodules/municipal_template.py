@@ -39,7 +39,7 @@ class DataContainer():
     def __init__(self) -> None:    
 
         # Load municipal shapefiles
-        muni_geofile = gpd.read_file(r'Data\Shapefiles\Denmark\Adm\gadm36_DNK_2.shp')
+        muni_geofile = gpd.read_file('./Data/Shapefiles/Denmark/Adm/gadm36_DNK_2.shp')
         
         # Correcting Municipal Names
         correct_names = {'Århus' : 'Aarhus',

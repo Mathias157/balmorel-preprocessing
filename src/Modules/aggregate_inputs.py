@@ -286,12 +286,14 @@ def plot_transmission_invcost(ctx, symbol: str,
 @click.option('--only-symbols', type=str, required=False, default=None, help="Only aggregate the symbols, input as comma-separated string")
 @click.option('--cluster-size', type=int, required=True, help='How many clusters?')
 @click.option('--cluster-params', type=str, required=True, help='Comma-separated list of Balmorel input data to cluster (use the symbol names, e.g. DE for annual electricity demand)')
+@click.option('--gams-sysdir', type=str, required=False, help='GAMS system directory')
 def main(ctx, model_path: str, scenario: str, exceptions: str, 
          mean_aggfuncs: str, median_aggfuncs: str, 
          zero_fillnas: str, only_symbols: Union[str, None], 
          cluster_size: int,
          cluster_params: str,
-         incfile_folder: str = 'Output'):
+         incfile_folder: str = 'Output',
+         gams_sysdir: str = '/opt/gams/48.5'):
     
     # Make configuration lists
     ctx.ensure_object(dict)
@@ -309,7 +311,7 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
                     'FLEXYDEMAND' : 'FLEXDEM_FLEXYDEMAND'} # Symbols that have a different incfile name
     
     # Load files
-    m = Balmorel(model_path)
+    m = Balmorel(model_path,gams_system_directory=gams_sysdir)
     m.load_incfiles(scenario)
     clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
         

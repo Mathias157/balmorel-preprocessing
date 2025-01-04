@@ -40,7 +40,7 @@ class DKSTAT():
     
     def __init__(self) -> None:
         # Energy per Type
-        f2 = pd.read_excel(r'Data\Danmarks Statistik\Industriforbrug Type.xlsx',
+        f2 = pd.read_excel('./Data/Danmarks Statistik/Industriforbrug Type.xlsx',
                              header=2, index_col=1).T
         f2 = f2.drop(index='Unnamed: 0')
         
@@ -70,7 +70,7 @@ class DKSTAT():
         )
         
         # Energy per Municipality
-        f1 = pd.read_excel(r'Data\Danmarks Statistik\Industriforbrug Kommuner.xlsx',
+        f1 = pd.read_excel('Data/Danmarks Statistik/Industriforbrug Kommuner.xlsx',
                              skiprows=2, index_col=0)
         
             

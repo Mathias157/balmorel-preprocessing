@@ -60,7 +60,7 @@ def main(energinet_data_path: str):
     )
 
     # Read code to translate municipality into name
-    codes = pd.read_excel(r'Data\Timeseries\EU-27-LAU-2023-NUTS-2021.xlsx', sheet_name='DK')
+    codes = pd.read_excel('Data/Timeseries/EU-27-LAU-2023-NUTS-2021.xlsx', sheet_name='DK')
 
     # Merge the codes dataframe with the f dataframe
     f = f.merge(codes, left_on='MunicipalityNo', right_on='LAU CODE')

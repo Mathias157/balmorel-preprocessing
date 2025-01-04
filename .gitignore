@@ -9,7 +9,8 @@ __pycache__
 prebalm
 *.pyc
 
-clusteroutput
+ClusterOutput
+!.keepfolder
 clustering_dot_source.txt
 clustering_dag
 preprocessing_dot_source.txt

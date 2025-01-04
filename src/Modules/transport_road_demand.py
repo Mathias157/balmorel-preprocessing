@@ -31,7 +31,7 @@ class FlexDem():
     def __init__(self) -> None:
         pass
 
-    def load_traffic_data(self, path: str = r'Data\PyPSA-Eur-Sec Data\emobility',
+    def load_traffic_data(self, path: str = './Data/PyPSA-Eur-Sec Data/emobility',
                           file: str = 'KFZ__count'):
         
         # Load PyPSA Data

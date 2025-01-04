@@ -114,9 +114,10 @@ def store_balmorel_input(symbol: str,
                          scenario: str,
                          load_again: bool = False,
                          filter_func: Tuple[None, callable] = None,
-                         save: bool = True):
+                         save: bool = True,
+                         gams_system_directory: str = '/opt/gams/48.5'):
     
-    balm = Balmorel(balmorel_model_path)
+    balm = Balmorel(balmorel_model_path, gams_system_directory=gams_system_directory)
     
     # Check if the symbol.gzip exists
     if '%s.gzip'%symbol in os.listdir('Data/BalmorelData'):
@@ -139,7 +140,7 @@ def store_balmorel_input(symbol: str,
             print('Loading %s...\n'%(balm_input_path))
             
             # Load the input
-            ws = GamsWorkspace()
+            ws = GamsWorkspace(system_directory=gams_system_directory)
             balm.input_data[scenario] = ws.add_database_from_gdx(os.path.abspath(balm_input_path))
 
         # Get symbol

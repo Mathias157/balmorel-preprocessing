@@ -386,11 +386,11 @@ def individual_AGKN(AGKN: pd.DataFrame, print_options: bool = False):
 def main(large_munis: str, medium_munis: str, path_to_allendofmodel: str):
     
     # Create file
-    if not(os.path.exists(r'Data\BalmorelData\AGKN_fromKountouris2024.gzip')):
+    if not(os.path.exists('./Data/BalmorelData/AGKN_fromKountouris2024.gzip')):
         save_symbol_from_all_endofmodel('AGKN', ['A', 'G'], 'set', r'C:\Users\mathi\gitRepos\Balmorel\all_endofmodel.gdx')
     
     # Load files
-    f = pd.read_parquet(r'Data\BalmorelData\AGKN_fromKountouris2024.gzip')
+    f = pd.read_parquet('./Data/BalmorelData/AGKN_fromKountouris2024.gzip')
     f = f.query('A.str.contains("DK")')
 
     # Make list of munis

@@ -352,12 +352,14 @@ def new_geofile(clustering: gpd.GeoDataFrame, plot: bool = False):
 @click.option('--aggregation-functions', type=str, required=True, help='Comma-separated list of aggregation functions used for clustering (E.g. sum for annual electricity demand and mean for wind full-load hours)')
 @click.option('--cluster-size', type=int, required=True, help='How many clusters?')
 @click.option('--plot-style', type=str, required=False, help='Style of the plot. Options are "report" (bright background) or "ppt" (dark background)')
+@click.option('--gams-sysdir', type=str, required=False, help='GAMS system directory')
 def main(model_path: str, 
          scenario: str, 
          cluster_params: str,
          aggregation_functions: str,
          cluster_size: int,
-         plot_style: str = 'report'):
+         plot_style: str = 'report',
+         gams_sysdir: str = '/opt/gams/48.5'):
 
     # Convert comma-separated string to list
     cluster_params_list = cluster_params.replace(' ', '').split(',')
@@ -372,7 +374,7 @@ def main(model_path: str,
         fc = 'none'
 
     # Collect Balmorel input data from scenario
-    model = Balmorel(model_path)
+    model = Balmorel(model_path, gams_system_directory=gams_sysdir)
     model.load_incfiles(scenario)
 
     # Get parameters for clustering    

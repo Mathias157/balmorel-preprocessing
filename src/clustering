@@ -8,6 +8,7 @@ submod_path  = "Modules/Submodules/"
 balmorel_path = config['balmorel_input']['model_path']
 scenario = config['balmorel_input']['scenario']
 balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
+gams_sysdir = config['balmorel_input']['gams_sysdir']
 
 # 1. General Purpose
 rule all:
@@ -22,19 +23,30 @@ rule collect_balmorel_input:
         f"{balmorel_sc_folder}{scenario}_input_data.gdx"
     run:
         from pybalmorel import Balmorel
-        model = Balmorel(balmorel_path)
+        model = Balmorel(balmorel_path, gams_system_directory=gams_sysdir)
         model.load_incfiles(scenario)
+
+
+rule create_conversion_dictionaries:
+    output:
+        [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl",
+        f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
+        f"{submod_path}exo_grid_conversion_dictionaries.pkl"]
+    script:
+        f"{submod_path}create_conversion_dictionaries.py"
 
 rule cluster:
     input:
         [
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
-            f"{modules_path}clustering.py"
+            f"{modules_path}clustering.py",
+            f"{submod_path}exo_grid_conversion_dictionaries.pkl"
         ]
     params:
         cluster_params=config['clustering']['data_for_clustering'],
         aggregation_functions=config['clustering']['aggregation_functions'],
-        cluster_size=config['clustering']['cluster_size']
+        cluster_size=config['clustering']['cluster_size'],
+        gams_sysdir=config['balmorel_input']['gams_sysdir']
     output:
         [
             f"{out_path}clustering.gpkg",
@@ -42,7 +54,7 @@ rule cluster:
         ]
     shell:
         """
-        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size}
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir}
         """
 
 rule aggregate_inputs:
@@ -60,7 +72,8 @@ rule aggregate_inputs:
         median_aggfuncs = config['aggregation']['median_aggfuncs'],
         zero_fillnas = config['aggregation']['zero_fillnas'],
         cluster_params=config['clustering']['data_for_clustering'],
-        cluster_size=config['clustering']['cluster_size']
+        cluster_size=config['clustering']['cluster_size'],
+        gams_sysdir=config['balmorel_input']['gams_sysdir']
     output:
         [
             f"{out_path}CCCRRRAAA.inc",
@@ -80,7 +93,7 @@ rule aggregate_inputs:
         ]
     shell:
         """
-        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size}
+        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir}
         """
 
 rule create_addon_files:
