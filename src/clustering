@@ -46,7 +46,8 @@ rule cluster:
         cluster_params=config['clustering']['data_for_clustering'],
         aggregation_functions=config['clustering']['aggregation_functions'],
         cluster_size=config['clustering']['cluster_size'],
-        gams_sysdir=config['balmorel_input']['gams_sysdir']
+        gams_sysdir=config['balmorel_input']['gams_sysdir'],
+        second_order=config['clustering']['second_order']
     output:
         [
             f"{out_path}clustering.gpkg",
@@ -54,7 +55,7 @@ rule cluster:
         ]
     shell:
         """
-        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir}
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order}
         """
 
 rule aggregate_inputs:

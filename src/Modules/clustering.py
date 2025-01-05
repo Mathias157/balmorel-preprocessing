@@ -195,21 +195,28 @@ def gather_data(db: gams.GamsDatabase,
         
     return collected_data.to_xarray().rename({'R':'IRRRE'})
 
-def cluster(collected_data: pd.DataFrame,
+def cluster(model: Balmorel,
+            scenario: str,
+            collected_data: pd.DataFrame,
             n_clusters: int,
             use_connectivity: bool = True,
             manual_corrections: list = [],
             linkage: str = 'Ward',
             connection_remark: str = 'connec. included + artifical',
             data_remark: str = 'all combined + xy coords',
-            include_coordinates: bool = True):
+            include_coordinates: bool = True,
+            second_order: bool = False):
 
     # collected_data = collected_data.drop_sel(IRRRE='Christiansoe')
 
     # Connectivity
     if use_connectivity:
         ## Use connectivity from Balmorel (Submodules/get_grid.py)
-        connectivity = xr.load_dataset('Data/BalmorelData/municipal_connectivity.nc')
+        if second_order:
+            connectivity = symbol_to_df(model.input_data[scenario], 'XINVCOST')
+            print(connectivity)
+        else:
+            connectivity = xr.load_dataset('Data/BalmorelData/municipal_connectivity.nc')
         connectivity_old, connectivity = convert_names('Modules/Submodules/exo_grid_conversion_dictionaries.pkl', connectivity, 'connection')
 
         ## Manual Corrections
@@ -238,7 +245,10 @@ def cluster(collected_data: pd.DataFrame,
         X = collected_data
     
     ## Combine with polygons for plotting and possible coordinate data
-    the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
+    if second_order:
+        geofiles = gpd.read_file('ClusterOutput/%s_%scluster_geofile.gpkg'%(data_remark.replace(',', '-'), scenario.lstrip('N')))
+    else:
+        the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
     geofiles.index.name = 'IRRRE'
     X = X.merge(geofiles['geometry'].to_xarray())
     
@@ -351,6 +361,7 @@ def new_geofile(clustering: gpd.GeoDataFrame, plot: bool = False):
 @click.option('--cluster-params', type=str, required=True, help='Comma-separated list of Balmorel input data to cluster (use the symbol names, e.g. DE for annual electricity demand)')
 @click.option('--aggregation-functions', type=str, required=True, help='Comma-separated list of aggregation functions used for clustering (E.g. sum for annual electricity demand and mean for wind full-load hours)')
 @click.option('--cluster-size', type=int, required=True, help='How many clusters?')
+@click.option('--second-order', type=bool, required=True, help='Is it a second order clustering?')
 @click.option('--plot-style', type=str, required=False, help='Style of the plot. Options are "report" (bright background) or "ppt" (dark background)')
 @click.option('--gams-sysdir', type=str, required=False, help='GAMS system directory')
 def main(model_path: str, 
@@ -382,7 +393,8 @@ def main(model_path: str,
                             cluster_params_list, aggfuncs)
     
     # Do clustering
-    fig, ax, clustering = cluster(collected, cluster_size, connection_remark='', data_remark=cluster_params)
+    fig, ax, clustering = cluster(model, scenario, collected, cluster_size, connection_remark='', data_remark=cluster_params, 
+                                  include_coordinates=True, second_order=second_order)
     fig.savefig('ClusterOutput/Figures/clustering.pdf', transparent=True, bbox_inches='tight')
     
     # Name clusters
