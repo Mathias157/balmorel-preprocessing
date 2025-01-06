@@ -1,7 +1,7 @@
 """
-TITLE
+Clustering
 
-Description
+Will cluster geographic regions depending on input data
 
 Created on 11.09.2024
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
@@ -13,7 +13,7 @@ Created on 11.09.2024
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcol
-from pybalmorel import Balmorel
+from pybalmorel import Balmorel, IncFile
 from pybalmorel.utils import symbol_to_df
 from Submodules.utils import convert_names
 from typing import Tuple
@@ -46,7 +46,7 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     
 
 #%% ------------------------------- ###
-###        1. 
+###      1. Utility Functions       ###
 ### ------------------------------- ###
 
 def correct_VRE_data(path_to_file, generation_name: str):
@@ -357,6 +357,43 @@ def new_geofile(clustering: gpd.GeoDataFrame, plot: bool = False):
         
     return new_geofile
         
+
+def region_area_connection(input_data: gams.GamsDatabase,
+                           clustering: gpd.GeoDataFrame):
+    """Creates connections between regions and areas in a 2nd order clustering
+    """
+    
+    # Old geographic sets
+    RRRAAA = symbol_to_df(input_data, 'RRRAAA')
+    
+    # Convert old regions to second order aggregated regions
+    RRRAAA_new = (
+        RRRAAA
+        .merge(clustering[['cluster_name']], left_on='RRR', right_index=True, how='left')
+        .drop(columns='RRR')
+        .rename(columns={'cluster_name' : 'RRR'})
+        [['RRR', 'AAA']]
+    )
+    
+    # The links
+    RRRAAA_new['RRRAAA'] = RRRAAA_new.RRR + ' . ' + RRRAAA_new.AAA
+    
+    # Save
+    IncFile(name='CCCRRRAAA',
+            path='ClusterOutput',
+            prefix="SET CCCRRRAAA(CCCRRRAAA) 'All geographical entities (CCC + RRR + AAA)'\n/\n",
+            body="DENMARK\n" + "\n".join(list(RRRAAA_new.RRR.unique()) + list(RRRAAA_new.AAA.unique())),
+            suffix='\n/;').save()
+    RAInc = IncFile(name='RRRAAA',
+            path='ClusterOutput',
+            prefix="SET RRRAAA(RRR, AAA) 'Areas in regions'\n/\n",
+            body=RRRAAA_new[['RRRAAA']].style.set_properties(**{'text-align' : 'left'}).hide(axis='index').hide(axis='columns').to_string(),
+            suffix="\n/;").save()
+
+#%% ------------------------------- ###
+###             2. Main             ###
+### ------------------------------- ###
+        
 @click.command()
 @click.option('--model-path', type=str, required=True, help='Balmorel model path')
 @click.option('--scenario', type=str, required=True, help='Balmorel scenario')
@@ -420,6 +457,10 @@ def main(model_path: str,
     
     ## Save
     gf.to_file('ClusterOutput/%s.gpkg'%aggregated_clustering_filename)
+    
+    if second_order:
+        region_area_connection(model.input_data[scenario],
+                               clustering)
 
 if __name__ == '__main__':
     main()

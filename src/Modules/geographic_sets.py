@@ -17,7 +17,7 @@ from Submodules.utils import combine_dicts
 from pybalmorel.interactive.dashboard.eel_dashboard import create_incfiles
 
 #%% ------------------------------- ###
-###        1. 
+###          1. Utilities           ###
 ### ------------------------------- ###
 
 def load_set(file: str):
@@ -81,6 +81,10 @@ def main():
     with open('Output/INDIVUSERS_INDIVUSERS_AAA.inc', 'w') as f:
         f.write(file)
     
+
+#%% ------------------------------- ###
+###             2. Main             ###
+### ------------------------------- ###
 
 if __name__ == '__main__':
     main()
