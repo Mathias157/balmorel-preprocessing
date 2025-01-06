@@ -9,6 +9,13 @@ balmorel_path = config['balmorel_input']['model_path']
 scenario = config['balmorel_input']['scenario']
 balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 gams_sysdir = config['balmorel_input']['gams_sysdir']
+second_order = config['clustering']['second_order']
+if second_order:
+    clusterfile = f"{out_path}clustering_2nd-order.gpkg"
+    aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile_2nd-order.gpkg"
+else:
+    clusterfile = f"{out_path}clustering.gpkg"
+    aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile.gpkg"
 
 # 1. General Purpose
 rule all:
@@ -50,8 +57,8 @@ rule cluster:
         second_order=config['clustering']['second_order']
     output:
         [
-            f"{out_path}clustering.gpkg",
-            f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile.gpkg"
+            clusterfile,
+            aggregated_clusterfile
         ]
     shell:
         """
@@ -62,7 +69,7 @@ rule aggregate_inputs:
     input:
         [
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
-            f"{out_path}clustering.gpkg",
+            clusterfile,
             f"{modules_path}aggregate_inputs.py"
         ]
     params:
@@ -74,7 +81,8 @@ rule aggregate_inputs:
         zero_fillnas = config['aggregation']['zero_fillnas'],
         cluster_params=config['clustering']['data_for_clustering'],
         cluster_size=config['clustering']['cluster_size'],
-        gams_sysdir=config['balmorel_input']['gams_sysdir']
+        gams_sysdir=config['balmorel_input']['gams_sysdir'],
+        second_order=second_order
     output:
         [
             f"{out_path}CCCRRRAAA.inc",
@@ -94,12 +102,12 @@ rule aggregate_inputs:
         ]
     shell:
         """
-        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir}
+        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order}
         """
 
 rule create_addon_files:
     input:
-        f"{out_path}clustering.gpkg"
+        clusterfile
     output:
         [
             f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
@@ -118,5 +126,7 @@ rule create_addon_files:
             f"{out_path}INDIVUSERS_DE.inc",
             f"{out_path}HYDROGEN_AGKN.inc",
         ]
-    script:
-        f"{modules_path}create_addon_files.py"
+    shell:
+        """
+        python {modules_path}create_addon_files.py --clusterfile={clusterfile}
+        """

@@ -51,8 +51,10 @@ def create_category_files(addons: list, clustering: gpd.GeoDataFrame, category_f
 ### ------------------------------- ###
 
 @click.command()
+@click.option('--clusterfile', type=str, required=True, help="The name of the clusterfile")
 # @click.option('--addons', type=(str, list), required=False, help='The addons that require empty set files and categories')
-def main(addons: Tuple[list, str] = ['INDUSTRY', 'HYDROGEN', 'INDIVUSERS'],
+def main(clusterfile: str,
+         addons: Tuple[list, str] = ['INDUSTRY', 'HYDROGEN', 'INDIVUSERS'],
          empty_files: Tuple[list, str] = ['DE', 'DE_VAR_T', 'DH', 'DH_VAR_T', 
                                           'CCCRRRAAA', 'RRRAAA', 'AAA', 'AGKN',
                                           'DISLOSS_E_AG']):
@@ -61,7 +63,8 @@ def main(addons: Tuple[list, str] = ['INDUSTRY', 'HYDROGEN', 'INDIVUSERS'],
     create_empty_set_files(addons, empty_files)
 
     # Create categories
-    clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
+    print('Reading %s'%clusterfile)
+    clusters = gpd.read_file(clusterfile)
     create_category_files([addon for addon in addons if addon != 'HYDROGEN'], 
                           clusters,
                           ['*_AAA'],

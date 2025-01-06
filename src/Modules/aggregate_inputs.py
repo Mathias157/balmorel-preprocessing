@@ -138,6 +138,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
                       clustering: gpd.GeoDataFrame,
                       aggfunc: str,
                       unique_names: dict,
+                      second_order: bool,
                       fillna: Tuple[float, int, str] = 'EPS'):
     
     # Load dataframe
@@ -187,7 +188,7 @@ def aggregate_parameter(db: gams.GamsDatabase,
     
     # Plot connection costs in case it is a connection parameter
     if 'INVCOST' in symbol:
-        plot_transmission_invcost(symbol, df)
+        plot_transmission_invcost(symbol, df, second_order)
     
     # Use N-1 sets as index, and the last as columns, where N = length of columns without 'Value' column
     if len(symbol_columns) > 2:
@@ -240,12 +241,15 @@ def aggregate_sets(db: gams.GamsDatabase,
 @click.pass_context
 def plot_transmission_invcost(ctx, symbol: str,
                               df: pd.DataFrame,
+                              second_order: bool,
                               year: int = 2050):
     print('Plotting connection costs for %s'%symbol)
     
-    cluster_file = 'ClusterOutput/%s_%dcluster_geofile.gpkg'%('-'.join(ctx.obj['cluster_params']), ctx.obj['cluster_size'])
-    # f = gpd.read_file('ClusterOutput/%s_%dcluster_geofile.gpkg'%('-'.join(cluster_params_list), cluster_size))
-    geo_union = gpd.read_file(cluster_file)
+    cluster_file = 'ClusterOutput/%s_%dcluster_geofile'%('-'.join(ctx.obj['cluster_params']), ctx.obj['cluster_size'])
+    if second_order:
+        cluster_file += '_2nd-order'
+    
+    geo_union = gpd.read_file(cluster_file + '.gpkg')
     geo_union['coord'] = geo_union.centroid
     
     fig, ax = plt.subplots()
@@ -286,12 +290,14 @@ def plot_transmission_invcost(ctx, symbol: str,
 @click.option('--only-symbols', type=str, required=False, default=None, help="Only aggregate the symbols, input as comma-separated string")
 @click.option('--cluster-size', type=int, required=True, help='How many clusters?')
 @click.option('--cluster-params', type=str, required=True, help='Comma-separated list of Balmorel input data to cluster (use the symbol names, e.g. DE for annual electricity demand)')
+@click.option('--second-order', type=bool, required=True, help='Second order clustering or not?')
 @click.option('--gams-sysdir', type=str, required=False, help='GAMS system directory')
 def main(ctx, model_path: str, scenario: str, exceptions: str, 
          mean_aggfuncs: str, median_aggfuncs: str, 
          zero_fillnas: str, only_symbols: Union[str, None], 
          cluster_size: int,
          cluster_params: str,
+         second_order: bool,
          incfile_folder: str = 'Output',
          gams_sysdir: str = '/opt/gams/48.5'):
     
@@ -313,7 +319,10 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
     # Load files
     m = Balmorel(model_path,gams_system_directory=gams_sysdir)
     m.load_incfiles(scenario)
-    clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
+    if second_order:
+        clusters = gpd.read_file('ClusterOutput/clustering_2nd-order.gpkg')
+    else:
+        clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
         
     # Get which .inc-files and how to aggregate based on folder content and configurations
     symbols, aggfuncs, fillnas = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
@@ -330,6 +339,7 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
                             clusters[['index', 'cluster_name']],
                             aggfunc=aggfuncs[symbol],
                             unique_names=unique_names,
+                            second_order=second_order,
                             fillna=fillnas[symbol])
         elif type(m.input_data[scenario][symbol] == gams.GamsSet):
             aggregate_sets(m.input_data[scenario],

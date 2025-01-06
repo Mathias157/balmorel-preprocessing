@@ -406,13 +406,20 @@ def main(model_path: str,
         idx = clustering.query('cluster_group == @cluster_grouping').index 
         clustering.loc[idx, 'cluster_name'] = 'CL%d'%cluster_grouping
     
-    clustering.to_file('ClusterOutput/clustering.gpkg')
+    # Name filenames
+    clustering_filename  = 'clustering'
+    aggregated_clustering_filename = '%s_%dcluster_geofile'%('-'.join(cluster_params_list), cluster_size)
+    if second_order:
+        clustering_filename += '_2nd-order'
+        aggregated_clustering_filename += '_2nd-order'
+    
+    clustering.to_file('ClusterOutput/%s.gpkg'%clustering_filename)
     
     # Create new geofile
     gf = new_geofile(clustering)
     
     ## Save
-    gf.to_file('ClusterOutput/%s_%dcluster_geofile.gpkg'%('-'.join(cluster_params_list), cluster_size))
+    gf.to_file('ClusterOutput/%s.gpkg'%aggregated_clustering_filename)
 
 if __name__ == '__main__':
     main()
