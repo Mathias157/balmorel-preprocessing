@@ -214,15 +214,17 @@ def cluster(model: Balmorel,
         ## Use connectivity from Balmorel (Submodules/get_grid.py)
         if second_order:
             connectivity = symbol_to_df(model.input_data[scenario], 'XINVCOST')
-            print(connectivity)
+            connectivity['connection'] = 1
+            connectivity = connectivity.drop(columns=['YYY', 'Value']).pivot_table(index=['IRRRE', 'IRRRI'], values='connection').to_xarray()
+            connectivity = connectivity.fillna(0)
         else:
             connectivity = xr.load_dataset('Data/BalmorelData/municipal_connectivity.nc')
-        connectivity_old, connectivity = convert_names('Modules/Submodules/exo_grid_conversion_dictionaries.pkl', connectivity, 'connection')
+            connectivity_old, connectivity = convert_names('Modules/Submodules/exo_grid_conversion_dictionaries.pkl', connectivity, 'connection') # Convert æøå
 
-        ## Manual Corrections
-        for manual_connection in manual_corrections:
-            connectivity.connection.loc[manual_connection[0], manual_connection[1]] = manual_connection[2]
-            connectivity.connection.loc[manual_connection[1], manual_connection[0]] = manual_connection[2]
+            ## Manual Corrections
+            for manual_connection in manual_corrections:
+                connectivity.connection.loc[manual_connection[0], manual_connection[1]] = manual_connection[2]
+                connectivity.connection.loc[manual_connection[1], manual_connection[0]] = manual_connection[2]
             
         print('Is matrix symmetric?', np.all(connectivity.connection.data == connectivity.connection.data.T))
         
@@ -246,12 +248,12 @@ def cluster(model: Balmorel,
     
     ## Combine with polygons for plotting and possible coordinate data
     if second_order:
-        geofiles = gpd.read_file('ClusterOutput/%s_%scluster_geofile.gpkg'%(data_remark.replace(',', '-'), scenario.lstrip('N')))
+        geofiles = gpd.read_file('ClusterOutput/%s_%scluster_geofile.gpkg'%(data_remark.replace(', ', '-'), scenario.lstrip('N')))
+        geofiles.index = geofiles.cluster_name
     else:
         the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
     geofiles.index.name = 'IRRRE'
     X = X.merge(geofiles['geometry'].to_xarray())
-    
     if include_coordinates:
         ## Get coordinates 
         coords = gpd.GeoDataFrame(geometry=X.geometry.data).centroid
@@ -369,6 +371,7 @@ def main(model_path: str,
          cluster_params: str,
          aggregation_functions: str,
          cluster_size: int,
+         second_order: bool,
          plot_style: str = 'report',
          gams_sysdir: str = '/opt/gams/48.5'):
 
