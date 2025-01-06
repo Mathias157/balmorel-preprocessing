@@ -14,7 +14,31 @@ second_order = config['clustering']['second_order']
 if second_order:
     clusterfile = f"{out_path}clustering_2nd-order.gpkg"
     aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile_2nd-order.gpkg"
-    aggregation_output = open('Data/Configurations/2ndOrderClusteringFiles.txt', 'r').read().splitlines()
+    aggregation_output = [
+        f"{out_path}CCCRRR.inc",
+        f"{out_path}RRR.inc",
+        f"{out_path}DISLOSS_E.inc",
+        f"{out_path}DISCOST_E.inc",
+        f"{out_path}DE_VAR_T.inc",
+        f"{out_path}DE.inc",
+        f"{out_path}FLEXDEM_FLEXMAXLIMIT.inc",
+        f"{out_path}FLEXDEM_FLEXYDEMAND.inc",
+        f"{out_path}FUELTRANSPORT_COST.inc",
+        f"{out_path}GMAXF.inc",
+        f"{out_path}HYDROGEN_DH2.inc",
+        f"{out_path}HYDROGEN_XH2COST.inc",
+        f"{out_path}HYDROGEN_XH2INVCOST.inc",
+        f"{out_path}HYDROGEN_XH2LOSS.inc",
+        f"{out_path}XCOST.inc",
+        f"{out_path}XINVCOST.inc",
+        f"{out_path}XLOSS.inc",
+    ]
+    addon_files = [
+        f"{out_path}INDIVUSERS_DE_VAR_T.inc",
+        f"{out_path}INDIVUSERS_DE.inc",
+        f"{out_path}INDUSTRY_DE_VAR_T.inc",
+        f"{out_path}INDUSTRY_DE.inc"
+    ]
 else:
     clusterfile = f"{out_path}clustering.gpkg"
     aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile.gpkg"
@@ -34,6 +58,23 @@ else:
         f"{out_path}HYDROGEN_XH2COST.inc",
         # ...and many more
     ]
+    addon_files = [
+        f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
+        f"{out_path}INDUSTRY_CCCRRRAAA.inc",
+        f"{out_path}INDUSTRY_RRRAAA.inc",
+        f"{out_path}INDUSTRY_AAA.inc",
+        f"{out_path}INDUSTRY_AGKN.inc",
+        f"{out_path}INDUSTRY_DH.inc",
+        f"{out_path}INDUSTRY_DE.inc",
+        f"{out_path}INDIVUSERS_INDIVUSERS_AAA.inc",
+        f"{out_path}INDIVUSERS_CCCRRRAAA.inc",
+        f"{out_path}INDIVUSERS_RRRAAA.inc",
+        f"{out_path}INDIVUSERS_AAA.inc",
+        f"{out_path}INDIVUSERS_AGKN.inc",
+        f"{out_path}INDIVUSERS_DH.inc",
+        f"{out_path}INDIVUSERS_DE.inc",
+        f"{out_path}HYDROGEN_AGKN.inc",
+    ]
 
 
 # 1. General Purpose
@@ -41,7 +82,7 @@ rule all:
     input:
         [   
             f"{out_path}DE.inc",
-            f"{out_path}HYDROGEN_AGKN.inc",
+            f"{out_path}INDUSTRY_DE_VAR_T.inc",
         ]
 
 rule collect_balmorel_input:
@@ -113,23 +154,7 @@ rule create_addon_files:
     input:
         clusterfile
     output:
-        [
-            f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
-            f"{out_path}INDUSTRY_CCCRRRAAA.inc",
-            f"{out_path}INDUSTRY_RRRAAA.inc",
-            f"{out_path}INDUSTRY_AAA.inc",
-            f"{out_path}INDUSTRY_AGKN.inc",
-            f"{out_path}INDUSTRY_DH.inc",
-            f"{out_path}INDUSTRY_DE.inc",
-            f"{out_path}INDIVUSERS_INDIVUSERS_AAA.inc",
-            f"{out_path}INDIVUSERS_CCCRRRAAA.inc",
-            f"{out_path}INDIVUSERS_RRRAAA.inc",
-            f"{out_path}INDIVUSERS_AAA.inc",
-            f"{out_path}INDIVUSERS_AGKN.inc",
-            f"{out_path}INDIVUSERS_DH.inc",
-            f"{out_path}INDIVUSERS_DE.inc",
-            f"{out_path}HYDROGEN_AGKN.inc",
-        ]
+        addon_files
     shell:
         """
         python {modules_path}create_addon_files.py --clusterfile={clusterfile}

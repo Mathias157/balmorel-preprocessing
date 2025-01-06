@@ -59,6 +59,10 @@ def main(clusterfile: str,
                                           'CCCRRRAAA', 'RRRAAA', 'AAA', 'AGKN',
                                           'DISLOSS_E_AG']):
     
+    if '2nd-order' in clusterfile:
+        print('Only making DE an DE_VAR_T!')
+        empty_files = ['DE', 'DE_VAR_T']
+    
     # Create empty sets
     create_empty_set_files(addons, empty_files)
 
