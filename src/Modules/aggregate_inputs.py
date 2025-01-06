@@ -326,6 +326,9 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
         
     # Get which .inc-files and how to aggregate based on folder content and configurations
     symbols, aggfuncs, fillnas = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
+    if second_order:
+        # If 2nd order, only create region-related files
+        symbols = open('Data/Configurations/2ndOrderClusteringFiles.txt', 'r').read().splitlines()
     if only_symbols != None:
         symbols = only_symbols.replace(' ', '').split(',')
 

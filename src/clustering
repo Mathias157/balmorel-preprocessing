@@ -10,12 +10,31 @@ scenario = config['balmorel_input']['scenario']
 balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 gams_sysdir = config['balmorel_input']['gams_sysdir']
 second_order = config['clustering']['second_order']
+
 if second_order:
     clusterfile = f"{out_path}clustering_2nd-order.gpkg"
     aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile_2nd-order.gpkg"
+    aggregation_output = open('Data/Configurations/2ndOrderClusteringFiles.txt', 'r').read().splitlines()
 else:
     clusterfile = f"{out_path}clustering.gpkg"
     aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile.gpkg"
+    aggregation_output =         [
+        f"{out_path}CCCRRRAAA.inc",
+        f"{out_path}CCCRRR.inc",
+        f"{out_path}RRRAAA.inc",
+        f"{out_path}RRR.inc",
+        f"{out_path}AAA.inc",
+        f"{out_path}DE.inc",
+        f"{out_path}DH.inc",
+        f"{out_path}XINVCOST.inc",
+        f"{out_path}XLOSS.inc",
+        f"{out_path}XCOST.inc",
+        f"{out_path}HYDROGEN_XH2INVCOST.inc",
+        f"{out_path}HYDROGEN_XH2LOSS.inc",
+        f"{out_path}HYDROGEN_XH2COST.inc",
+        # ...and many more
+    ]
+
 
 # 1. General Purpose
 rule all:
@@ -84,22 +103,7 @@ rule aggregate_inputs:
         gams_sysdir=config['balmorel_input']['gams_sysdir'],
         second_order=second_order
     output:
-        [
-            f"{out_path}CCCRRRAAA.inc",
-            f"{out_path}CCCRRR.inc",
-            f"{out_path}RRRAAA.inc",
-            f"{out_path}RRR.inc",
-            f"{out_path}AAA.inc",
-            f"{out_path}DE.inc",
-            f"{out_path}DH.inc",
-            f"{out_path}XINVCOST.inc",
-            f"{out_path}XLOSS.inc",
-            f"{out_path}XCOST.inc",
-            f"{out_path}HYDROGEN_XH2INVCOST.inc",
-            f"{out_path}HYDROGEN_XH2LOSS.inc",
-            f"{out_path}HYDROGEN_XH2COST.inc",
-            # ...and many more
-        ]
+        aggregation_output
     shell:
         """
         python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order}

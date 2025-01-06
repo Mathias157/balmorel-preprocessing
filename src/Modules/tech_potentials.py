@@ -100,6 +100,7 @@ def create_subtechgroupkpot(df: pd.DataFrame, PTES_land_use: float):
                 prefix="TABLE SUBTECHGROUPKPOT(CCCRRRAAA, TECH_GROUP, SUBTECH_GROUP)  'Subtechnology group capacity restriction by geography (MWh)'\n* A %0.2f m2/MWh for PTES was assumed with 1 pct of municipal regions available for capacity expansion\n"%(PTES_land_use),
                 body=df,
                 suffix='\n;')
+    f.body.index += '_A'
     f.body.index.name = ''
     f.save()
 
