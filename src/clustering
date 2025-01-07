@@ -30,7 +30,6 @@ if second_order:
     clusterfile = f"{out_path}clustering_2nd-order.gpkg"
     aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile_2nd-order.gpkg"
     aggregation_output = [
-        f"{out_path}CCCRRR.inc",
         f"{out_path}DISLOSS_E.inc",
         f"{out_path}DISCOST_E.inc",
         f"{out_path}DE_VAR_T.inc",
@@ -109,7 +108,8 @@ rule cluster:
         [
             f"{balmorel_sc_folder}{scenario}_input_data.gdx",
             f"{modules_path}clustering.py",
-            f"{submod_path}exo_grid_conversion_dictionaries.pkl"
+            f"{submod_path}exo_grid_conversion_dictionaries.pkl",
+            "clustering.yaml"
         ]
     params:
         cluster_params=config['clustering']['data_for_clustering'],
