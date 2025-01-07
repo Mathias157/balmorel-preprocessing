@@ -54,7 +54,18 @@ dependencies:
 
 The processing is initiated through a snakemake command in a command-line interface in the src directory. If using windows, the pre-processing can be run by calling `preprocessing` and the clustering through `clustering`. If on other systems, do either of the following commands:
 ```
-snakemake -s workflow/preprocessing
-snakemake -s workflow/clustering
+snakemake -s preprocessing
+snakemake -s clustering
 ```
 A plot of the process workflow can be found [here](src/Analysis/preprocessing_dag.pdf).
+Remember to examine the `assumptions.yaml` used for pre-processing data and the `clustering.yaml` for clustering configurations, e.g. assumptions on grid investment costs and cluster size, respectively. Clustering assumes that a functioning Balmorel model is placed in the model_path written in `clustering.yaml`, as data from a Balmorel scenario needs to be read. 
+
+### Hierarchical Clustering
+
+It is possible to do hierarchical clustering by running the `clustering` command (or in Linux/Mac: `snakemake -s clustering`) twice with different configurations and some copying of files in between. Follow this procedure:
+1) Run the clustering command with `second_order: False` of your 'base' scenario at a desired cluster size X.
+2) Copy (don't remove yet!) the produced .inc files in ClusterOutput to the data of a new scenario in Balmorel, check [this guide](https://balmorelcommunity.github.io/Balmorel/get_started/scenario_setup.html) on how to setup Balmorel scenarios.
+3) Run the clustering command with `second_order: True` of the new scenario at a new cluster size Y that is less than X from step 1. 
+4) Only some .inc files in ClusterOutput was replaced in the second order clustering. Once again copy all of the .inc files in ClusterOutput to another new scenario in Balmorel (including the .inc files that was not overwritten and remains from step 1)
+
+This procedure will have generated two new scenarios, one with X clusters for all carriers and investment options (step 2), and one with X clusters for heat and investment options linked to Y clusters for electricity and hydrogen.  

@@ -9,9 +9,8 @@ balmorel_path = config['balmorel_input']['model_path']
 scenario = config['balmorel_input']['scenario']
 balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 gams_sysdir = config['balmorel_input']['gams_sysdir']
-second_order = config['clustering']['second_order']
+second_order = bool(config['clustering']['second_order'])
 
-    
 addon_files = [
     f"{out_path}INDUSTRY_CCCRRRAAA.inc",
     f"{out_path}INDUSTRY_RRRAAA.inc",
@@ -156,7 +155,8 @@ rule aggregate_inputs:
 
 rule create_addon_files:
     input:
-        clusterfile
+        clusterfile,
+        f"{modules_path}create_addon_files.py"
     output:
         addon_files
     shell:

@@ -27,16 +27,15 @@ import time
 ###          1. Functions           ###
 ### ------------------------------- ###
 
-def get_symbols_to_aggregate(incfile_folder: str,
+def get_symbols_to_aggregate(symbols: list,
                              exceptions: str,
                              mean_aggfuncs: str,
                              median_aggfuncs: str,
                              zero_fillnas: str): 
 
-    incfiles = pd.DataFrame({'files' : os.listdir(incfile_folder)}).query('files.str.contains(".inc")')
     ## Get unique symbols (i.e., remove addon prefix from symbol names)
     symbols = (
-        incfiles.files
+        pd.Series(symbols)
         .str.replace('INDUSTRY_', '')
         .str.replace('HYDROGEN_', '')
         .str.replace('DH2', 'HYDROGEN_DH2')
@@ -45,7 +44,6 @@ def get_symbols_to_aggregate(incfile_folder: str,
         .str.replace('FUELCOST', 'FUELTRANSPORT_COST')
         .str.replace('OFFSHORE_', '')
         .str.replace('FLEXDEM_', '')
-        .str.replace('.inc', '')
         .unique()
     )
     ## Remove exceptions
@@ -324,11 +322,16 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
     else:
         clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
         
-    # Get which .inc-files and how to aggregate based on folder content and configurations
-    symbols, aggfuncs, fillnas = get_symbols_to_aggregate(incfile_folder, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
+    # Get which symbols to aggregate 
     if second_order:
         # If 2nd order, only create region-related files
         symbols = open('Data/Configurations/2ndOrderClusteringFiles.txt', 'r').read().replace('.inc', '').replace('ClusterOutput/', '').splitlines()
+    else:
+        symbols = open('Data/Configurations/1stOrderClusteringFiles.txt', 'r').read().replace('.inc', '').replace('ClusterOutput/', '').splitlines()
+    
+    # Filter out exceptions and get aggregation methods per symbol
+    symbols, aggfuncs, fillnas = get_symbols_to_aggregate(symbols, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
+    
     if only_symbols != None:
         symbols = only_symbols.replace(' ', '').split(',')
 

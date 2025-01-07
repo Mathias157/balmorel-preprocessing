@@ -63,9 +63,9 @@ def main(clusterfile: str,
     create_empty_set_files(addons, empty_files)
 
     # Create categories
-    print('Reading %s'%clusterfile)
-    clusters = gpd.read_file(clusterfile)
     if not('2nd-order' in clusterfile):
+        print('Reading %s'%clusterfile)
+        clusters = gpd.read_file(clusterfile)
         create_category_files([addon for addon in addons if addon != 'HYDROGEN'], 
                             clusters,
                             ['*_AAA'],
