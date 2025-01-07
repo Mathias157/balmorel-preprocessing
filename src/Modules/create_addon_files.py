@@ -59,21 +59,18 @@ def main(clusterfile: str,
                                           'CCCRRRAAA', 'RRRAAA', 'AAA', 'AGKN',
                                           'DISLOSS_E_AG']):
     
-    # if '2nd-order' in clusterfile:
-    #     print('Only making DE an DE_VAR_T!')
-    #     empty_files = ['DE', 'DE_VAR_T', 'RRRAAA']
-    
     # Create empty sets
     create_empty_set_files(addons, empty_files)
 
     # Create categories
     print('Reading %s'%clusterfile)
     clusters = gpd.read_file(clusterfile)
-    create_category_files([addon for addon in addons if addon != 'HYDROGEN'], 
-                          clusters,
-                          ['*_AAA'],
-                          suffixes={'INDUSTRY' : ['IND-LT-NODH', 'IND-MT-NODH', 'IND-HT-NODH'],
-                                    'INDIVUSERS' : ['IDVU-SPACEHEAT']})
+    if not('2nd-order' in clusterfile):
+        create_category_files([addon for addon in addons if addon != 'HYDROGEN'], 
+                            clusters,
+                            ['*_AAA'],
+                            suffixes={'INDUSTRY' : ['IND-LT-NODH', 'IND-MT-NODH', 'IND-HT-NODH'],
+                                        'INDIVUSERS' : ['IDVU-SPACEHEAT']})
 
 if __name__ == '__main__':
     main()

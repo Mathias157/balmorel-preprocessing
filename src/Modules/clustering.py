@@ -376,6 +376,10 @@ def region_area_connection(input_data: gams.GamsDatabase,
         [['RRR', 'AAA']]
     )
     
+    # Extract sorted lists of 
+    RRR = sorted(RRRAAA_new.RRR.unique(), key=lambda x: int(x[2:]))
+    AAA = sorted(RRRAAA_new.AAA.unique(), key=lambda x: int(x.split('_')[0][2:]))
+    
     # The links
     RRRAAA_new['RRRAAA'] = RRRAAA_new.RRR + ' . ' + RRRAAA_new.AAA
     
@@ -383,7 +387,12 @@ def region_area_connection(input_data: gams.GamsDatabase,
     IncFile(name='CCCRRRAAA',
             path='ClusterOutput',
             prefix="SET CCCRRRAAA(CCCRRRAAA) 'All geographical entities (CCC + RRR + AAA)'\n/\n",
-            body="DENMARK\n" + "\n".join(list(RRRAAA_new.RRR.unique()) + list(RRRAAA_new.AAA.unique())),
+            body="DENMARK\n" + "\n".join(RRR + AAA),
+            suffix='\n/;').save()
+    IncFile(name='RRR',
+            path='ClusterOutput',
+            prefix="SET RRR(CCCRRRAAA) 'All regions'\n/\n",
+            body="\n".join(RRR),
             suffix='\n/;').save()
     RAInc = IncFile(name='RRRAAA',
             path='ClusterOutput',

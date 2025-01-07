@@ -1,14 +1,15 @@
 balmorel_input:  
   model_path: "../../Balmorel"
   gams_sysdir: "/opt/gams/48.5"
-  scenario: "N10"
+  scenario: "base"
   load_again: False
 
 clustering:
   data_for_clustering: "DE, DH, WNDFLH, SOLEFLH"
   aggregation_functions: "sum, sum, mean, mean"
   cluster_size: 2
-  second_order: True
+  second_order: False
+  first_order_geofile: DE-DH-WNDFLH-SOLEFLH_10cluster_geofile.gpkg
 
 aggregation:
   exceptions: "DH_VAR_T2, DH_VAR_T3, SUBTECHGROUPKPOT2"

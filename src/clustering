@@ -11,12 +11,27 @@ balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
 gams_sysdir = config['balmorel_input']['gams_sysdir']
 second_order = config['clustering']['second_order']
 
+    
+addon_files = [
+    f"{out_path}INDUSTRY_CCCRRRAAA.inc",
+    f"{out_path}INDUSTRY_RRRAAA.inc",
+    f"{out_path}INDUSTRY_AAA.inc",
+    f"{out_path}INDUSTRY_AGKN.inc",
+    f"{out_path}INDUSTRY_DH.inc",
+    f"{out_path}INDUSTRY_DE.inc",
+    f"{out_path}INDIVUSERS_CCCRRRAAA.inc",
+    f"{out_path}INDIVUSERS_RRRAAA.inc",
+    f"{out_path}INDIVUSERS_AAA.inc",
+    f"{out_path}INDIVUSERS_AGKN.inc",
+    f"{out_path}INDIVUSERS_DH.inc",
+    f"{out_path}INDIVUSERS_DE.inc",
+    f"{out_path}HYDROGEN_AGKN.inc",
+]
 if second_order:
     clusterfile = f"{out_path}clustering_2nd-order.gpkg"
     aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile_2nd-order.gpkg"
     aggregation_output = [
         f"{out_path}CCCRRR.inc",
-        f"{out_path}RRR.inc",
         f"{out_path}DISLOSS_E.inc",
         f"{out_path}DISCOST_E.inc",
         f"{out_path}DE_VAR_T.inc",
@@ -58,24 +73,11 @@ else:
         f"{out_path}HYDROGEN_XH2COST.inc",
         # ...and many more
     ]
-    
-addon_files = [
-    f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
-    f"{out_path}INDUSTRY_CCCRRRAAA.inc",
-    f"{out_path}INDUSTRY_RRRAAA.inc",
-    f"{out_path}INDUSTRY_AAA.inc",
-    f"{out_path}INDUSTRY_AGKN.inc",
-    f"{out_path}INDUSTRY_DH.inc",
-    f"{out_path}INDUSTRY_DE.inc",
-    f"{out_path}INDIVUSERS_INDIVUSERS_AAA.inc",
-    f"{out_path}INDIVUSERS_CCCRRRAAA.inc",
-    f"{out_path}INDIVUSERS_RRRAAA.inc",
-    f"{out_path}INDIVUSERS_AAA.inc",
-    f"{out_path}INDIVUSERS_AGKN.inc",
-    f"{out_path}INDIVUSERS_DH.inc",
-    f"{out_path}INDIVUSERS_DE.inc",
-    f"{out_path}HYDROGEN_AGKN.inc",
-]
+    addon_files += [
+        f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
+        f"{out_path}INDIVUSERS_INDIVUSERS_AAA.inc",
+    ]
+
 
 
 # 1. General Purpose
