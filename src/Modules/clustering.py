@@ -382,7 +382,7 @@ def region_area_connection(input_data: gams.GamsDatabase,
     
     # The links
     RRRAAA_new['RRRAAA'] = RRRAAA_new.RRR + ' . ' + RRRAAA_new.AAA
-    RRRAAA_new['CCCRRR'] = 'DENMARK . ' + RRRAAA_new.RRR
+    RRRAAA_new['CCCRRR'] = 'DENMARK . ' + RRRAAA_new.RRR.unique()
     
     # Save
     IncFile(name='CCCRRRAAA',
@@ -392,8 +392,8 @@ def region_area_connection(input_data: gams.GamsDatabase,
             suffix='\n/;').save()
     IncFile(name='CCCRRR',
             path='ClusterOutput',
-            prefix="CCCRRR(CCC, RRR) 'Regions in countries'\n/\n",
-            body="\n".join(RRRAAA_new['CCCRRR'].style.set_properties(**{'text-align' : 'left'}).hide(axis='index').hide(axis='columns').to_string()),
+            prefix="SET CCCRRR(CCC, RRR) 'Regions in countries'\n/\n",
+            body=RRRAAA_new[['CCCRRR']].style.set_properties(**{'text-align' : 'left'}).hide(axis='index').hide(axis='columns').to_string(),
             suffix='\n/;').save()
     IncFile(name='RRR',
             path='ClusterOutput',

@@ -64,7 +64,6 @@ def merge_RRR_names(df: pd.DataFrame,
     new_column = 'RRR_new'
 
     clustering.columns = [old_column, new_column]
-
     df = (
         df
         .merge(clustering, on=old_column, how='outer')
@@ -142,7 +141,8 @@ def aggregate_parameter(db: gams.GamsDatabase,
     # Load dataframe
     df = symbol_to_df(db, symbol)
     symbol_columns = list(df.columns)
-
+    value_sum_before = df.Value.sum()
+    
     # How to define this? Search for _, if that exists then its areas otherwise regions assumed? What about CCCRRRAAA
     if 'RRR' in symbol_columns:
         df = merge_RRR_names(df, clustering)
@@ -165,11 +165,15 @@ def aggregate_parameter(db: gams.GamsDatabase,
     )
     
     # Writing eps if fillna == EPS
-    if fillna == 'EPS':
-        idx = df.query('Value <= 1e-9').index
-        df = df.astype('object')
-        df.loc[idx, 'Value'] = 'EPS'
+    # if fillna == 'EPS':
+    #     idx = df.query('Value <= 1e-9').index
+    #     df = df.astype('object')
+    #     df.loc[idx, 'Value'] = 'EPS'
+    value_sum_after = df.query('Value != "EPS"').Value.sum()
     
+    if not(np.isclose(value_sum_after, value_sum_before, rtol=0.01)) and aggfunc == 'sum':
+        print('Sum of value before (%0.2f) is not equal to the sum of value after (%0.2f) for symbol %s'%(value_sum_before, value_sum_after, symbol))
+        raise('Error in aggregation')
     
     # Make IncFile
     prefix = "TABLE %s(%s) '%s'\n"%(symbol, ", ".join(symbol_columns[:-1]), db[symbol].text)
@@ -296,8 +300,9 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
          cluster_size: int,
          cluster_params: str,
          second_order: bool,
-         incfile_folder: str = 'Output',
          gams_sysdir: str = '/opt/gams/48.5'):
+    
+    # only_symbols = 'DE'
     
     # Make configuration lists
     ctx.ensure_object(dict)
@@ -314,21 +319,16 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
                     'FLEXMAXLIMIT' : 'FLEXDEM_FLEXMAXLIMIT',
                     'FLEXYDEMAND' : 'FLEXDEM_FLEXYDEMAND'} # Symbols that have a different incfile name
     
-    # Load files
+    # Load input data, cluster geofile and symbols to aggregate
     m = Balmorel(model_path,gams_system_directory=gams_sysdir)
     m.load_incfiles(scenario)
     if second_order:
         clusters = gpd.read_file('ClusterOutput/clustering_2nd-order.gpkg')
-    else:
-        clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
-        
-    # Get which symbols to aggregate 
-    if second_order:
-        # If 2nd order, only create region-related files
         symbols = open('Data/Configurations/2ndOrderClusteringFiles.txt', 'r').read().replace('.inc', '').replace('ClusterOutput/', '').splitlines()
     else:
+        clusters = gpd.read_file('ClusterOutput/clustering.gpkg')
         symbols = open('Data/Configurations/1stOrderClusteringFiles.txt', 'r').read().replace('.inc', '').replace('ClusterOutput/', '').splitlines()
-    
+        
     # Filter out exceptions and get aggregation methods per symbol
     symbols, aggfuncs, fillnas = get_symbols_to_aggregate(symbols, exceptions, mean_aggfuncs, median_aggfuncs, zero_fillnas)
     
