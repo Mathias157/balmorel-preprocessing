@@ -83,7 +83,7 @@ rule all:
     input:
         [   
             f"{out_path}DE.inc",
-            f"{out_path}INDUSTRY_DE_VAR_T.inc",
+            f"{out_path}INDUSTRY_DE.inc",
         ]
 
 rule collect_balmorel_input:
@@ -115,7 +115,8 @@ rule cluster:
         aggregation_functions=config['clustering']['aggregation_functions'],
         cluster_size=config['clustering']['cluster_size'],
         gams_sysdir=config['balmorel_input']['gams_sysdir'],
-        second_order=config['clustering']['second_order']
+        second_order=config['clustering']['second_order'],
+        first_order_geofile=config['clustering']['first_order_geofile']
     output:
         [
             clusterfile,
@@ -123,7 +124,7 @@ rule cluster:
         ]
     shell:
         """
-        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order}
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order} --first-order-geofile={params.first_order_geofile}
         """
 
 rule aggregate_inputs:

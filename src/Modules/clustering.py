@@ -205,7 +205,8 @@ def cluster(model: Balmorel,
             connection_remark: str = 'connec. included + artifical',
             data_remark: str = 'all combined + xy coords',
             include_coordinates: bool = True,
-            second_order: bool = False):
+            second_order: bool = False,
+            first_order_geofile: str = ''):
 
     # collected_data = collected_data.drop_sel(IRRRE='Christiansoe')
 
@@ -248,7 +249,7 @@ def cluster(model: Balmorel,
     
     ## Combine with polygons for plotting and possible coordinate data
     if second_order:
-        geofiles = gpd.read_file('ClusterOutput/%s_%scluster_geofile.gpkg'%(data_remark.replace(', ', '-'), scenario.lstrip('N')))
+        geofiles = gpd.read_file('ClusterOutput/%s'%first_order_geofile)
         geofiles.index = geofiles.cluster_name
     else:
         the_index, geofiles, c = prepared_geofiles('DKmunicipalities_names')
@@ -401,6 +402,7 @@ def region_area_connection(input_data: gams.GamsDatabase,
 @click.option('--aggregation-functions', type=str, required=True, help='Comma-separated list of aggregation functions used for clustering (E.g. sum for annual electricity demand and mean for wind full-load hours)')
 @click.option('--cluster-size', type=int, required=True, help='How many clusters?')
 @click.option('--second-order', type=bool, required=True, help='Is it a second order clustering?')
+@click.option('--first-order-geofile', type=str, required=False, help='The geofile from first order clusterig')
 @click.option('--plot-style', type=str, required=False, help='Style of the plot. Options are "report" (bright background) or "ppt" (dark background)')
 @click.option('--gams-sysdir', type=str, required=False, help='GAMS system directory')
 def main(model_path: str, 
@@ -409,6 +411,7 @@ def main(model_path: str,
          aggregation_functions: str,
          cluster_size: int,
          second_order: bool,
+         first_order_geofile: str = '',
          plot_style: str = 'report',
          gams_sysdir: str = '/opt/gams/48.5'):
 
@@ -434,7 +437,7 @@ def main(model_path: str,
     
     # Do clustering
     fig, ax, clustering = cluster(model, scenario, collected, cluster_size, connection_remark='', data_remark=cluster_params, 
-                                  include_coordinates=True, second_order=second_order)
+                                  include_coordinates=True, second_order=second_order, first_order_geofile=first_order_geofile)
     fig.savefig('ClusterOutput/Figures/clustering.pdf', transparent=True, bbox_inches='tight')
     
     # Name clusters
