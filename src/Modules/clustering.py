@@ -382,7 +382,7 @@ def region_area_connection(input_data: gams.GamsDatabase,
     
     # The links
     RRRAAA_new['RRRAAA'] = RRRAAA_new.RRR + ' . ' + RRRAAA_new.AAA
-    RRRAAA_new['CCCRRR'] = 'DENMARK . ' + RRRAAA_new.RRR.unique()
+    RRRAAA_new['CCCRRR'] = 'DENMARK . ' + pd.Series(RRR)
     
     # Save
     IncFile(name='CCCRRRAAA',
