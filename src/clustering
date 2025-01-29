@@ -91,9 +91,10 @@ rule collect_balmorel_input:
         f"{balmorel_sc_folder}{scenario}_input_data.gdx"
     run:
         from pybalmorel import Balmorel
+        from time import sleep
         model = Balmorel(balmorel_path, gams_system_directory=gams_sysdir)
         model.load_incfiles(scenario)
-
+        sleep(2)
 
 rule create_conversion_dictionaries:
     output:
