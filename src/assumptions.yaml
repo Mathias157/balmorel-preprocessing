@@ -1,0 +1,43 @@
+balmorel_input:
+  model_path: "../../Balmorel"
+  scenario: "base"
+  load_again: False
+  
+zones:
+  large_munis: "Koebenhavn_A, Aalborg_A, Odense_A, Aarhus_A"
+  medium_munis: "Esbjerg_A, Vejle_A, Frederiksberg_A, Randers_A, Kolding_A"
+
+grid_assumptions:
+  electricity:
+    investment_cost: 3.1 # €/MW/m DEA high bound
+    lifetime: 40 # Lifetime of grid elements
+    transmission_loss: 3.318383e-08 # fraction of loss pr. m, From Balmorel DK1-DK2 line
+    transmission_cost: 0.0001 # €/MWh
+    distribution_loss: 0.05 # fraction of loss pr. m
+    distribution_cost: 5 # €/MWh
+    industry_technologies: 0.05 # assumed equal to distribution loss
+    individual_technologies: 0.05 # assumed equal to distribution loss
+    charging_capacity_per_vehicle: 3 # Charging capacity in kW per electric vehicle
+  hydrogen:
+    investment_cost: 150.0e-03 # €/MW/m repurposed H2 onshore, Kountouries et al. 2024 
+    lifetime: 50 # Lifetime of H2 pipes, Kountouries et al. 2024
+    transmission_loss: 2.2e-08 # frac/m
+    transmission_cost: 1.0e-06
+
+fuel_assumptions:
+  meoh_per_jetfuel: 0.65  # Based on Rosendal et al. 2024, Renewable fuels and the impact of hydrogen infrastructure 
+  jetfuel_demand: 11e6 # MWh, Based on IDA Klimasvar
+  shipping_demand: 4e6 # MWh, Based on IDA Klimasvar
+
+timeseries:
+  weather_year: 2023
+
+resources:
+  cutout_path: Output/VRE/2023_DK.nc
+  total_offshore_wind_potential: 40000 # MW
+  woodpot: 40   # PJ, potential of woody biomass for energy, Bramstoft et al. 2020
+  strawpot: 54   # PJ, potential of agro waste for energy, Bramstoft et al. 2020
+  biogaspot: 10.56  # PJ, potential of biogas for energy assuming 60% conversion efficiency (DEA tech catalogue of biogas plant) and manure potential (Bramstoft et al. 2020) 
+  woodimport: False # Allow import of woody biomass to major cities?
+  biotransportcost: 0.0153 # Cost of biomass transport in €/GJ/km, Rosendal et al 2024 
+  available_land_for_PTES: 0.01 # %

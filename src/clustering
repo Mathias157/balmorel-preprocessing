@@ -1,0 +1,165 @@
+# Load the config file at the top
+configfile: "clustering.yaml"
+
+out_path     = "ClusterOutput/"
+data_path    = "Data/"
+modules_path = "Modules/"
+submod_path  = "Modules/Submodules/"
+balmorel_path = config['balmorel_input']['model_path']
+scenario = config['balmorel_input']['scenario']
+balmorel_sc_folder = f"{balmorel_path}/{scenario}/model/"
+gams_sysdir = config['balmorel_input']['gams_sysdir']
+second_order = bool(config['clustering']['second_order'])
+
+addon_files = [
+    f"{out_path}INDUSTRY_CCCRRRAAA.inc",
+    f"{out_path}INDUSTRY_RRRAAA.inc",
+    f"{out_path}INDUSTRY_AAA.inc",
+    f"{out_path}INDUSTRY_AGKN.inc",
+    f"{out_path}INDUSTRY_DH.inc",
+    f"{out_path}INDUSTRY_DE.inc",
+    f"{out_path}INDIVUSERS_CCCRRRAAA.inc",
+    f"{out_path}INDIVUSERS_RRRAAA.inc",
+    f"{out_path}INDIVUSERS_AAA.inc",
+    f"{out_path}INDIVUSERS_AGKN.inc",
+    f"{out_path}INDIVUSERS_DH.inc",
+    f"{out_path}INDIVUSERS_DE.inc",
+    f"{out_path}HYDROGEN_AGKN.inc",
+]
+if second_order:
+    clusterfile = f"{out_path}clustering_2nd-order.gpkg"
+    aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile_2nd-order.gpkg"
+    aggregation_output = [
+        f"{out_path}DISLOSS_E.inc",
+        f"{out_path}DISCOST_E.inc",
+        f"{out_path}DE_VAR_T.inc",
+        f"{out_path}DE.inc",
+        f"{out_path}FLEXDEM_FLEXMAXLIMIT.inc",
+        f"{out_path}FLEXDEM_FLEXYDEMAND.inc",
+        f"{out_path}FUELTRANSPORT_COST.inc",
+        f"{out_path}GMAXF.inc",
+        f"{out_path}HYDROGEN_DH2.inc",
+        f"{out_path}HYDROGEN_XH2COST.inc",
+        f"{out_path}HYDROGEN_XH2INVCOST.inc",
+        f"{out_path}HYDROGEN_XH2LOSS.inc",
+        f"{out_path}XCOST.inc",
+        f"{out_path}XINVCOST.inc",
+        f"{out_path}XLOSS.inc",
+    ]
+    # addon_files = [
+    #     f"{out_path}INDIVUSERS_DE_VAR_T.inc",
+    #     f"{out_path}INDIVUSERS_DE.inc",
+    #     f"{out_path}INDUSTRY_DE_VAR_T.inc",
+    #     f"{out_path}INDUSTRY_DE.inc"
+    # ]
+else:
+    clusterfile = f"{out_path}clustering.gpkg"
+    aggregated_clusterfile = f"{out_path}{'-'.join(config['clustering']['data_for_clustering'].replace(' ', '').split(','))}_{config['clustering']['cluster_size']}cluster_geofile.gpkg"
+    aggregation_output =         [
+        f"{out_path}CCCRRRAAA.inc",
+        f"{out_path}CCCRRR.inc",
+        f"{out_path}RRRAAA.inc",
+        f"{out_path}RRR.inc",
+        f"{out_path}AAA.inc",
+        f"{out_path}DE.inc",
+        f"{out_path}DH.inc",
+        f"{out_path}XINVCOST.inc",
+        f"{out_path}XLOSS.inc",
+        f"{out_path}XCOST.inc",
+        f"{out_path}HYDROGEN_XH2INVCOST.inc",
+        f"{out_path}HYDROGEN_XH2LOSS.inc",
+        f"{out_path}HYDROGEN_XH2COST.inc",
+        # ...and many more
+    ]
+    addon_files += [
+        f"{out_path}INDUSTRY_INDUSTRY_AAA.inc",
+        f"{out_path}INDIVUSERS_INDIVUSERS_AAA.inc",
+    ]
+
+
+
+# 1. General Purpose
+rule all:
+    input:
+        [   
+            f"{out_path}DE.inc",
+            f"{out_path}INDUSTRY_DE.inc",
+        ]
+
+rule collect_balmorel_input:
+    output:
+        f"{balmorel_sc_folder}{scenario}_input_data.gdx"
+    run:
+        from pybalmorel import Balmorel
+        model = Balmorel(balmorel_path, gams_system_directory=gams_sysdir)
+        model.load_incfiles(scenario)
+
+
+rule create_conversion_dictionaries:
+    output:
+        [f"{submod_path}exo_elec_dem_conversion_dictionaries.pkl",
+        f"{submod_path}exo_heat_dem_conversion_dictionaries.pkl",
+        f"{submod_path}exo_grid_conversion_dictionaries.pkl"]
+    script:
+        f"{submod_path}create_conversion_dictionaries.py"
+
+rule cluster:
+    input:
+        [
+            f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+            f"{modules_path}clustering.py",
+            f"{submod_path}exo_grid_conversion_dictionaries.pkl",
+            "clustering.yaml"
+        ]
+    params:
+        cluster_params=config['clustering']['data_for_clustering'],
+        aggregation_functions=config['clustering']['aggregation_functions'],
+        cluster_size=config['clustering']['cluster_size'],
+        gams_sysdir=config['balmorel_input']['gams_sysdir'],
+        second_order=config['clustering']['second_order'],
+        first_order_geofile=config['clustering']['first_order_geofile']
+    output:
+        [
+            clusterfile,
+            aggregated_clusterfile
+        ]
+    shell:
+        """
+        python {modules_path}clustering.py --model-path={balmorel_path} --scenario={scenario} --cluster-params "{params.cluster_params}" --aggregation-functions="{params.aggregation_functions}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order} --first-order-geofile={params.first_order_geofile}
+        """
+
+rule aggregate_inputs:
+    input:
+        [
+            f"{balmorel_sc_folder}{scenario}_input_data.gdx",
+            clusterfile,
+            f"{modules_path}aggregate_inputs.py"
+        ]
+    params:
+        model_path = balmorel_path,
+        scenario = scenario,
+        exceptions = config['aggregation']['exceptions'],
+        mean_aggfuncs = config['aggregation']['mean_aggfuncs'],
+        median_aggfuncs = config['aggregation']['median_aggfuncs'],
+        zero_fillnas = config['aggregation']['zero_fillnas'],
+        cluster_params=config['clustering']['data_for_clustering'],
+        cluster_size=config['clustering']['cluster_size'],
+        gams_sysdir=config['balmorel_input']['gams_sysdir'],
+        second_order=second_order
+    output:
+        aggregation_output
+    shell:
+        """
+        python {modules_path}aggregate_inputs.py --model-path={params.model_path} --scenario={params.scenario} --exceptions="{params.exceptions}" --mean-aggfuncs="{params.mean_aggfuncs}" --median-aggfuncs="{params.median_aggfuncs}" --zero-fillnas="{params.zero_fillnas}" --cluster-params "{params.cluster_params}" --cluster-size={params.cluster_size} --gams-sysdir={params.gams_sysdir} --second-order={params.second_order}
+        """
+
+rule create_addon_files:
+    input:
+        clusterfile,
+        f"{modules_path}create_addon_files.py"
+    output:
+        addon_files
+    shell:
+        """
+        python {modules_path}create_addon_files.py --clusterfile={clusterfile}
+        """

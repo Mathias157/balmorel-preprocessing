@@ -1,10 +1,29 @@
-Raw Data Processing/Data/*
-Raw Data Processing/Output/*
-!Raw Data Processing/Data/IncFilePreSuf/README.md
-!Raw Data Processing/Output/Figures/.keepoutfolder
-conversion_dictionaries.pkl
+Logs
+src/Data/*
+src/Output/*
+!src/Data/IncFilePreSuf/README.md
+!src/Output/Figures/.keepoutfolder
 .snakemake
 __pycache__
 .new_env/*
 prebalm
 *.pyc
+
+ClusterOutput
+!.keepfolder
+clustering_dot_source.txt
+clustering_dag
+preprocessing_dot_source.txt
+preprocessing_dag
+
+gurobi.log
+
+exo_elec_dem_conversion_dictionaries.pkl
+exo_heat_dem_conversion_dictionaries.pkl
+exo_grid_conversion_dictionaries.pkl
+
+districtheat_sets.pkl
+individual_sets.pkl
+ind-lt_sets.pkl
+ind-mt_sets.pkl
+ind-ht_sets.pkl
