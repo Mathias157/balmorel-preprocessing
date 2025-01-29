@@ -69,8 +69,8 @@ def get_connections(areas: pd.DataFrame):
     X = pd.DataFrame(np.zeros((len(areas), len(areas))).astype(int),
                 index=areas.loc[:, the_index],
                 columns=areas.loc[:, the_index])
-    X.index.name = 'IRRRE'
-    X.columns.name = 'IRRRI'
+    X.index.name = 'IAAAE'
+    X.columns.name = 'IAAAI'
 
 def create_grid_incfiles(d: pd.DataFrame,
                          X: pd.DataFrame,
@@ -109,7 +109,7 @@ def create_grid_incfiles(d: pd.DataFrame,
     
 
     with open('./Output/%s%sINVCOST.inc'%(prefix, carrier_symbol), 'w') as f:
-        f.write("TABLE %sINVCOST(YYY,IRRRE,IRRRI)        'Investment cost in new %s transmission capacity (Money/MW)'\n"%(carrier_symbol, carrier.capitalize()))
+        f.write("TABLE %sINVCOST(YYY,IAAAE,IAAAI)        'Investment cost in new %s transmission capacity (Money/MW)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = XE.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
@@ -125,7 +125,7 @@ def create_grid_incfiles(d: pd.DataFrame,
     XL = XL.replace(0, '')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
     with open('./Output/%s%sLOSS.inc'%(prefix, carrier_symbol), 'w') as f:
-        f.write("TABLE %sLOSS(IRRRE,IRRRI)        '%s transmission loss between regions (fraction)'\n"%(carrier_symbol, carrier.capitalize()))
+        f.write("TABLE %sLOSS(IAAAE,IAAAI)        '%s transmission loss between regions (fraction)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = XL.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
@@ -142,7 +142,7 @@ def create_grid_incfiles(d: pd.DataFrame,
     )
 
     with open('./Output/%s%sCOST.inc'%(prefix, carrier_symbol), 'w') as f:
-        f.write("TABLE %sCOST(IRRRE,IRRRI)  '%s transmission cost between regions (Money/MWh)'\n"%(carrier_symbol, carrier.capitalize()))
+        f.write("TABLE %sCOST(IAAAE,IAAAI)  '%s transmission cost between regions (Money/MWh)'\n"%(carrier_symbol, carrier.capitalize()))
         dfAsString = xcost_e.to_string(header=True, index=True)
         f.write(dfAsString)
         f.write('\n;')
@@ -243,7 +243,7 @@ def create_tech_specific_distribution_loss(wind_offshore_loss: dict,
                 ])
                 )   
     f.body += "\n".join([f"DISLOSS_E_AG_INDIVUSERS('{area}',G)$((GDATA(G,'GDTYPE') EQ GETOH OR  GDATA(G,'GDTYPE') EQ GESTO OR GDATA(G,'GDTYPE') EQ GESTOS)  AND (SUM(Y,GKFX(Y,'{area}',G)) OR AGKN('{area}',G)))={individual_loss};" for area in set.values()])
-    f.save()                                                                                                                                                                                                                                                                      
+    f.save()
 
 
 @click.command()
@@ -278,6 +278,7 @@ def main():
         .str.replace('ø', 'oe')
         .str.replace('å', 'aa')
     )
+    geofile.index += '_A'
     d = get_distance_matrix(geofile)
     
     # 3. Get connections
@@ -285,12 +286,15 @@ def main():
     f, fnew = convert_names('Modules/Submodules/exo_grid_conversion_dictionaries.pkl',
                       f, 'connection')
     ## Convert to dataframe
+    fnew = fnew.rename({'IRRRE' : 'IAAAE', 'IRRRI' : 'IAAAI'})
+    fnew['IAAAE'] = fnew['IAAAE'] + '_A'
+    fnew['IAAAI'] = fnew['IAAAI'] + '_A'
     X = (
         fnew
         .to_dataframe()
         .pivot_table(
-            index='IRRRE', 
-            columns='IRRRI', 
+            index='IAAAE', 
+            columns='IAAAI', 
             values='connection',
             aggfunc='sum'
         )
@@ -453,8 +457,8 @@ if __name__ == '__main__':
             X = pd.DataFrame(np.zeros((len(areas), len(areas))).astype(int),
                             index=areas.loc[:, the_index],
                             columns=areas.loc[:, the_index])
-            X.index.name = 'IRRRE'
-            X.columns.name = 'IRRRI'
+            X.index.name = 'IAAAE'
+            X.columns.name = 'IAAAI'
 
             # Use touches or intersects for areas not separated
             buffering = 1 # minimum 0.000001 to take care of invalid geometries
@@ -590,7 +594,7 @@ if __name__ == '__main__':
         XKFX.index = '2050 . ' + XKFX.index 
         XKFX = XKFX.astype(str).replace('0', '')
         with open('./Output/XKFX.inc', 'w') as f:
-            f.write("TABLE XKFX(YYY,IRRRE,IRRRI)  'Initial transmission capacity between regions'\n")
+            f.write("TABLE XKFX(YYY,IAAAE,IAAAI)  'Initial transmission capacity between regions'\n")
             dfAsString = XKFX.to_string(header=True, index=True)
             f.write(dfAsString)
             f.write('\n;\n')
@@ -658,7 +662,7 @@ if __name__ == '__main__':
         XE = XE.replace(0, '')
 
         with open('./Output/XINVCOST.inc', 'w') as f:
-            f.write("TABLE XINVCOST(YYY,IRRRE,IRRRI)        'Investment cost in new transmission capacity (Money/MW)'\n")
+            f.write("TABLE XINVCOST(YYY,IAAAE,IAAAI)        'Investment cost in new transmission capacity (Money/MW)'\n")
             dfAsString = XE.to_string(header=True, index=True)
             f.write(dfAsString)
             f.write('\n;')
@@ -674,7 +678,7 @@ if __name__ == '__main__':
         XL = XL.replace(0, '')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
         with open('./Output/XLOSS.inc', 'w') as f:
-            f.write("TABLE XLOSS(IRRRE,IRRRI)        'Transmission loss between regions (fraction)'\n")
+            f.write("TABLE XLOSS(IAAAE,IAAAI)        'Transmission loss between regions (fraction)'\n")
             dfAsString = XL.to_string(header=True, index=True)
             f.write(dfAsString)
             f.write('\n;')
@@ -688,7 +692,7 @@ if __name__ == '__main__':
         xcost_e = xcost_e.replace(0, '')
 
         with open('./Output/XCOST.inc', 'w') as f:
-            f.write("TABLE XCOST(IRRRE,IRRRI)  'Transmission cost between regions (Money/MWh)'\n")
+            f.write("TABLE XCOST(IAAAE,IAAAI)  'Transmission cost between regions (Money/MWh)'\n")
             dfAsString = xcost_e.to_string(header=True, index=True).replace(the_index, '')
             f.write(dfAsString)
             f.write('\n;')
