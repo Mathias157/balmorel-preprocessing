@@ -99,6 +99,35 @@ def merge_IRRRI_names(df: pd.DataFrame,
 
     return df
 
+def merge_IAAAI_names(df: pd.DataFrame,
+                    clustering: gpd.GeoDataFrame):
+    
+    old_columns = ['IAAAI', 'IAAAE']
+    new_columns = ['IAAAI_new', 'IAAAE_new']
+    clustering['index'] = clustering['index'] + '_A'
+    clustering['cluster_name'] = clustering['cluster_name'] + '_A'
+
+
+    for i in range(2):
+        
+        old_column = old_columns[i]
+        new_column = new_columns[i]
+        
+        clustering.columns = [old_column, new_column]
+
+        df = (
+            df
+            .merge(clustering, on=old_column, how='outer')
+            .drop(columns=old_column)
+            .rename(columns={new_column : old_column})
+        )
+        
+    # Make sure that there are no connections to itself
+    idx = df.query('IAAAI == IAAAE').index
+    df.loc[idx, 'Value'] = np.NaN
+
+    return df
+
 def loop_and_replace_names(df: pd.DataFrame,
                     clustering: gpd.GeoDataFrame,
                     old_column: str):
@@ -148,6 +177,8 @@ def aggregate_parameter(db: gams.GamsDatabase,
         df = merge_RRR_names(df, clustering)
     elif 'IRRRE' in symbol_columns:
         df = merge_IRRRI_names(df, clustering)
+    elif 'IAAAE' in symbol_columns:
+        df = merge_IAAAI_names(df, clustering)
     elif 'CCCRRRAAA' in symbol_columns:
         df = loop_and_replace_names(df, clustering, 'CCCRRRAAA')
     elif 'AAA' in symbol_columns:
@@ -165,10 +196,13 @@ def aggregate_parameter(db: gams.GamsDatabase,
     )
     
     # Writing eps if fillna == EPS
-    # if fillna == 'EPS':
-    #     idx = df.query('Value <= 1e-9').index
-    #     df = df.astype('object')
-    #     df.loc[idx, 'Value'] = 'EPS'
+    if fillna == 'EPS':
+        idx = df.query('Value == "EPS"').index
+        df.loc[idx, 'Value'] = 1e-10
+        df = df.astype('float')
+        idx = df.query('Value <= 1e-9').index
+        df = df.astype('object')
+        df.loc[idx, 'Value'] = 'EPS'
     value_sum_after = df.query('Value != "EPS"').Value.sum()
     
     if not(np.isclose(value_sum_after, value_sum_before, rtol=0.01)) and aggfunc == 'sum':
@@ -189,8 +223,8 @@ def aggregate_parameter(db: gams.GamsDatabase,
     f.body = df
     
     # Plot connection costs in case it is a connection parameter
-    if 'INVCOST' in symbol:
-        plot_transmission_invcost(symbol, df, second_order)
+    # if 'INVCOST' in symbol:
+    #     plot_transmission_invcost(symbol, df, second_order)
     
     # Use N-1 sets as index, and the last as columns, where N = length of columns without 'Value' column
     if len(symbol_columns) > 2:
@@ -301,8 +335,6 @@ def main(ctx, model_path: str, scenario: str, exceptions: str,
          cluster_params: str,
          second_order: bool,
          gams_sysdir: str = '/opt/gams/48.5'):
-    
-    # only_symbols = 'DE'
     
     # Make configuration lists
     ctx.ensure_object(dict)
