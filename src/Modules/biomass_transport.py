@@ -76,7 +76,7 @@ def transport(transport_cost: float):
     d = get_distance_matrix(geofile)
     
     # Get cost matrix
-    C = d * transport_cost
+    C = d * transport_cost / 1e3
     C.index.name=''
     C.columns.name=''
     C = C.astype('object')
@@ -92,7 +92,7 @@ def transport(transport_cost: float):
     f = IncFile(name='FUELTRANSPORT_COST', path='Output',
                 prefix="TABLE FUELTRANSPORT_COST(FFF, IRRRE, IRRRI) 'Cost of transporting one GJ of fuel F from region IRRRE to IRRRI'\n",
                 body=C,
-                suffix='\n;')
+                suffix='\n;\nFUELTRANSPORT_COST("WOOD", IRRRE, IRRRI) = FUELTRANSPORT_COST("STRAW", IRRRE, IRRRI);\n')
     f.save()
 
 
