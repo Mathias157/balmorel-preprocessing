@@ -1,0 +1,55 @@
+municipal_template
+==================
+
+.. py:module:: municipal_template
+
+.. autoapi-nested-parse::
+
+   TITLE
+
+   Description
+
+   Created on 28.08.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   municipal_template.style
+   municipal_template.fc
+   municipal_template.x
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   municipal_template.DataContainer
+
+
+Module Contents
+---------------
+
+.. py:data:: style
+   :value: 'report'
+
+
+.. py:data:: fc
+   :value: 'white'
+
+
+.. py:class:: DataContainer
+
+   .. py:attribute:: muni
+
+
+   .. py:method:: get_polygons(resolution: str = 'muni', coord_system: str = 'geographic')
+
+
+.. py:data:: x
+

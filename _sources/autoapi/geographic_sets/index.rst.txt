@@ -1,0 +1,35 @@
+geographic_sets
+===============
+
+.. py:module:: geographic_sets
+
+.. autoapi-nested-parse::
+
+   TITLE
+
+   Description
+
+   Created on 24.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   geographic_sets.load_set
+   geographic_sets.format_set
+   geographic_sets.main
+
+
+Module Contents
+---------------
+
+.. py:function:: load_set(file: str)
+
+.. py:function:: format_set(combined_dict: dict, set_dimension: int)
+
+.. py:function:: main()
+

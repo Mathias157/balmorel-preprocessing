@@ -1,0 +1,19 @@
+onshore_vre_func
+================
+
+.. py:module:: onshore_vre_func
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   onshore_vre_func.onshore_vre_func
+
+
+Module Contents
+---------------
+
+.. py:function:: onshore_vre_func(ctx)
+
