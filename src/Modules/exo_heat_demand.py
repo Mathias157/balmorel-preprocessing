@@ -15,19 +15,10 @@ import matplotlib.pyplot as plt
 from pybalmorel import IncFile
 import xarray as xr
 import pickle
-from Submodules.utils import convert_names, transform_xrdata, save_dict_set
+from Submodules.utils import convert_names, transform_xrdata, save_dict_set, cmap
 from Submodules.municipal_template import DataContainer
 from pybalmorel import IncFile
-    
-try:
-    import cmcrameri
-    cmap = cmcrameri.cm.cmaps['roma_r']
-    cmap = cmcrameri.cm.cmaps['vik']
-    colors = [cmap(i) for i in range(256)]
-except ModuleNotFoundError:
-    print('cmrameri package not installed, using default colourmaps')
-    cmap = matplotlib.colormaps['viridis']
-    colors = [cmap(i) for i in range(256)]
+import click
 
 style = 'report'
 
@@ -72,7 +63,7 @@ class DistrictHeatAAU:
 
         if plot:
             # Plot it
-            temp = data.muni.heat_demand_mwh.sel(year=2019, user='district_heating').data
+            temp = data.muni.heat_demand_mwh.sel(year=2019, user='district_heating').data 
             temp += data.muni.heat_demand_mwh.sel(year=2019, user='individual').data
             temp += data.muni.heat_demand_mwh.sel(year=2019, user='industry_phl').data.astype(float)
             temp += data.muni.heat_demand_mwh.sel(year=2019, user='industry_phm').data.astype(float)
@@ -80,12 +71,13 @@ class DistrictHeatAAU:
 
             fig, ax = plt.subplots()
             data.get_polygons().plot(ax=ax,
-                                    column=temp,
+                                    column=temp/1e6,
                                     cmap=cmap,
                                     vmin=0,
-                                    vmax=6e6,
-                                    legend=True).set_title('sum')
-            fig.savefig(f'Output/Figures/Heat/total_heatdemand.png',
+                                    vmax=6,
+                                    legend=True).set_title('Exogenous Heat Demand (TWh)')
+            ax.axes.set_axis_off()
+            fig.savefig(f'Output/Figures/exo_heat_demand_total.png',
                         transparent=True,
                         bbox_inches='tight')
             
@@ -98,7 +90,7 @@ class DistrictHeatAAU:
                                             vmax=6e6,
                                             column=data.muni.heat_demand_mwh.sel(year=2019, user=user).data,
                                             legend=True).set_title(user)
-                fig.savefig(f'Output/Figures/Heat/{user}_heatdemand.png',
+                fig.savefig(f'Output/Figures/exo_heat_demand_{user}.png',
                             transparent=True,
                             bbox_inches='tight')
 
@@ -223,143 +215,150 @@ def create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xr.Dataset, A_suffix: str)
 #%% ------------------------------- ###
 ###             3. Main             ###
 ### ------------------------------- ###
-def main(show_difference: bool = False):
-    heat = DistrictHeatAAU()
-    heat.combine_data()
-    dataset = heat.data
-    
-    # 3.1 Format Dataset
-    conversion_file = 'Modules/Submodules/exo_heat_dem_conversion_dictionaries.pkl'
-    
-    ## 3.1.1 Heat Demand
-    dataset, new_dataset = convert_names(conversion_file, dataset, 'heat_demand_mwh')
-    
-    ### Drop dimensions
-    new_dataset = (
-        new_dataset
-        .drop_dims(['lat', 'lon'])
-        .drop_vars('polygons')
-    )
-    
-    if show_difference:
-        print('###\nHeat Dataset\n###')
-        print('Before: \n', dataset, '\n\n')
-        print('After: \n', new_dataset, '\n\n')
-       
-    ## 3.1.2 Electricity Profile for Industry
-    eldem = (
-        xr.load_dataset('Data/Timeseries/energinet_eldem.nc')
-        .sel(user='industry')
-        .assign_coords(user='industry_phh')
-        .rename({'week' : 'S', 'hour' : 'T'})
-    )
-    eldataset, el_new_dataset = convert_names(conversion_file, eldem, 'electricity_demand_mwh', convert_seasons_and_terms=True)
 
-    if show_difference:
-        print('###\nElectricity Dataset\n###')
-        print('Before: \n', eldataset, '\n\n')
-        print('After: \n', el_new_dataset, '\n\n')
+@click.command()
+@click.option('--plot-only', is_flag=True, default=False, help="Only output a plot")
+def main(plot_only: bool, show_difference: bool = False):
+    heat = DistrictHeatAAU()
+    
+    if plot_only:
+        heat.combine_data(plot_only)
+    else:
+        heat.combine_data()
+        dataset = heat.data
+        
+        # 3.1 Format Dataset
+        conversion_file = 'Modules/Submodules/exo_heat_dem_conversion_dictionaries.pkl'
+        
+        ## 3.1.1 Heat Demand
+        dataset, new_dataset = convert_names(conversion_file, dataset, 'heat_demand_mwh')
+        
+        ### Drop dimensions
+        new_dataset = (
+            new_dataset
+            .drop_dims(['lat', 'lon'])
+            .drop_vars('polygons')
+        )
+        
+        if show_difference:
+            print('###\nHeat Dataset\n###')
+            print('Before: \n', dataset, '\n\n')
+            print('After: \n', new_dataset, '\n\n')
+        
+        ## 3.1.2 Electricity Profile for Industry
+        eldem = (
+            xr.load_dataset('Data/Timeseries/energinet_eldem.nc')
+            .sel(user='industry')
+            .assign_coords(user='industry_phh')
+            .rename({'week' : 'S', 'hour' : 'T'})
+        )
+        eldataset, el_new_dataset = convert_names(conversion_file, eldem, 'electricity_demand_mwh', convert_seasons_and_terms=True)
+
+        if show_difference:
+            print('###\nElectricity Dataset\n###')
+            print('Before: \n', eldataset, '\n\n')
+            print('After: \n', el_new_dataset, '\n\n')
+            
+            
+        # 3.2 Create .inc files
+        out_path = 'Output'
+        ## 3.2.1 DH.inc
+        create_DH(new_dataset=new_dataset, name='DH', path=out_path, 
+                    prefix='\n'.join([
+                        "* Data from Varmeplan 2021 (AAU)",
+                        "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
+                        "TABLE DH1(DHUSER,AAA,YYY)",
+                        ""
+                    ]),
+                    suffix='\n'.join([
+                        "",
+                        ";",
+                        "DH(YYY,AAA,DHUSER)  = DH1(DHUSER,AAA,YYY);",
+                        "DH1(DHUSER,AAA,YYY) = 0;",
+                        "DH('2050',AAA,DHUSER) = DH('2019', AAA, DHUSER);"
+                    ])
+    )
+        
+        ## 3.2.2 INDUSTRY_DH.inc
+        create_INDUSTRY_DH(new_dataset=new_dataset, 
+                        name='INDUSTRY_DH', 
+                        path=out_path,
+                        prefix='\n'.join([
+                            "* Data from Varmeplan 2021 (AAU), Danmarks statistik on industrial energy consumption pr. type",
+                            "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
+                            "TABLE DH1_IND(DHUSER,AAA,YYY)",
+                            ""
+                        ]),
+                        suffix='\n'.join([
+                            "",
+                            ";",
+                            "DH(YYY,AAA,DHUSER)$DH1_IND(DHUSER,AAA,YYY)  = DH1_IND(DHUSER,AAA,YYY);",
+                            "DH('2050',AAA,DHUSER)$DH1_IND(DHUSER,AAA,'2019') = DH('2019', AAA, DHUSER)$DH1_IND(DHUSER,AAA,'2019');",
+                            "DH1_IND(DHUSER,AAA,YYY)=0;"
+                        ]))
         
         
-    # 3.2 Create .inc files
-    out_path = 'Output'
-    ## 3.2.1 DH.inc
-    create_DH(new_dataset=new_dataset, name='DH', path=out_path, 
-                prefix='\n'.join([
-                    "* Data from Varmeplan 2021 (AAU)",
-                    "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
-                    "TABLE DH1(DHUSER,AAA,YYY)",
-                    ""
-                ]),
-                suffix='\n'.join([
-                    "",
-                    ";",
-                    "DH(YYY,AAA,DHUSER)  = DH1(DHUSER,AAA,YYY);",
-                    "DH1(DHUSER,AAA,YYY) = 0;",
-                    "DH('2050',AAA,DHUSER) = DH('2019', AAA, DHUSER);"
-                ])
-)
-    
-    ## 3.2.2 INDUSTRY_DH.inc
-    create_INDUSTRY_DH(new_dataset=new_dataset, 
-                       name='INDUSTRY_DH', 
-                       path=out_path,
-                       prefix='\n'.join([
-                           "* Data from Varmeplan 2021 (AAU), Danmarks statistik on industrial energy consumption pr. type",
-                           "PARAMETER DH(YYY,AAA,DHUSER)  'Annual brutto heat consumption';",
-                           "TABLE DH1_IND(DHUSER,AAA,YYY)",
-                           ""
-                       ]),
-                       suffix='\n'.join([
-                           "",
-                           ";",
-                           "DH(YYY,AAA,DHUSER)$DH1_IND(DHUSER,AAA,YYY)  = DH1_IND(DHUSER,AAA,YYY);",
-                           "DH('2050',AAA,DHUSER)$DH1_IND(DHUSER,AAA,'2019') = DH('2019', AAA, DHUSER)$DH1_IND(DHUSER,AAA,'2019');",
-                           "DH1_IND(DHUSER,AAA,YYY)=0;"
-                       ]))
-    
-    
-    ## 3.2.3 INDIVUSERS_DH.inc
-    create_INDIVUSERS_DH(new_dataset=new_dataset, 
-                         name='INDIVUSERS_DH', 
-                         path=out_path,
-                         prefix='\n'.join([
-                             "* Data from Varmeplan 2021 (AAU)",
-                             "TABLE DH1_INDIVHEATING(DHUSER,AAA,YYY)",
-                             ""
-                         ]),
-                         suffix='\n'.join([
-                             "",
-                             ";",
-                             "DH1_INDIVHEATING(DHUSER,AAA,'2050') = DH1_INDIVHEATING(DHUSER,AAA,'2019');",
-                             "DH(YYY,AAA,DHUSER)$DH1_INDIVHEATING(DHUSER,AAA,YYY)  = DH1_INDIVHEATING(DHUSER,AAA,YYY);",
-                             "DH1_INDIVHEATING(DHUSER,AAA,YYY)=0;"
-                         ]))
-    
-    ## 3.3 Make Heat Variation Profiles
-    
-    ### 3.3.1 INDUSTRY_DH_VAR_T
-    #### High process heat
-    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
-                             name='INDUSTRY_DH_VAR_T', 
-                             A_suffix='_IND-HT-NODH',
-                             path=out_path,
-                             prefix="TABLE DH_VAR_T_IND(SSS,TTT,AAA)\n",
-                             suffix='\n'.join(["",
-                                               ";",
-                                               "* Collect series to other heat series, if there is a industry heat series",
-                                               "DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA))) = DH_VAR_T_IND(SSS,TTT,AAA);",
-                                               "DH_VAR_T_IND(SSS,TTT,AAA)=0;",
-                                               "$if     EXIST '../data/INDUSTRY_DH_VAR_T2.inc' $INCLUDE '../data/INDUSTRY_DH_VAR_T2.inc';",
-                                               "$if not EXIST '../data/INDUSTRY_DH_VAR_T2.inc' $INCLUDE '../../base/data/INDUSTRY_DH_VAR_T2.inc';",
-                                               "$if     EXIST '../data/INDUSTRY_DH_VAR_T3.inc' $INCLUDE '../data/INDUSTRY_DH_VAR_T3.inc';",
-                                               "$if not EXIST '../data/INDUSTRY_DH_VAR_T3.inc' $INCLUDE '../../base/data/INDUSTRY_DH_VAR_T3.inc';"
-                             ]))
-    #### Medium process heat
-    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
-                             name='INDUSTRY_DH_VAR_T2', 
-                             A_suffix='_IND-MT-NODH',
-                             path=out_path,
-                             prefix="TABLE DH_VAR_T_INDMT(SSS,TTT,AAA)\n",
-                             suffix='\n'.join(["",
-                                               ";",
-                                               "* Collect series to other heat series, if there is a industry heat series",
-                                               "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T_INDMT(S,T,AAA))) = DH_VAR_T_INDMT(SSS,TTT,AAA);",
-                                               "DH_VAR_T_INDMT(SSS,TTT,AAA)=0;"
-                             ]))
-    #### Low process heat
-    create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
-                             name='INDUSTRY_DH_VAR_T3', 
-                             A_suffix='_IND-LT-NODH',
-                             path=out_path,
-                             prefix="TABLE DH_VAR_T_INDLT(SSS,TTT,AAA)\n",
-                             suffix='\n'.join(["",
-                                               ";",
-                                               "* Collect series to other heat series, if there is a industry heat series",
-                                               "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T_INDLT(S,T,AAA))) = DH_VAR_T_INDLT(SSS,TTT,AAA);",
-                                               "DH_VAR_T_INDLT(SSS,TTT,AAA)=0;"
-                             ]))
+        ## 3.2.3 INDIVUSERS_DH.inc
+        create_INDIVUSERS_DH(new_dataset=new_dataset, 
+                            name='INDIVUSERS_DH', 
+                            path=out_path,
+                            prefix='\n'.join([
+                                "* Data from Varmeplan 2021 (AAU)",
+                                "TABLE DH1_INDIVHEATING(DHUSER,AAA,YYY)",
+                                ""
+                            ]),
+                            suffix='\n'.join([
+                                "",
+                                ";",
+                                "DH1_INDIVHEATING(DHUSER,AAA,'2050') = DH1_INDIVHEATING(DHUSER,AAA,'2019');",
+                                "DH(YYY,AAA,DHUSER)$DH1_INDIVHEATING(DHUSER,AAA,YYY)  = DH1_INDIVHEATING(DHUSER,AAA,YYY);",
+                                "DH1_INDIVHEATING(DHUSER,AAA,YYY)=0;"
+                            ]))
+        
+        ## 3.3 Make Heat Variation Profiles
+        
+        ### 3.3.1 INDUSTRY_DH_VAR_T
+        #### High process heat
+        create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                                name='INDUSTRY_DH_VAR_T', 
+                                A_suffix='_IND-HT-NODH',
+                                path=out_path,
+                                prefix="TABLE DH_VAR_T_IND(SSS,TTT,AAA)\n",
+                                suffix='\n'.join(["",
+                                                ";",
+                                                "* Collect series to other heat series, if there is a industry heat series",
+                                                "DH_VAR_T(AAA,'IND-PHH',SSS,TTT)$(SUM((S,T), DH_VAR_T_IND(S,T,AAA))) = DH_VAR_T_IND(SSS,TTT,AAA);",
+                                                "DH_VAR_T_IND(SSS,TTT,AAA)=0;",
+                                                "$if     EXIST '../data/INDUSTRY_DH_VAR_T2.inc' $INCLUDE '../data/INDUSTRY_DH_VAR_T2.inc';",
+                                                "$if not EXIST '../data/INDUSTRY_DH_VAR_T2.inc' $INCLUDE '../../base/data/INDUSTRY_DH_VAR_T2.inc';",
+                                                "$if     EXIST '../data/INDUSTRY_DH_VAR_T3.inc' $INCLUDE '../data/INDUSTRY_DH_VAR_T3.inc';",
+                                                "$if not EXIST '../data/INDUSTRY_DH_VAR_T3.inc' $INCLUDE '../../base/data/INDUSTRY_DH_VAR_T3.inc';"
+                                ]))
+        #### Medium process heat
+        create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                                name='INDUSTRY_DH_VAR_T2', 
+                                A_suffix='_IND-MT-NODH',
+                                path=out_path,
+                                prefix="TABLE DH_VAR_T_INDMT(SSS,TTT,AAA)\n",
+                                suffix='\n'.join(["",
+                                                ";",
+                                                "* Collect series to other heat series, if there is a industry heat series",
+                                                "DH_VAR_T(AAA,'IND-PHM',SSS,TTT)$(SUM((S,T), DH_VAR_T_INDMT(S,T,AAA))) = DH_VAR_T_INDMT(SSS,TTT,AAA);",
+                                                "DH_VAR_T_INDMT(SSS,TTT,AAA)=0;"
+                                ]))
+        #### Low process heat
+        create_INDUSTRY_DH_VAR_T(el_new_dataset=el_new_dataset, 
+                                name='INDUSTRY_DH_VAR_T3', 
+                                A_suffix='_IND-LT-NODH',
+                                path=out_path,
+                                prefix="TABLE DH_VAR_T_INDLT(SSS,TTT,AAA)\n",
+                                suffix='\n'.join(["",
+                                                ";",
+                                                "* Collect series to other heat series, if there is a industry heat series",
+                                                "DH_VAR_T(AAA,'IND-PHL',SSS,TTT)$(SUM((S,T), DH_VAR_T_INDLT(S,T,AAA))) = DH_VAR_T_INDLT(SSS,TTT,AAA);",
+                                                "DH_VAR_T_INDLT(SSS,TTT,AAA)=0;"
+                                ]))
 
 
 if __name__ == '__main__':
-    main(show_difference=False)
+    main()

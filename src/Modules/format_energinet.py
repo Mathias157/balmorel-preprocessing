@@ -31,7 +31,7 @@ import click
 
 @click.command()
 @click.option('--plot-only', is_flag=True, default=False, help="Only output a plot")
-@click.option('--plot-each-user', is_flag=True, default=False, help="Plot each user? Else, total exogenous will be plotted")
+@click.option('--plot-each-user', is_flag=True, default=False, help="Plot each user? Else, total will be plotted")
 @click.option("--energinet-data-path", type=str, required=True, help="Path of data from https://www.energidataservice.dk/tso-electricity/consumptionindustry")
 def main(energinet_data_path: str, plot_only: bool, plot_each_user: bool):
     # Read municipality timeseries
