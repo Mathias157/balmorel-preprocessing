@@ -13,12 +13,21 @@ import xarray as xr
 from typing import Tuple
 import pickle
 import numpy as np
+from matplotlib import colormaps
 from pybalmorel import Balmorel
 from pybalmorel.utils import symbol_to_df
 import geopandas as gpd
 from gams import GamsWorkspace
 import os
-
+try:
+    import cmcrameri
+    cmap = cmcrameri.cm.cmaps['batlowK']
+    colors = [cmap(i) for i in range(256)]
+except ModuleNotFoundError:
+    print('cmrameri package not installed, using default colourmaps')
+    cmap = colormaps['viridis']
+    colors = [cmap(i) for i in range(256)]
+    
 #%% ------------------------------- ###
 ###     1. Conversion Functions     ###
 ### ------------------------------- ###

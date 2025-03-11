@@ -16,10 +16,12 @@ Created on 22.08.2024
 ### ------------------------------- ###
 
 import matplotlib.pyplot as plt
+from numpy import array
+from matplotlib import colormaps
 import pandas as pd
 from pytz import timezone
 from Submodules.municipal_template import DataContainer
-from Submodules.utils import convert_coordname_elements
+from Submodules.utils import convert_coordname_elements, cmap
 import click
 
 
@@ -28,8 +30,10 @@ import click
 ### ------------------------------- ###
 
 @click.command()
+@click.option('--plot-only', is_flag=True, default=False, help="Only output a plot")
+@click.option('--plot-each-user', is_flag=True, default=False, help="Plot each user? Else, total exogenous will be plotted")
 @click.option("--energinet-data-path", type=str, required=True, help="Path of data from https://www.energidataservice.dk/tso-electricity/consumptionindustry")
-def main(energinet_data_path: str):
+def main(energinet_data_path: str, plot_only: bool, plot_each_user: bool):
     # Read municipality timeseries
     f = pd.read_csv(energinet_data_path, sep=';', decimal=',')
 
@@ -81,35 +85,37 @@ def main(energinet_data_path: str):
     # Convert to xarray
     energinet_el = f2.to_xarray()
     energinet_el.electricity_demand_mwh.data = energinet_el.electricity_demand_mwh.data / 1e3 # to MWh
-    energinet_el.to_netcdf('Data/Timeseries/energinet_eldem.nc')
 
-    merge_example = False
-    if merge_example:
+    if plot_only:
         # Example on merging with other data
         x = DataContainer()
         x.muni = x.muni.merge(energinet_el)
 
-
-        for user in x.muni.electricity_demand_mwh.coords['user']:
+        if plot_each_user:
+            for user in x.muni.electricity_demand_mwh.coords['user']:
+                fig, ax = plt.subplots()
+                x.get_polygons().plot(
+                    column=x.muni.electricity_demand_mwh.sum(dim=['year', 'week', 'hour']).sel(user=user).data,
+                    legend=True,
+                    ax=ax,
+                    vmin=0,
+                    vmax=1.5e6
+                ).set_title(str(user.data))
+                ax.axes.set_axis_off()
+                fig.savefig('Output/Figures/exo_el_demand_%s.png'%str(user.values))
+        else:
             fig, ax = plt.subplots()
             x.get_polygons().plot(
-                column=x.muni.electricity_demand_mwh.sum(dim=['year', 'week', 'hour']).sel(user=user).data,
+                column=x.muni.electricity_demand_mwh.sum(dim=['year', 'week', 'hour', 'user']).data / 1e6,
                 legend=True,
+                cmap=cmap,
                 ax=ax
-            ).set_title(str(user.data))
-
-
-        dataset = convert_coordname_elements(energinet_el,
-                            'electricity_demand_mwh',
-                            {'municipality' : 'R',
-                                'user' : 'DEUSER',
-                                'year' : 'Y',
-                            'week' : 'S',
-                            'hour' : 'T'},
-                            {'user' : {'industry' : 'PII',
-                                        'public' : 'OTHER',
-                                        'residential' : 'RESE'}})
-
+            ).set_title('Exogenous Electricity Demand (TWh)')
+            ax.axes.set_axis_off()
+            fig.savefig('Output/Figures/exo_el_demand_total.png')
+        
+    else:
+        energinet_el.to_netcdf('Data/Timeseries/energinet_eldem.nc')
 
 if __name__ == '__main__':
     main()
