@@ -17,7 +17,7 @@ import numpy as np
 import geopandas as gpd
 from pybalmorel import IncFile
 from geofiles import prepared_geofiles
-from Submodules.municipal_template import DataContainer
+from Submodules.utils import cmap 
 from format_dkstat import load_transport_demand
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -161,11 +161,22 @@ class FlexDem():
 ###        2. Spatial Spread        ###
 ### ------------------------------- ###
 
-def distribute_road_flex_electricity_demand(choice: str = 'dkmunicipalities_names'):
+def distribute_road_flex_electricity_demand(plot: bool, choice: str = 'dkmunicipalities_names'):
     # 2.1 Vehicle Counts on Roads from Ioannis' source 
     f = gpd.read_file('Data/Gas, Transport and Industry Data/gdf_all_ETISplus.geojson')
 
     id, geo, c = prepared_geofiles(choice)
+    
+    if plot: 
+        fig, ax = plt.subplots()
+        geo.plot(ax=ax, facecolor=[.6, .6, .6])
+        f.plot(ax=ax, color=[.8, .1, .1], linewidth=f.vehicles/1e4)
+        bounds = geo.total_bounds
+        ax.set_xlim([bounds[0], bounds[2]])
+        ax.set_ylim([bounds[1], bounds[3]])
+        ax.axes.set_axis_off()
+        fig.savefig('Output/Figures/traffic-gis-data.png', transparent=True)
+    
     geo['traffic_count'] = 0
     for i, row in f.iterrows():
         idx = row.geometry.intersects(geo.geometry)
@@ -209,9 +220,10 @@ def distribute_dkstat_demand(geo: gpd.GeoDataFrame,
         
         ## Plot distribution of demand
         fig2, ax2 = plt.subplots()
-        geo.plot(ax=ax2, column='flex_electricity_demand_twh', legend=True)
-        ax2.set_title('Demand distribution')
-        plt.show()
+        geo.plot(ax=ax2, column='flex_electricity_demand_twh', cmap=cmap, legend=True)
+        ax2.set_title('Semi-Flexible Electricity Demand for EVs (TWh)')
+        ax2.axes.set_axis_off()
+        fig2.savefig('Output/Figures/road-el-demand.png', transparent=True)
 
     road_demand = geo['flex_electricity_demand_twh'].to_xarray()
     road_demand = road_demand.assign_coords(year=year, user='road')
@@ -221,18 +233,20 @@ def distribute_dkstat_demand(geo: gpd.GeoDataFrame,
 
 @click.command()
 @click.option('--chargercap', type=float, required=True, help="Charging capacity in kW pr. vehicle")
-def main(chargercap: float):
+@click.option('--plot-only', is_flag=True, default=False, help="Only plot")
+def main(chargercap: float, plot_only: bool):
     # Distribute road demand to municipalities using the transport study
-    geo = distribute_road_flex_electricity_demand()
-    road_demand = distribute_dkstat_demand(geo)
+    geo = distribute_road_flex_electricity_demand(plot_only)
+    road_demand = distribute_dkstat_demand(geo, plot_only)
     
-    # Create demands
-    FD = FlexDem()
-    FD.load_traffic_data()
-    FD.create_profile(plot=False)
-    FD.create_road_demand_from_Nvehicles(charger_capacity_pr_vehicle=chargercap)
-    FD.create_road_demand_from_dkstat(road_demand)
-    FD.create_flexdem_incfiles(road_demand)
+    if not(plot_only):
+        # Create demands
+        FD = FlexDem()
+        FD.load_traffic_data()
+        FD.create_profile(plot=False)
+        FD.create_road_demand_from_Nvehicles(charger_capacity_pr_vehicle=chargercap)
+        FD.create_road_demand_from_dkstat(road_demand)
+        FD.create_flexdem_incfiles(road_demand)
 
 
 if __name__ == '__main__':
