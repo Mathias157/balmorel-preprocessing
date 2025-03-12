@@ -1,0 +1,41 @@
+vre_profiles
+============
+
+.. py:module:: vre_profiles
+
+.. autoapi-nested-parse::
+
+   Created on Sat Dec  3 15:33:10 2022
+
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+   See the following documentation, for understanding how atlite works:
+       Cutouts: https://atlite.readthedocs.io/en/latest/examples/create_cutout.html
+       Power potentials: https://atlite.readthedocs.io/en/latest/examples/landuse-availability.html
+
+   REQUIRED:
+       Using ERA5 requires an API-key from Copernicus
+       1) Sign up at https://cds.climate.copernicus.eu/#!/home
+       2) Create a file called .cdsapirc in your home drive (typically C:/Users/USERNAME)
+           Copy paste the UID and API key that you got into .cdsapirc in the following format:
+           url: https://cds.climate.copernicus.eu/api/v2
+           key: UID:API  
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   vre_profiles.doLDC
+   vre_profiles.main
+
+
+Module Contents
+---------------
+
+.. py:function:: doLDC(file, cols, idx, r, c, title='')
+
+.. py:function:: main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, overwrite_cutout: bool = False)
+

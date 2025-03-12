@@ -1,0 +1,199 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geographic_sets &mdash; Balmorel Pre-Processing Framework 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css_options.css?v=313b1874" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="technology_data" href="../technology_data/index.html" />
+    <link rel="prev" title="tech_potentials" href="../tech_potentials/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Balmorel Pre-Processing Framework
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Balmorel Pre-Processing Framework</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../chapter1.html">Chapter 1</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About this code</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../grids/index.html">grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/index.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geofiles/index.html">geofiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_flh/index.html">plot_flh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_dag/index.html">plot_dag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../clustering/index.html">clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vre_profiles/index.html">vre_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_vpdk21/index.html">format_vpdk21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_dkstat/index.html">format_dkstat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../heat_profiles/index.html">heat_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../offshore_wind/index.html">offshore_wind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_heat_demand/index.html">exo_heat_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tech_potentials/index.html">tech_potentials</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">geographic_sets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geographic_sets.load_set"><code class="docutils literal notranslate"><span class="pre">load_set()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geographic_sets.format_set"><code class="docutils literal notranslate"><span class="pre">format_set()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geographic_sets.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../technology_data/index.html">technology_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_powerplants/index.html">exo_powerplants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_energinet/index.html">format_energinet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../aggregate_inputs/index.html">aggregate_inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../onshore_vre_func/index.html">onshore_vre_func</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../biomass_transport/index.html">biomass_transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../investment_options/index.html">investment_options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_addon_files/index.html">create_addon_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../municipal_template/index.html">municipal_template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_balmorel_data/index.html">format_balmorel_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transport_road_demand/index.html">transport_road_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_electricity_demand/index.html">exo_electricity_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transport_heavy_demand/index.html">transport_heavy_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_infinite_transmission/index.html">create_infinite_transmission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_conversion_dictionaries/index.html">create_conversion_dictionaries</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Balmorel Pre-Processing Framework</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+      <li class="breadcrumb-item active">geographic_sets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/autoapi/geographic_sets/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-geographic_sets">
+<span id="geographic-sets"></span><h1>geographic_sets<a class="headerlink" href="#module-geographic_sets" title="Link to this heading"></a></h1>
+<p>TITLE</p>
+<p>Description</p>
+<p>Created on 24.09.2024
+&#64;author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics &amp; Modelling)</p>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geographic_sets.load_set" title="geographic_sets.load_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_set</span></code></a>(file)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geographic_sets.format_set" title="geographic_sets.format_set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_set</span></code></a>(combined_dict, set_dimension)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geographic_sets.main" title="geographic_sets.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geographic_sets.load_set">
+<span class="sig-prename descclassname"><span class="pre">geographic_sets.</span></span><span class="sig-name descname"><span class="pre">load_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geographic_sets.load_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geographic_sets.format_set">
+<span class="sig-prename descclassname"><span class="pre">geographic_sets.</span></span><span class="sig-name descname"><span class="pre">format_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combined_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_dimension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geographic_sets.format_set" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geographic_sets.main">
+<span class="sig-prename descclassname"><span class="pre">geographic_sets.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geographic_sets.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../tech_potentials/index.html" class="btn btn-neutral float-left" title="tech_potentials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../technology_data/index.html" class="btn btn-neutral float-right" title="technology_data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Mathias Berg Rosendal.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

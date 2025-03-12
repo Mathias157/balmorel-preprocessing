@@ -1,0 +1,742 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>exo_powerplants &mdash; Balmorel Pre-Processing Framework 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css_options.css?v=313b1874" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="format_energinet" href="../format_energinet/index.html" />
+    <link rel="prev" title="technology_data" href="../technology_data/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Balmorel Pre-Processing Framework
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Balmorel Pre-Processing Framework</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../chapter1.html">Chapter 1</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About this code</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../grids/index.html">grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/index.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geofiles/index.html">geofiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_flh/index.html">plot_flh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_dag/index.html">plot_dag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../clustering/index.html">clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vre_profiles/index.html">vre_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_vpdk21/index.html">format_vpdk21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_dkstat/index.html">format_dkstat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../heat_profiles/index.html">heat_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../offshore_wind/index.html">offshore_wind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_heat_demand/index.html">exo_heat_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tech_potentials/index.html">tech_potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geographic_sets/index.html">geographic_sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../technology_data/index.html">technology_data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">exo_powerplants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.techs"><code class="docutils literal notranslate"><span class="pre">techs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.T"><code class="docutils literal notranslate"><span class="pre">T</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.fuels"><code class="docutils literal notranslate"><span class="pre">fuels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.fuels_assumed"><code class="docutils literal notranslate"><span class="pre">fuels_assumed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.F"><code class="docutils literal notranslate"><span class="pre">F</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.units"><code class="docutils literal notranslate"><span class="pre">units</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.units_assumed"><code class="docutils literal notranslate"><span class="pre">units_assumed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.U"><code class="docutils literal notranslate"><span class="pre">U</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.Ymax"><code class="docutils literal notranslate"><span class="pre">Ymax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.choice"><code class="docutils literal notranslate"><span class="pre">choice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.filename_EPT"><code class="docutils literal notranslate"><span class="pre">filename_EPT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.filename_WT"><code class="docutils literal notranslate"><span class="pre">filename_WT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.f"><code class="docutils literal notranslate"><span class="pre">f</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.fWT"><code class="docutils literal notranslate"><span class="pre">fWT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">fWT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">fWT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">fWT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.pp"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.UTM32"><code class="docutils literal notranslate"><span class="pre">UTM32</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.newWT"><code class="docutils literal notranslate"><span class="pre">newWT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.dt"><code class="docutils literal notranslate"><span class="pre">dt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.dt_int"><code class="docutils literal notranslate"><span class="pre">dt_int</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.idx"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">dt_int</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.CHPidx"><code class="docutils literal notranslate"><span class="pre">CHPidx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.EXTidx"><code class="docutils literal notranslate"><span class="pre">EXTidx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.E"><code class="docutils literal notranslate"><span class="pre">E</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.idxE"><code class="docutils literal notranslate"><span class="pre">idxE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id20"><code class="docutils literal notranslate"><span class="pre">pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.crs"><code class="docutils literal notranslate"><span class="pre">crs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.types"><code class="docutils literal notranslate"><span class="pre">types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id21"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.lines"><code class="docutils literal notranslate"><span class="pre">lines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.new_ax"><code class="docutils literal notranslate"><span class="pre">new_ax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.new"><code class="docutils literal notranslate"><span class="pre">new</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.temp_pp"><code class="docutils literal notranslate"><span class="pre">temp_pp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id22"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id23"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.dist"><code class="docutils literal notranslate"><span class="pre">dist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id24"><code class="docutils literal notranslate"><span class="pre">idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.GKFX"><code class="docutils literal notranslate"><span class="pre">GKFX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id25"><code class="docutils literal notranslate"><span class="pre">GKFX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id26"><code class="docutils literal notranslate"><span class="pre">GKFX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.Ymin"><code class="docutils literal notranslate"><span class="pre">Ymin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id27"><code class="docutils literal notranslate"><span class="pre">GKFX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id28"><code class="docutils literal notranslate"><span class="pre">GKFX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_powerplants.dfAsString"><code class="docutils literal notranslate"><span class="pre">dfAsString</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../format_energinet/index.html">format_energinet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../aggregate_inputs/index.html">aggregate_inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../onshore_vre_func/index.html">onshore_vre_func</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../biomass_transport/index.html">biomass_transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../investment_options/index.html">investment_options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_addon_files/index.html">create_addon_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../municipal_template/index.html">municipal_template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_balmorel_data/index.html">format_balmorel_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transport_road_demand/index.html">transport_road_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_electricity_demand/index.html">exo_electricity_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transport_heavy_demand/index.html">transport_heavy_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_infinite_transmission/index.html">create_infinite_transmission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_conversion_dictionaries/index.html">create_conversion_dictionaries</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Balmorel Pre-Processing Framework</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+      <li class="breadcrumb-item active">exo_powerplants</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/autoapi/exo_powerplants/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-exo_powerplants">
+<span id="exo-powerplants"></span><h1>exo_powerplants<a class="headerlink" href="#module-exo_powerplants" title="Link to this heading"></a></h1>
+<p>Created on Fri Nov 25 13:33:33 2022</p>
+<p>&#64;author: Mathias Berg Rosendal, Research Assistant DTU Management</p>
+<p>Reads the Danish Energy Agency’s “Energiproducenttælling” (EPT, includes solar power)
+and windturbines datasheet.</p>
+<p>It is converted and aggregated to a GKFX.inc file for Balmorel.</p>
+<p>Download EPT and datasheet for windturbines here:
+<a class="reference external" href="https://ens.dk/service/statistik-data-noegletal-og-kort/data-oversigt-over-energisektoren">https://ens.dk/service/statistik-data-noegletal-og-kort/data-oversigt-over-energisektoren</a></p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.techs" title="exo_powerplants.techs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">techs</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.T" title="exo_powerplants.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.fuels" title="exo_powerplants.fuels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fuels</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.fuels_assumed" title="exo_powerplants.fuels_assumed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fuels_assumed</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.F" title="exo_powerplants.F"><code class="xref py py-obj docutils literal notranslate"><span class="pre">F</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.units" title="exo_powerplants.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.units_assumed" title="exo_powerplants.units_assumed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units_assumed</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.U" title="exo_powerplants.U"><code class="xref py py-obj docutils literal notranslate"><span class="pre">U</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.Ymax" title="exo_powerplants.Ymax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ymax</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.choice" title="exo_powerplants.choice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">choice</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.filename_EPT" title="exo_powerplants.filename_EPT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename_EPT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.filename_WT" title="exo_powerplants.filename_WT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename_WT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.f" title="exo_powerplants.f"><code class="xref py py-obj docutils literal notranslate"><span class="pre">f</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="exo_powerplants.fWT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fWT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="exo_powerplants.fWT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fWT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id2" title="exo_powerplants.fWT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fWT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id2" title="exo_powerplants.fWT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fWT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.UTM32" title="exo_powerplants.UTM32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UTM32</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.newWT" title="exo_powerplants.newWT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newWT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.dt" title="exo_powerplants.dt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id9" title="exo_powerplants.dt_int"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dt_int</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id9" title="exo_powerplants.dt_int"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dt_int</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.CHPidx" title="exo_powerplants.CHPidx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CHPidx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.EXTidx" title="exo_powerplants.EXTidx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EXTidx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.E" title="exo_powerplants.E"><code class="xref py py-obj docutils literal notranslate"><span class="pre">E</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.idxE" title="exo_powerplants.idxE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id20" title="exo_powerplants.pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.crs" title="exo_powerplants.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crs</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.types" title="exo_powerplants.types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">types</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.lines" title="exo_powerplants.lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lines</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.new_ax" title="exo_powerplants.new_ax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_ax</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.new" title="exo_powerplants.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.temp_pp" title="exo_powerplants.temp_pp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">temp_pp</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.dist" title="exo_powerplants.dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dist</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id24" title="exo_powerplants.idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id28" title="exo_powerplants.GKFX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GKFX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id28" title="exo_powerplants.GKFX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GKFX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id28" title="exo_powerplants.GKFX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GKFX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_powerplants.Ymin" title="exo_powerplants.Ymin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ymin</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#id28" title="exo_powerplants.GKFX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GKFX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id28" title="exo_powerplants.GKFX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GKFX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_powerplants.dfAsString" title="exo_powerplants.dfAsString"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dfAsString</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.techs">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">techs</span></span><a class="headerlink" href="#exo_powerplants.techs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.T">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">T</span></span><a class="headerlink" href="#exo_powerplants.T" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.fuels">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">fuels</span></span><a class="headerlink" href="#exo_powerplants.fuels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.fuels_assumed">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">fuels_assumed</span></span><a class="headerlink" href="#exo_powerplants.fuels_assumed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.F">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">F</span></span><a class="headerlink" href="#exo_powerplants.F" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.units">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#exo_powerplants.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.units_assumed">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">units_assumed</span></span><a class="headerlink" href="#exo_powerplants.units_assumed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.U">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">U</span></span><a class="headerlink" href="#exo_powerplants.U" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.Ymax">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">Ymax</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2050</span></em><a class="headerlink" href="#exo_powerplants.Ymax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.choice">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">choice</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DKMunicipalities_names'</span></em><a class="headerlink" href="#exo_powerplants.choice" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.filename_EPT">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">filename_EPT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'./Data/Powerplants...</span></em><a class="headerlink" href="#exo_powerplants.filename_EPT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.filename_WT">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">filename_WT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'./Data/Powerplants</span> <span class="pre">(Energistyrelsen)/anlaeg.xlsx'</span></em><a class="headerlink" href="#exo_powerplants.filename_WT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.f">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">f</span></span><a class="headerlink" href="#exo_powerplants.f" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.fWT">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">fWT</span></span><a class="headerlink" href="#exo_powerplants.fWT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">fWT</span></span><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">fWT</span></span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">fWT</span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.pp">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#exo_powerplants.pp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.UTM32">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">UTM32</span></span><a class="headerlink" href="#exo_powerplants.UTM32" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.newWT">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">newWT</span></span><a class="headerlink" href="#exo_powerplants.newWT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.dt">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#exo_powerplants.dt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.dt_int">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">dt_int</span></span><a class="headerlink" href="#exo_powerplants.dt_int" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.idx">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#exo_powerplants.idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">dt_int</span></span><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.CHPidx">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">CHPidx</span></span><a class="headerlink" href="#exo_powerplants.CHPidx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.EXTidx">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">EXTidx</span></span><a class="headerlink" href="#exo_powerplants.EXTidx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id19" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.E">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">E</span></span><a class="headerlink" href="#exo_powerplants.E" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.idxE">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idxE</span></span><a class="headerlink" href="#exo_powerplants.idxE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">pp</span></span><a class="headerlink" href="#id20" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.crs">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">crs</span></span><a class="headerlink" href="#exo_powerplants.crs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.types">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'main_fuel'</span></em><a class="headerlink" href="#exo_powerplants.types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id21" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.lines">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">lines</span></span><a class="headerlink" href="#exo_powerplants.lines" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.new_ax">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">new_ax</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#exo_powerplants.new_ax" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.new">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">new</span></span><a class="headerlink" href="#exo_powerplants.new" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.temp_pp">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">temp_pp</span></span><a class="headerlink" href="#exo_powerplants.temp_pp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id22" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id23">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id23" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.dist">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">dist</span></span><a class="headerlink" href="#exo_powerplants.dist" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id24">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#id24" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.GKFX">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">GKFX</span></span><a class="headerlink" href="#exo_powerplants.GKFX" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id25">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">GKFX</span></span><a class="headerlink" href="#id25" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id26">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">GKFX</span></span><a class="headerlink" href="#id26" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.Ymin">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">Ymin</span></span><a class="headerlink" href="#exo_powerplants.Ymin" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id27">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">GKFX</span></span><a class="headerlink" href="#id27" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id28">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">GKFX</span></span><a class="headerlink" href="#id28" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_powerplants.dfAsString">
+<span class="sig-prename descclassname"><span class="pre">exo_powerplants.</span></span><span class="sig-name descname"><span class="pre">dfAsString</span></span><a class="headerlink" href="#exo_powerplants.dfAsString" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../technology_data/index.html" class="btn btn-neutral float-left" title="technology_data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../format_energinet/index.html" class="btn btn-neutral float-right" title="format_energinet" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Mathias Berg Rosendal.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

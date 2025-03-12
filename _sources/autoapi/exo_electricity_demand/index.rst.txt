@@ -1,0 +1,45 @@
+exo_electricity_demand
+======================
+
+.. py:module:: exo_electricity_demand
+
+.. autoapi-nested-parse::
+
+   Create electricity demand profiles for Denmark
+   Use Energinet data for municipalities:
+   https://www.energidataservice.dk/tso-electricity/consumptionindustry
+   Convert LAU code to municipality name with: 
+   LAU – NUTS 2021, EU-27 and EFTA / available candidate countries
+   https://ec.europa.eu/eurostat/web/nuts/local-administrative-units
+   Note: The dataset above also contains population
+
+   Created on 22.08.2024
+
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   exo_electricity_demand.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main(conversion_file: str, el_dataset: str, show_difference: bool = False)
+
+       Main function to process and convert dataset names, and create .inc files.
+   Args:
+       conversion_file (str): Path to the file containing conversion mappings.
+       el_dataset (str): Path to the dataset file to be processed.
+       show_difference (bool, optional): Flag to indicate whether to print the 
+                                           dataset before and after conversion. 
+                                           Defaults to False.
+   Returns:
+       None
+
+

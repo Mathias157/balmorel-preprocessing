@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>exo_heat_demand &mdash; Balmorel Pre-Processing Framework 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css_options.css?v=313b1874" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="tech_potentials" href="../tech_potentials/index.html" />
+    <link rel="prev" title="offshore_wind" href="../offshore_wind/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Balmorel Pre-Processing Framework
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Balmorel Pre-Processing Framework</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../chapter1.html">Chapter 1</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About this code</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../grids/index.html">grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/index.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geofiles/index.html">geofiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_flh/index.html">plot_flh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plot_dag/index.html">plot_dag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../clustering/index.html">clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vre_profiles/index.html">vre_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_vpdk21/index.html">format_vpdk21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_dkstat/index.html">format_dkstat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../heat_profiles/index.html">heat_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../offshore_wind/index.html">offshore_wind</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">exo_heat_demand</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.style"><code class="docutils literal notranslate"><span class="pre">style</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.fc"><code class="docutils literal notranslate"><span class="pre">fc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.DistrictHeatAAU"><code class="docutils literal notranslate"><span class="pre">DistrictHeatAAU</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.create_incfile"><code class="docutils literal notranslate"><span class="pre">create_incfile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.create_DH"><code class="docutils literal notranslate"><span class="pre">create_DH()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.create_INDUSTRY_DH"><code class="docutils literal notranslate"><span class="pre">create_INDUSTRY_DH()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.create_INDIVUSERS_DH"><code class="docutils literal notranslate"><span class="pre">create_INDIVUSERS_DH()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.create_INDUSTRY_DH_VAR_T"><code class="docutils literal notranslate"><span class="pre">create_INDUSTRY_DH_VAR_T()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exo_heat_demand.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tech_potentials/index.html">tech_potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geographic_sets/index.html">geographic_sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../technology_data/index.html">technology_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_powerplants/index.html">exo_powerplants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_energinet/index.html">format_energinet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../aggregate_inputs/index.html">aggregate_inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../onshore_vre_func/index.html">onshore_vre_func</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../biomass_transport/index.html">biomass_transport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../investment_options/index.html">investment_options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_addon_files/index.html">create_addon_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../municipal_template/index.html">municipal_template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format_balmorel_data/index.html">format_balmorel_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transport_road_demand/index.html">transport_road_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../exo_electricity_demand/index.html">exo_electricity_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transport_heavy_demand/index.html">transport_heavy_demand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_infinite_transmission/index.html">create_infinite_transmission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../create_conversion_dictionaries/index.html">create_conversion_dictionaries</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Balmorel Pre-Processing Framework</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+      <li class="breadcrumb-item active">exo_heat_demand</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/autoapi/exo_heat_demand/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-exo_heat_demand">
+<span id="exo-heat-demand"></span><h1>exo_heat_demand<a class="headerlink" href="#module-exo_heat_demand" title="Link to this heading"></a></h1>
+<p>Exogenous Heat Demands</p>
+<p>Create exogenous heat demands using data from various places</p>
+<p>Created on 20.09.2024
+&#64;author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics &amp; Modelling)</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_heat_demand.style" title="exo_heat_demand.style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">style</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_heat_demand.fc" title="exo_heat_demand.fc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fc</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_heat_demand.DistrictHeatAAU" title="exo_heat_demand.DistrictHeatAAU"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistrictHeatAAU</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_heat_demand.create_incfile" title="exo_heat_demand.create_incfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_incfile</span></code></a>(unique_processing)</p></td>
+<td><p>The general wrapper for creating and saving .inc files,</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_heat_demand.create_DH" title="exo_heat_demand.create_DH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_DH</span></code></a>(incfile, new_dataset)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_heat_demand.create_INDUSTRY_DH" title="exo_heat_demand.create_INDUSTRY_DH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_INDUSTRY_DH</span></code></a>(incfile, new_dataset)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_heat_demand.create_INDIVUSERS_DH" title="exo_heat_demand.create_INDIVUSERS_DH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_INDIVUSERS_DH</span></code></a>(incfile, new_dataset)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#exo_heat_demand.create_INDUSTRY_DH_VAR_T" title="exo_heat_demand.create_INDUSTRY_DH_VAR_T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_INDUSTRY_DH_VAR_T</span></code></a>(incfile, el_new_dataset, A_suffix)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#exo_heat_demand.main" title="exo_heat_demand.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(plot_only[, show_difference])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_heat_demand.style">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">style</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'report'</span></em><a class="headerlink" href="#exo_heat_demand.style" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="exo_heat_demand.fc">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">fc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'white'</span></em><a class="headerlink" href="#exo_heat_demand.fc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="exo_heat_demand.DistrictHeatAAU">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">DistrictHeatAAU</span></span><a class="headerlink" href="#exo_heat_demand.DistrictHeatAAU" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="exo_heat_demand.DistrictHeatAAU.district_heat">
+<span class="sig-name descname"><span class="pre">district_heat</span></span><a class="headerlink" href="#exo_heat_demand.DistrictHeatAAU.district_heat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="exo_heat_demand.DistrictHeatAAU.industry">
+<span class="sig-name descname"><span class="pre">industry</span></span><a class="headerlink" href="#exo_heat_demand.DistrictHeatAAU.industry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="exo_heat_demand.DistrictHeatAAU.annual_industry_demand">
+<span class="sig-name descname"><span class="pre">annual_industry_demand</span></span><a class="headerlink" href="#exo_heat_demand.DistrictHeatAAU.annual_industry_demand" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exo_heat_demand.DistrictHeatAAU.combine_data">
+<span class="sig-name descname"><span class="pre">combine_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.DistrictHeatAAU.combine_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="exo_heat_demand.create_incfile">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">create_incfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unique_processing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.create_incfile" title="Link to this definition"></a></dt>
+<dd><p>The general wrapper for creating and saving .inc files,
+because the creating of the IncFile class and saving it is the same every time.
+The unique processing of the .body content differs, however.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>unique_processing (func): The unique processing per case
+<a href="#id1"><span class="problematic" id="id2">**</span></a>incfile_kwargs: Keyword arguments to pass to IncFile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="exo_heat_demand.create_DH">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">create_DH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xarray.Dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.create_DH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="exo_heat_demand.create_INDUSTRY_DH">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">create_INDUSTRY_DH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xarray.Dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.create_INDUSTRY_DH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="exo_heat_demand.create_INDIVUSERS_DH">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">create_INDIVUSERS_DH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xarray.Dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.create_INDIVUSERS_DH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="exo_heat_demand.create_INDUSTRY_DH_VAR_T">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">create_INDUSTRY_DH_VAR_T</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">el_new_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xarray.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A_suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.create_INDUSTRY_DH_VAR_T" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="exo_heat_demand.main">
+<span class="sig-prename descclassname"><span class="pre">exo_heat_demand.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_difference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#exo_heat_demand.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../offshore_wind/index.html" class="btn btn-neutral float-left" title="offshore_wind" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tech_potentials/index.html" class="btn btn-neutral float-right" title="tech_potentials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Mathias Berg Rosendal.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
