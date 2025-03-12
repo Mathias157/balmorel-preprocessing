@@ -19,7 +19,7 @@ grid_assumptions:
     individual_technologies: 0.05 # assumed equal to distribution loss
     charging_capacity_per_vehicle: 3 # Charging capacity in kW per electric vehicle
   hydrogen:
-    investment_cost: 150.0e-03 # €/MW/m repurposed H2 onshore, Kountouries et al. 2024 
+    investment_cost: 150.0e-03 # €/MW/m repurposed H2 onshore, Kountouries et al. 2024. New pipeline cost: 536.17e-03 
     lifetime: 50 # Lifetime of H2 pipes, Kountouries et al. 2024
     transmission_loss: 2.2e-08 # frac/m
     transmission_cost: 1.0e-06

@@ -15,31 +15,11 @@ Created on 22.08.2024
 ###        0. Script Settings       ###
 ### ------------------------------- ###
 
-import matplotlib.pyplot as plt
 import click
 from Submodules.utils import convert_names, transform_xrdata 
 import xarray as xr
 from pybalmorel import IncFile
-import matplotlib
-try:
-    import cmcrameri
-    cmap = cmcrameri.cm.cmaps['roma_r']
-    cmap = cmcrameri.cm.cmaps['vik']
-    colors = [cmap(i) for i in range(256)]
-except ModuleNotFoundError:
-    print('cmrameri package not installed, using default colourmaps')
-    cmap = matplotlib.colormaps['viridis']
-    colors = [cmap(i) for i in range(256)]
 
-
-style = 'report'
-
-if style == 'report':
-    plt.style.use('default')
-    fc = 'white'
-elif style == 'ppt':
-    plt.style.use('dark_background')
-    fc = 'none'
 
 #%% ------------------------------- ###
 ###      1. Make .inc Files         ###

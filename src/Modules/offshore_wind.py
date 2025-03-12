@@ -1,7 +1,7 @@
 """
 Offshore Wind Definition
 
-Loads profiles generated with "createVRE.py"
+Loads profiles generated with the vre_profiles.py module
 
 Created on 27.09.2024
 @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
@@ -13,7 +13,6 @@ Created on 27.09.2024
 import pandas as pd
 from geofiles import prepared_geofiles
 from pybalmorel import IncFile
-from Submodules.municipal_template import DataContainer
 import xarray as xr
 import click
 import geopandas as gpd
