@@ -11,6 +11,7 @@ Created on 24.09.2024
 ### ------------------------------- ###
 
 from Submodules.municipal_template import DataContainer
+from Submodules.utils import cmap
 from clustering import convert_municipal_code_to_name
 from geofiles import prepared_geofiles
 from Submodules.utils import store_balmorel_input
@@ -20,6 +21,7 @@ from pybalmorel import IncFile
 import pandas as pd
 import click
 import os
+import matplotlib.pyplot as plt
 
 #%% ------------------------------- ###
 ###      1. Utility Functions       ###
@@ -124,8 +126,10 @@ def grids(ctx):
 @click.option('--strawpot', type=float, required=True, help="Domestic potential of agricultural biomass")
 @click.option('--biogaspot', type=float, required=True, help="Domestic potential of biogas")
 @click.option('--woodimport', type=bool, required=True, help="Allow import of woodpellets to large cities?")
+@click.option('--plot-only', is_flag=True, required=False, default=False, help="Only plot potentials?")
 @click.pass_context
-def biomass_availability(ctx, woodpot: float, strawpot: float, biogaspot: float, woodimport: bool):
+def biomass_availability(ctx, woodpot: float, strawpot: float, biogaspot: float, woodimport: bool,
+                         plot_only: bool):
     """Get biomass distribution key from Bramstoft et al 2020, assume total availability.
     
     Distribution potentials:
@@ -158,38 +162,75 @@ def biomass_availability(ctx, woodpot: float, strawpot: float, biogaspot: float,
         .astype(float)
     )
     
-    # Make .inc-file
-    f = IncFile(name='GMAXF', path='Output',
-                prefix="TABLE GMAXF(YYY, CCCRRRAAA, FFF) 'Maximum fuel use (GJ) per year'\n",
-                suffix='\n;\n', 
-                body=df)
-    
-    ## Set national levels
-    f.suffix += "\n".join([
-        "GMAXF('2050', 'DENMARK', 'BIOGAS') = %0.2f;"%(biogaspot*1e6),
-        "GMAXF('2050', 'DENMARK', 'WOODCHIPS') = EPS;",
-        "GMAXF('2050', 'DENMARK', 'WOODWASTE') = EPS;",
-        "GMAXF('2050', 'DENMARK', 'STRAW') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "STRAW"')['Value'].sum()),
-        "GMAXF('2050', 'DENMARK', 'WOOD') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOOD"')['Value'].sum()),
-        "* Use existing potentials as distribution key for input potentials for straw and wood, defined below",
-        "GMAXF('2050', CCCRRRAAA, 'STRAW') = GMAXF('2050', CCCRRRAAA, 'STRAW') / GMAXF('2050', 'DENMARK', 'STRAW') * %0.2f;"%(strawpot*1e6), # From PJ to GJ
-        "GMAXF('2050', CCCRRRAAA, 'WOOD') = GMAXF('2050', CCCRRRAAA, 'WOOD') / GMAXF('2050', 'DENMARK', 'WOOD') * %0.2f;"%(woodpot*1e6), # From PJ to GJ
-    ])
-    
-    if not(woodimport):
-        f.suffix += "\n* Disallow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = EPS;"
+    if plot_only:
+        # Convert dataframe
+        df = (
+            df
+            .rename(columns={'CRA' : 'municipality'})
+            .pivot_table(index=['F', 'municipality'], 
+                         values='Value', aggfunc='sum')
+            .reset_index()
+        )
+        
+        # Get Polygons 
+        the_index, muni, country = prepared_geofiles('DKmunicipalities_names')
+        muni = (
+            muni
+            .rename(columns={'NAME_2' : 'municipality'})
+            .reset_index()
+            .merge(df, on='municipality')
+        ) 
+        muni.loc[:, 'Value'] = muni.loc[:, 'Value'] / 1e3 # convert to TJ
+        
+        pots = {'STRAW' : strawpot, 'WOOD' : woodpot}
+        for resource in ['STRAW', 'WOOD']:
+            # Distribute
+            idx = df.loc[:, 'F'] == resource
+            df.loc[idx, 'Value'] = df.loc[idx, 'Value'] / df.loc[idx, 'Value'].sum() * pots[resource]
+            
+            # Plot
+            fig, ax = plt.subplots()
+            muni.query('F == @resource').plot(ax=ax, column='Value',
+                                          cmap=cmap, legend=True)
+            ax.axes.set_axis_off()
+            ax.set_title('%s Potential (TJ)'%resource.capitalize())
+            fig.savefig('Output/Figures/%s_potential.png'%resource.lower(),
+                        transparent=True, bbox_inches='tight')
+            
     else:
-        f.suffix += "\n* Allow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOODPELLETS"')['Value'].sum())
-    
-    # Municipal waste
-    f.suffix += "\nGMAXF(Y,'DENMARK','MUNIWASTE') = 763308;"
-    
-    f.body_prepare(index=['Y', 'CRA'], columns='F', values='Value')
-    
-    ## Zeros have to be EPS
-    idx = f.body.values == 0
-    f.body[idx] = 'EPS'
-    f.save()
+        
+        # Make .inc-file
+        f = IncFile(name='GMAXF', path='Output',
+                    prefix="TABLE GMAXF(YYY, CCCRRRAAA, FFF) 'Maximum fuel use (GJ) per year'\n",
+                    suffix='\n;\n', 
+                    body=df)
+        
+        ## Set national levels
+        f.suffix += "\n".join([
+            "GMAXF('2050', 'DENMARK', 'BIOGAS') = %0.2f;"%(biogaspot*1e6),
+            "GMAXF('2050', 'DENMARK', 'WOODCHIPS') = EPS;",
+            "GMAXF('2050', 'DENMARK', 'WOODWASTE') = EPS;",
+            "GMAXF('2050', 'DENMARK', 'STRAW') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "STRAW"')['Value'].sum()),
+            "GMAXF('2050', 'DENMARK', 'WOOD') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOOD"')['Value'].sum()),
+            "* Use existing potentials as distribution key for input potentials for straw and wood, defined below",
+            "GMAXF('2050', CCCRRRAAA, 'STRAW') = GMAXF('2050', CCCRRRAAA, 'STRAW') / GMAXF('2050', 'DENMARK', 'STRAW') * %0.2f;"%(strawpot*1e6), # From PJ to GJ
+            "GMAXF('2050', CCCRRRAAA, 'WOOD') = GMAXF('2050', CCCRRRAAA, 'WOOD') / GMAXF('2050', 'DENMARK', 'WOOD') * %0.2f;"%(woodpot*1e6), # From PJ to GJ
+        ])
+        
+        if not(woodimport):
+            f.suffix += "\n* Disallow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = EPS;"
+        else:
+            f.suffix += "\n* Allow import of woodpellets\nGMAXF('2050', 'DENMARK', 'WOODPELLETS') = %0.2f;"%(df.query('CRA != "DENMARK" and F == "WOODPELLETS"')['Value'].sum())
+        
+        # Municipal waste
+        f.suffix += "\nGMAXF(Y,'DENMARK','MUNIWASTE') = 763308;"
+        
+        f.body_prepare(index=['Y', 'CRA'], columns='F', values='Value')
+        
+        ## Zeros have to be EPS
+        idx = f.body.values == 0
+        f.body[idx] = 'EPS'
+        f.save()
 
 if __name__ == '__main__':
     main()

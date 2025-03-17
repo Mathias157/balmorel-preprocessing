@@ -85,7 +85,7 @@ def doLDC(file, cols, idx, r, c, title=''):
 @click.option('--cutout-path', type=str, required=True, help="The path of a cutout .nc file")
 @click.option('--weather-year', type=int, required=True, help="The weather year")
 @click.option('--offshore-profiles', type=bool, required=False, help="Generate offshore profiles?")
-@click.option('--overwrite-cutout', type=str, required=False, help="Overwrite an existing cutout?")
+@click.option('--overwrite-cutout', type=bool, required=False, help="Overwrite an existing cutout?")
 def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, overwrite_cutout: bool = False):
     ### 0.1 Capacity pr. km for PV and Wind
     cap_per_sqkm_pv = 1.7 # MW/km2
@@ -516,48 +516,6 @@ def main(cutout_path: str, weather_year: int, offshore_profiles: bool = False, o
             f.write('\n;\n')
             f.write('SOLH_VAR_T(AAA,SSS,TTT) = SOLH_VAR_T1(SSS,TTT,AAA);\n')
             f.write('SOLH_VAR_T1(SSS,TTT,AAA) = 0;\n')
-
-    ### X.X CALCULATE POTENTIALS
-    exc_points = gpd.read_file('Data/Shapefiles/BalmorelVRE/BalmGrid-Urb-GLWD123-WDPA012-MTabove1km.gpkg')
-    VREareas = gpd.read_file('Data/Shapefiles/BalmorelVRE/BalmorelVREAreas.gpkg')
-    exc_points = exc_points.to_crs(VREareas.crs) # Set CRS
-    exc_points_bounds = exc_points.bounds
-    
-    # for i,row in areas.iloc[10:13].iterrows(): # West-germany and DK in NordpoolReal
-        
-    #     fig, ax = plt.subplots()
-    #     geo_ser = VREareas.intersection(row.geometry)
-    #     geo_ser_df = gpd.GeoDataFrame({'geometry' : geo_ser.geometry})
-    #     geo_ser.plot(ax=ax)
-    #     xlims = ax.get_xlim()
-    #     ylims = ax.get_ylim()
-        
-    #     ## Narrow points down
-    #     idx = exc_points_bounds.minx > xlims[0]
-    #     idx = idx & (exc_points_bounds.maxx < xlims[1])
-    #     idx = idx & (exc_points_bounds.miny > ylims[0])
-    #     idx = idx & (exc_points_bounds.maxy < ylims[1])
-    #     temp_points = exc_points[idx]
-        
-    #     ## Get points inside polygon intersection
-    #     temp_points = gpd.sjoin(temp_points, geo_ser_df)
-        
-    #     temp_points.plot(ax=ax, markersize=0.5, color='r')
-        
-    #     ## Get capacity
-    #     available_space = temp_points.shape[0] * 30 * 30 # km2
-        
-    #     print('Potential of PV installation: %0.0f MW'%(cap_per_sqkm_pv*available_space)) 
-    #     print('Potential of Wind installation: %0.0f MW'%(cap_per_sqkm_wind*available_space)) 
-        
-        
-        ### OFFSHORE IF STATEMENT! OR AFTERWARDS?
-
-        # print(VREareas[VREareas.intersects(row.geometry)].Region)
-        # l = gpd.GeoSeries(areas.loc[R].geometry).plot(ax=ax)
-        # ax.set_title(R)
-        
-    ## Each marker is 30x30 km
 
 
     # 3.4 Potentials
