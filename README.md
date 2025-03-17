@@ -52,16 +52,23 @@ dependencies:
 ````
 
 ### Using pixi
-A pixi.toml also enables the use of the [pixi package manager](https://prefix.dev/), which ensures that *all* dependencies are exactly the same as the time of use.
-When running the snakemake files the first time, pixi will install the required packages.
+A pixi.toml also enables the use of the [pixi package manager](https://prefix.dev/), which ensures that *all* dependencies remain exactly the same on the long term.
+When running the snakemake files the first time, pixi will install the required packages, though `pixi install` can be used to just install the environment.
 
 ## Get Started
 
-The processing is initiated through a snakemake command in a command-line interface in the src directory. If using windows, the pre-processing can be run by calling `preprocessing` and the clustering through `clustering`. If on other systems, do either of the following commands (remember to put `pixi run` in front of these if using pixi):
+The processing is initiated through a snakemake command in a command-line interface in the src directory. If using windows, the pre-processing can be run by calling `preprocessing` and the clustering through `clustering`. If on other systems, do either of the following commands:
 ```
 snakemake -s preprocessing
 snakemake -s clustering
 ```
+
+Or, if using pixi:
+```
+pixi run preprocessing
+pixi run clustering
+```
+
 A plot of the process workflow can be found [here](src/Analysis/preprocessing_dag.pdf).
 Remember to examine the `assumptions.yaml` used for pre-processing data and the `clustering.yaml` for clustering configurations, e.g. assumptions on grid investment costs and cluster size, respectively. Clustering assumes that a functioning Balmorel model is placed in the model_path written in `clustering.yaml`, as data from a Balmorel scenario needs to be read. 
 

@@ -31,3 +31,7 @@ pip = "*"
 [pypi-dependencies]
 gamsapi = { version = "==45.7.0", extras = ["transfer"] }
 pybalmorel = ">=0.4.5, <0.5"
+
+[tasks]
+clustering = "cd src && snakemake -s clustering"
+preprocessing = "cd src && snakemake -s preprocessing"
