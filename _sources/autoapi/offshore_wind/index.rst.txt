@@ -1,0 +1,44 @@
+offshore_wind
+=============
+
+.. py:module:: offshore_wind
+
+.. autoapi-nested-parse::
+
+   Offshore Wind Definition
+
+   Loads profiles generated with the vre_profiles.py module
+
+   Created on 27.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   offshore_wind.load_profiles
+   offshore_wind.create_geo_sets
+   offshore_wind.create_profiles
+   offshore_wind.create_investment_options
+   offshore_wind.distribute_offshore_potential
+   offshore_wind.main
+
+
+Module Contents
+---------------
+
+.. py:function:: load_profiles(choice: str = 'dkmunicipalities_names', weather_year: int = 2012, plot: bool = False)
+
+.. py:function:: create_geo_sets(profiles: xarray.Dataset)
+
+.. py:function:: create_profiles(profiles: xarray.Dataset, year: int = 2012)
+
+.. py:function:: create_investment_options(profiles: xarray.Dataset)
+
+.. py:function:: distribute_offshore_potential(total_potential: float, geofile: geopandas.GeoDataFrame)
+
+.. py:function:: main(weather_year: int, total_offshore_wind_potential: float)
+

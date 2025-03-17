@@ -1,0 +1,34 @@
+format_energinet
+================
+
+.. py:module:: format_energinet
+
+.. autoapi-nested-parse::
+
+   Create electricity demand profiles for Denmark
+   Use Energinet data for municipalities:
+   https://www.energidataservice.dk/tso-electricity/consumptionindustry
+   Convert LAU code to municipality name with: 
+   LAU – NUTS 2021, EU-27 and EFTA / available candidate countries
+   https://ec.europa.eu/eurostat/web/nuts/local-administrative-units
+   Note: The dataset above also contains population
+
+   Created on 22.08.2024
+
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   format_energinet.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main(energinet_data_path: str, plot_only: bool, plot_each_user: bool)
+

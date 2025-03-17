@@ -1,0 +1,113 @@
+geofiles
+========
+
+.. py:module:: geofiles
+
+.. autoapi-nested-parse::
+
+   Created on Sat Dec  3 15:33:10 2022
+
+   @author: mathi
+
+   See the following documentation, for understanding how this script works:
+       Cutouts: https://atlite.readthedocs.io/en/latest/examples/create_cutout.html
+       Power potentials: https://atlite.readthedocs.io/en/latest/examples/landuse-availability.html
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   geofiles.style
+   geofiles.fc
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   geofiles.prepared_geofiles
+   geofiles.calculate_intersects
+   geofiles.assign_area_to_region
+
+
+Module Contents
+---------------
+
+.. py:data:: style
+   :value: 'report'
+
+
+.. py:data:: fc
+   :value: 'white'
+
+
+.. py:function:: prepared_geofiles(choice: str, plot: bool = False) -> tuple[str, geopandas.GeoDataFrame, str]
+
+   Prepared geofiles for various spatial resolutions
+
+   Parameters
+   ----------
+   choice : str
+       Currently supports:
+
+           'DK Municipalities'
+
+           'NUTS1'
+
+           'NUTS2'
+
+           'NUTS3'
+
+           'Nordpool'
+
+           'NordpoolReal'
+
+           'BalmorelVREAreas'
+
+           'Antbalm'
+
+           
+   plot : str
+       Chooses to plot or not
+
+   Returns
+   -------
+   area_names : Array of str
+       The region names.
+       
+   areas : GeoDataFrame
+       The pre-processed shapefile, including all metadata.
+
+
+.. py:function:: calculate_intersects(areas_inter1: geopandas.GeoDataFrame, areas_inter2: geopandas.GeoDataFrame, sum_total: bool = False) -> pandas.DataFrame
+
+   Calculates intersection of the series of areas_inter2 to each areas_inter1 element 
+
+   Args:
+       areas_inter1 (gpd.GeoDataFrame): _description_
+       areas_inter2 (gpd.GeoDataFrame): _description_
+       sum_total (bool, optional): _description_. Defaults to False.
+
+   Returns:
+       pd.DataFrame: _description_
+
+
+.. py:function:: assign_area_to_region(A: Union[geopandas.GeoSeries, pandas.Series], R: Union[geopandas.GeoSeries, pandas.Series] = gpd.GeoSeries(), A_suffix: str = '_A', R_suffix: str = '', method: str = '', splitstring: str = '_', splitint: int = 0)
+
+   Assigns areas to regions. Defaults to assign the inserted series to itself, by putting 
+   an _A suffix on the A-series
+
+   Args:
+       A (Union[gpd.GeoSeries, pd.Series]): _description_
+       R (Union[gpd.GeoSeries, pd.Series], optional): _description_. Defaults to gpd.GeoDataFrame().
+       A_suffix (str, optional): _description_. Defaults to '_A'.
+       R_suffix (str, optional): _description_. Defaults to ''.
+       method (str, optional): 'splitstring' or geometries 'within'. Defaults to 'splitstring'.
+       splitstring (str, optional): _description_. Defaults to '_'.
+       splitint (int, optional): _description_. Defaults to 0.
+
+

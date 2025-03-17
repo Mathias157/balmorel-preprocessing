@@ -1,0 +1,120 @@
+technology_data
+===============
+
+.. py:module:: technology_data
+
+.. autoapi-nested-parse::
+
+   Created on 24/04/2023
+
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+   This script creates input data for technoeconomic assumptions.
+   Most technologies come from the technology catalogue of the Danish Energy Agency:
+       - District Heating and Power Generation, June 2022 https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and
+       - Renewable Fuels, March 2023 https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-renewable-fuels
+       - Energy Storage, January 2020 https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-energy-storage
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   technology_data.style
+   technology_data.fc
+   technology_data.techs_to_add
+   technology_data.choice
+   technology_data.y_start
+   technology_data.y_stop
+   technology_data.y_step
+   technology_data.est
+   technology_data.GDATASTRING1
+   technology_data.GDATASTRING2
+   technology_data.GDATA
+   technology_data.eldh2balm
+   technology_data.eldh2TYPE
+   technology_data.eldh2TECH
+   technology_data.felDH
+   technology_data.areas
+   technology_data.GDATA
+   technology_data.y_range
+   technology_data.idx
+   technology_data.dfAsString
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   technology_data.get_value
+
+
+Module Contents
+---------------
+
+.. py:data:: style
+   :value: 'report'
+
+
+.. py:data:: fc
+   :value: 'white'
+
+
+.. py:function:: get_value(search_series, search_strings, y0, y1, den, y0_dif)
+
+   Gets value by interpolation
+
+
+.. py:data:: techs_to_add
+   :value: ['Gas turbine, combined cycle - extraction - natural gas - large']
+
+
+.. py:data:: choice
+   :value: 'NordpoolReal'
+
+
+.. py:data:: y_start
+   :value: 2020
+
+
+.. py:data:: y_stop
+   :value: 2050
+
+
+.. py:data:: y_step
+   :value: 5
+
+
+.. py:data:: est
+   :value: 'ctrl'
+
+
+.. py:data:: GDATASTRING1
+   :value: "Generation type Fuel type   Cv-value for CHP-Ext Cb-value for CHP  Fuel efficiency   CH4-factor...
+
+
+.. py:data:: GDATASTRING2
+
+.. py:data:: GDATA
+
+.. py:data:: eldh2balm
+
+.. py:data:: eldh2TYPE
+
+.. py:data:: eldh2TECH
+
+.. py:data:: felDH
+
+.. py:data:: areas
+
+.. py:data:: GDATA
+
+.. py:data:: y_range
+
+.. py:data:: idx
+
+.. py:data:: dfAsString
+

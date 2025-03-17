@@ -1,0 +1,44 @@
+biomass_transport
+=================
+
+.. py:module:: biomass_transport
+
+.. autoapi-nested-parse::
+
+   TITLE
+
+   Description
+
+   Created on 11.10.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   biomass_transport.CLI
+   biomass_transport.transport
+   biomass_transport.plot_style
+
+
+Module Contents
+---------------
+
+.. py:function:: CLI(ctx, dark_style: bool, plot_ext: str)
+
+   Description of the CLI
+
+
+.. py:function:: transport(transport_cost: float)
+
+   Producing transport costs for fuels
+
+   Args:
+       transport_cost (_type_): the cost of transport in €/GJ/km
+
+
+.. py:function:: plot_style(ctx, fig: matplotlib.pyplot.figure, ax: matplotlib.pyplot.axes, name: str)
+

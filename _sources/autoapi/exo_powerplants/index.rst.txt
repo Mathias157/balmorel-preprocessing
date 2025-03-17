@@ -1,0 +1,232 @@
+exo_powerplants
+===============
+
+.. py:module:: exo_powerplants
+
+.. autoapi-nested-parse::
+
+   Created on Fri Nov 25 13:33:33 2022
+
+   @author: Mathias Berg Rosendal, Research Assistant DTU Management
+
+   Reads the Danish Energy Agency's "Energiproducenttælling" (EPT, includes solar power) 
+   and windturbines datasheet.
+
+   It is converted and aggregated to a GKFX.inc file for Balmorel.
+
+   Download EPT and datasheet for windturbines here:
+   https://ens.dk/service/statistik-data-noegletal-og-kort/data-oversigt-over-energisektoren
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   exo_powerplants.techs
+   exo_powerplants.T
+   exo_powerplants.fuels
+   exo_powerplants.fuels_assumed
+   exo_powerplants.F
+   exo_powerplants.units
+   exo_powerplants.units_assumed
+   exo_powerplants.U
+   exo_powerplants.Ymax
+   exo_powerplants.choice
+   exo_powerplants.filename_EPT
+   exo_powerplants.filename_WT
+   exo_powerplants.f
+   exo_powerplants.fWT
+   exo_powerplants.fWT
+   exo_powerplants.fWT
+   exo_powerplants.fWT
+   exo_powerplants.pp
+   exo_powerplants.pp
+   exo_powerplants.UTM32
+   exo_powerplants.pp
+   exo_powerplants.newWT
+   exo_powerplants.pp
+   exo_powerplants.pp
+   exo_powerplants.pp
+   exo_powerplants.pp
+   exo_powerplants.dt
+   exo_powerplants.dt_int
+   exo_powerplants.idx
+   exo_powerplants.dt_int
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.CHPidx
+   exo_powerplants.EXTidx
+   exo_powerplants.idx
+   exo_powerplants.E
+   exo_powerplants.idxE
+   exo_powerplants.pp
+   exo_powerplants.crs
+   exo_powerplants.types
+   exo_powerplants.idx
+   exo_powerplants.lines
+   exo_powerplants.new_ax
+   exo_powerplants.new
+   exo_powerplants.temp_pp
+   exo_powerplants.idx
+   exo_powerplants.idx
+   exo_powerplants.dist
+   exo_powerplants.idx
+   exo_powerplants.GKFX
+   exo_powerplants.GKFX
+   exo_powerplants.GKFX
+   exo_powerplants.Ymin
+   exo_powerplants.GKFX
+   exo_powerplants.GKFX
+   exo_powerplants.dfAsString
+
+
+Module Contents
+---------------
+
+.. py:data:: techs
+
+.. py:data:: T
+
+.. py:data:: fuels
+
+.. py:data:: fuels_assumed
+
+.. py:data:: F
+
+.. py:data:: units
+
+.. py:data:: units_assumed
+
+.. py:data:: U
+
+.. py:data:: Ymax
+   :value: 2050
+
+
+.. py:data:: choice
+   :value: 'DKMunicipalities_names'
+
+
+.. py:data:: filename_EPT
+   :value: './Data/Powerplants...
+
+
+.. py:data:: filename_WT
+   :value: './Data/Powerplants (Energistyrelsen)/anlaeg.xlsx'
+
+
+.. py:data:: f
+
+.. py:data:: fWT
+
+.. py:data:: fWT
+
+.. py:data:: fWT
+
+.. py:data:: fWT
+
+.. py:data:: pp
+
+.. py:data:: pp
+
+.. py:data:: UTM32
+
+.. py:data:: pp
+
+.. py:data:: newWT
+
+.. py:data:: pp
+
+.. py:data:: pp
+
+.. py:data:: pp
+
+.. py:data:: pp
+
+.. py:data:: dt
+
+.. py:data:: dt_int
+
+.. py:data:: idx
+
+.. py:data:: dt_int
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: CHPidx
+
+.. py:data:: EXTidx
+
+.. py:data:: idx
+
+.. py:data:: E
+
+.. py:data:: idxE
+
+.. py:data:: pp
+
+.. py:data:: crs
+
+.. py:data:: types
+   :value: 'main_fuel'
+
+
+.. py:data:: idx
+
+.. py:data:: lines
+
+.. py:data:: new_ax
+   :value: []
+
+
+.. py:data:: new
+
+.. py:data:: temp_pp
+
+.. py:data:: idx
+
+.. py:data:: idx
+
+.. py:data:: dist
+
+.. py:data:: idx
+
+.. py:data:: GKFX
+
+.. py:data:: GKFX
+
+.. py:data:: GKFX
+
+.. py:data:: Ymin
+
+.. py:data:: GKFX
+
+.. py:data:: GKFX
+
+.. py:data:: dfAsString
+

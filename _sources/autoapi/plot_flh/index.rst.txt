@@ -1,0 +1,35 @@
+plot_flh
+========
+
+.. py:module:: plot_flh
+
+.. autoapi-nested-parse::
+
+   Full-Load Hours of VRE
+
+   A better plotting of VRE full-load hours
+
+   Created on 12.03.2025
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   plot_flh.CLI
+   plot_flh.plot_style
+
+
+Module Contents
+---------------
+
+.. py:function:: CLI(ctx, weather_year: int, dark_style: bool, plot_ext: str)
+
+   Description of the CLI
+
+
+.. py:function:: plot_style(ctx, fig: matplotlib.pyplot.figure, ax: matplotlib.pyplot.axes, name: str, legend: bool = True)
+

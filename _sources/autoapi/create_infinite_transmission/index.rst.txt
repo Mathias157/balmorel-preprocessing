@@ -1,0 +1,38 @@
+create_infinite_transmission
+============================
+
+.. py:module:: create_infinite_transmission
+
+.. autoapi-nested-parse::
+
+   Generate high/infinite transmission capacities 
+
+   Does what the title says, based on a clustering.gpkg file as outputted by the snakemake -s clustering command.
+
+   Created on 15.01.2025
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   create_infinite_transmission.CLI
+   create_infinite_transmission.trans
+   create_infinite_transmission.plot_style
+
+
+Module Contents
+---------------
+
+.. py:function:: CLI(ctx, dark_style: bool, plot_ext: str)
+
+   Description of the CLI
+
+
+.. py:function:: trans(cluster_file: str, cap: float)
+
+.. py:function:: plot_style(ctx, fig: matplotlib.pyplot.figure, ax: matplotlib.pyplot.axes, name: str, legend: bool = True)
+

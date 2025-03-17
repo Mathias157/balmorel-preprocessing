@@ -1,0 +1,61 @@
+transport_road_demand
+=====================
+
+.. py:module:: transport_road_demand
+
+.. autoapi-nested-parse::
+
+   Created on 22.06.2024
+
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+   ASSUMPTIONS:
+   - Assumes one demand and charging capacity pr. electric vehicle
+   - Assumes a uniform distribution of EV demand within country regions (very bad for FR15-FR00 and UK00-UKNI) 
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   transport_road_demand.FlexDem
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   transport_road_demand.distribute_road_flex_electricity_demand
+   transport_road_demand.distribute_dkstat_demand
+   transport_road_demand.main
+
+
+Module Contents
+---------------
+
+.. py:class:: FlexDem
+
+   .. py:method:: load_traffic_data(path: str = './Data/PyPSA-Eur-Sec Data/emobility', file: str = 'KFZ__count')
+
+
+   .. py:method:: create_profile(plot: bool = False)
+
+
+   .. py:method:: create_road_demand_from_Nvehicles(demand_pr_vehicle: float = 100 * 52 / 1000, charger_capacity_pr_vehicle: float = 1.5)
+
+
+   .. py:method:: create_road_demand_from_dkstat(road_demand: xarray.DataArray)
+
+
+   .. py:method:: create_flexdem_incfiles(road_demand: xarray.Dataset, area_choice: str = 'dkmunicipalities_names')
+
+
+.. py:function:: distribute_road_flex_electricity_demand(plot: bool, choice: str = 'dkmunicipalities_names')
+
+.. py:function:: distribute_dkstat_demand(geo: geopandas.GeoDataFrame, plot: bool = False)
+
+.. py:function:: main(chargercap: float, plot_only: bool)
+

@@ -1,0 +1,30 @@
+create_conversion_dictionaries
+==============================
+
+.. py:module:: create_conversion_dictionaries
+
+.. autoapi-nested-parse::
+
+   Is used to convert the easy-to-read-for-non-balmorel-user sets and elements to Balmorel input
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   create_conversion_dictionaries.exo_elec_dem_conversion_dictionaries
+   create_conversion_dictionaries.exo_heat_dem_conversion_dictionaries
+   create_conversion_dictionaries.exo_grid_conversion_dictionaries
+
+
+Module Contents
+---------------
+
+.. py:data:: exo_elec_dem_conversion_dictionaries
+
+.. py:data:: exo_heat_dem_conversion_dictionaries
+
+.. py:data:: exo_grid_conversion_dictionaries
+

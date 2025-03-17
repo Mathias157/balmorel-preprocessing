@@ -1,0 +1,94 @@
+format_vpdk21
+=============
+
+.. py:module:: format_vpdk21
+
+.. autoapi-nested-parse::
+
+   Pre-Processing of the Varmeplan 2021 dataset
+
+   Aalborg dataset, can be used to get individual and district heat gross supply:
+   https://vbn.aau.dk/da/datasets/kommunepakker-varmeplan-danmark-2021
+   - Note that heat demand should be combined wrt. the s1-s5 scenarios (sums to 53.95 TWh without heat efficiency investments)
+
+   Assumption for distribution of low-, mid- and high temperatures should probably come from:
+   Viegand Maagø and Energistyrelsen. ‘Kortlægning Af Energiforbrug Og Opgørelse Af Energisparepotentialer i Produktionserhvervene’, 2022.
+   See page 8:
+   “
+   - Omkring 45% af forbruget ligger ved temperaturer under 100 ºC – totalt 26.798 TJ/år 
+   - Godt 40% ligger ved temperaturer over 200 ºC – totalt 23.774 TJ/år 
+   - Resten, altså ca. 15%, ligger i intervallet 100 – 200 ºC eller derover
+   ”, Viegand Maagø and Energistyrelsen, 2022, p. 8
+
+   One simple, first assumption could be to say that 40-55% is high temperature, 
+   and use that amount of TJ to distribute the sum of TJ in the "over 80C" category
+   of Aalborg data into high and middle temperature (middle temperature is the remaining over 80C)  
+   - E.g.: 
+   - 59496 TJ/år in total
+   - 32723 TJ/år for >100 C (55%)
+   AAU data:
+   GJ_over_80    17.1217 %       3369.050427 TJ
+   GJ_60_80C     12.1648 %       2393.687324 TJ
+   GJ_under_6    70.7135 %       13914.38463 TJ
+   ..doesn't really fit - maybe the assumption that surplus heat above 80C comes from high, 60-80C from mid and below 60C from low is good enough?
+   for that to be true:
+   - 17.1217 + 12.1648 = 29.2865
+   - 40 - 29.2865 = 10.7135
+   - 10.7135 / 0.7 = 15.305% of GJ_under_6 is high, plus 100% of GJ_60_80C and 100% of GJ_over_80
+   - 15% / 0.7 = 21.42857142857143 of GJ_under_6 is mid
+   - 45% / 0.7 = 64.28571428571429 of GJ_under_6 is low
+
+   Python package requirements:
+   - xlrd 
+
+   Created on 26.08.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   format_vpdk21.style
+   format_vpdk21.fc
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   format_vpdk21.VPDK21
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   format_vpdk21.main
+
+
+Module Contents
+---------------
+
+.. py:data:: style
+   :value: 'report'
+
+
+.. py:data:: fc
+   :value: 'white'
+
+
+.. py:class:: VPDK21(scenario: str = 'SUM_GWh_uden_besp')
+
+   .. py:attribute:: DH
+
+
+   .. py:attribute:: IND
+
+
+.. py:function:: main(plot_only: bool, plot_each_user: bool)
+

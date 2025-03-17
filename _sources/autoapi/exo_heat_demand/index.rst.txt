@@ -1,0 +1,92 @@
+exo_heat_demand
+===============
+
+.. py:module:: exo_heat_demand
+
+.. autoapi-nested-parse::
+
+   Exogenous Heat Demands
+
+   Create exogenous heat demands using data from various places
+
+   Created on 20.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   exo_heat_demand.style
+   exo_heat_demand.fc
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   exo_heat_demand.DistrictHeatAAU
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   exo_heat_demand.create_incfile
+   exo_heat_demand.create_DH
+   exo_heat_demand.create_INDUSTRY_DH
+   exo_heat_demand.create_INDIVUSERS_DH
+   exo_heat_demand.create_INDUSTRY_DH_VAR_T
+   exo_heat_demand.main
+
+
+Module Contents
+---------------
+
+.. py:data:: style
+   :value: 'report'
+
+
+.. py:data:: fc
+   :value: 'white'
+
+
+.. py:class:: DistrictHeatAAU
+
+   .. py:attribute:: district_heat
+
+
+   .. py:attribute:: industry
+
+
+   .. py:attribute:: annual_industry_demand
+
+
+   .. py:method:: combine_data(plot: bool = False)
+
+
+.. py:function:: create_incfile(unique_processing)
+
+   The general wrapper for creating and saving .inc files, 
+   because the creating of the IncFile class and saving it is the same every time.
+   The unique processing of the .body content differs, however. 
+
+   Args:
+       unique_processing (func): The unique processing per case
+       **incfile_kwargs: Keyword arguments to pass to IncFile
+
+
+.. py:function:: create_DH(incfile, new_dataset: xarray.Dataset)
+
+.. py:function:: create_INDUSTRY_DH(incfile, new_dataset: xarray.Dataset)
+
+.. py:function:: create_INDIVUSERS_DH(incfile, new_dataset: xarray.Dataset)
+
+.. py:function:: create_INDUSTRY_DH_VAR_T(incfile, el_new_dataset: xarray.Dataset, A_suffix: str)
+
+.. py:function:: main(plot_only: bool, show_difference: bool = False)
+

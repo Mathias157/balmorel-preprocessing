@@ -1,0 +1,73 @@
+heat_profiles
+=============
+
+.. py:module:: heat_profiles
+
+.. autoapi-nested-parse::
+
+   Generate Heat Demand Timeseries
+
+   Will use temperature coordinates to 1) find average temperatures within polygons, 
+   2) use heating degree days assumption from Eurostat to generate heat demand profiles based on these timeseries
+   3) aggregate this profile with a flat profile for hot water consumption, being 25% of the total profile
+
+   Created on 14.10.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   heat_profiles.CLI
+   heat_profiles.generate
+   heat_profiles.aggregate_temperatures
+   heat_profiles.format_data
+   heat_profiles.plot_data
+   heat_profiles.plot_style
+   heat_profiles.load_profiles_from_balmorel
+   heat_profiles.heat_profiles_func
+
+
+Module Contents
+---------------
+
+.. py:function:: CLI(ctx, dark_style: bool, plot_ext: str)
+
+   Description of the CLI
+
+
+.. py:function:: generate(ctx, cutout: str, weather_year: int, plot: bool)
+
+   A command in the CLI
+
+
+.. py:function:: aggregate_temperatures(temperature: xarray.DataArray, geofile: geopandas.GeoDataFrame, aggfunc: str = 'mean')
+
+.. py:function:: format_data(agg_temperatures: xarray.Dataset, weather_year: int) -> pandas.DataFrame
+
+   Format timeseries to format expected by Balmorel 
+
+   Args:
+       agg_temperatures (xr.Dataset): The dataset with heat demands per municipality
+
+   Returns:
+       pd.DataFrame: The formatted dataframe, ready for the IncFile class
+
+
+.. py:function:: plot_data(ctx, aggregated_temperatures: xarray.Dataset, data: str)
+
+.. py:function:: plot_style(ctx, fig: matplotlib.pyplot.figure, ax: matplotlib.pyplot.axes, name: str, legend: bool)
+
+.. py:function:: load_profiles_from_balmorel(ctx)
+
+.. py:function:: heat_profiles_func(df)
+
+   Generates heat profiles from previous Balmorel input data 
+
+   Args:
+           df (_type_): The previous profiles input data
+
+
