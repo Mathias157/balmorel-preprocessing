@@ -3,5 +3,13 @@
     "files.associations": {
         "clustering": "snakemake",
         "preprocessing": "snakemake",
-    }
+    },
+
+    "terminal.integrated.profiles.windows": {
+        "Command Prompt with Aliases": {
+        "path": "cmd.exe",
+        "args": ["/k", "doskey pixi=C:\\Users\\mberos\\.pixi\\bin\\pixi.exe $* && doskey gams=C:\\GAMS\\47\\gams.exe $* & doskey clust=C:\\Users\\mberos\\.pixi\\bin\\pixi.exe run clustering $*"]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "Command Prompt with Aliases"
 }

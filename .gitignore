@@ -27,3 +27,7 @@ individual_sets.pkl
 ind-lt_sets.pkl
 ind-mt_sets.pkl
 ind-ht_sets.pkl
+
+# pixi environments
+.pixi
+*.egg-info

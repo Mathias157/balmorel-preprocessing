@@ -11,20 +11,21 @@ https://zenodo.org/records/10960910
 
 ## Installation
 
-The necessary python packages can be installed in a virtual environment by following the command below:
+### Using conda
+The necessary python packages can be installed in a virtual conda environment by following the command below:
 
 ```` 
 conda env create -f environment.yaml
 ````
 
-This requires [anaconda](https://www.anaconda.com/download?utm_source=anacondadoc&utm_medium=documentation&utm_campaign=download&utm_content=topnavalldocs) (or the more lightweight [miniconda](https://docs.anaconda.com/miniconda/#miniconda-latest-installer-links)) installs an environment with the following packages:
+This requires [anaconda](https://www.anaconda.com/download?utm_source=anacondadoc&utm_medium=documentation&utm_campaign=download&utm_content=topnavalldocs) (or the more lightweight [miniconda](https://docs.anaconda.com/miniconda/#miniconda-latest-installer-links)) and installs an environment with the following packages:
 ````
 name: spatialstudy
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - Cartopy=0.23.0
+  - Cartopy=0.24.0
   - geopandas=1.0.1
   - matplotlib=3.9.2
   - ipywidgets=8.1.3
@@ -47,12 +48,16 @@ dependencies:
   - pip
   - pip:
     - gamsapi[transfer]==45.7.0
-    - pybalmorel==0.3.10
+    - pybalmorel==0.4.5
 ````
+
+### Using pixi
+A pixi.toml also enables the use of the [pixi package manager](https://prefix.dev/), which ensures that *all* dependencies are exactly the same as the time of use.
+When running the snakemake files the first time, pixi will install the required packages.
 
 ## Get Started
 
-The processing is initiated through a snakemake command in a command-line interface in the src directory. If using windows, the pre-processing can be run by calling `preprocessing` and the clustering through `clustering`. If on other systems, do either of the following commands:
+The processing is initiated through a snakemake command in a command-line interface in the src directory. If using windows, the pre-processing can be run by calling `preprocessing` and the clustering through `clustering`. If on other systems, do either of the following commands (remember to put `pixi run` in front of these if using pixi):
 ```
 snakemake -s preprocessing
 snakemake -s clustering
