@@ -27,13 +27,6 @@ import click
 import requests
 import pandas as pd
 
-r = requests.get(
-    "https://api.energidataservice.dk/dataset/PrivateConsumptionHeatingHour?offset=0&start=2023-01-01T00:00&end=2024-01-01T00:00&sort=TimeUTC%20DESC"
-)
-
-j = r.json()
-
-df = pd.DataFrame.from_dict(j)
 
 # %% ------------------------------- ###
 ### 1. Load & Format Energinet Data ###
@@ -55,8 +48,14 @@ df = pd.DataFrame.from_dict(j)
     help="Path of data from https://www.energidataservice.dk/tso-electricity/consumptionindustry",
 )
 def main(energinet_data_path: str, plot_only: bool, plot_each_user: bool):
-    # Read municipality timeseries
-    f = pd.read_csv(energinet_data_path, sep=";", decimal=",")
+
+    r = requests.get(
+        "https://api.energidataservice.dk/dataset/PrivateConsumptionHeatingHour?offset=0&start=2023-01-01T00:00&end=2024-01-01T00:00&sort=TimeUTC%20DESC"
+    )
+
+    j = r.json()
+
+    f = pd.DataFrame.from_dict(j).to(energinet_data_path)
 
     ## Record Timezone (UTC, i.e. similar to GMT)
     time = pd.to_datetime(f.HourUTC)
