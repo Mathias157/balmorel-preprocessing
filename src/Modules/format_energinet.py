@@ -24,7 +24,16 @@ from pytz import timezone
 from Submodules.municipal_template import DataContainer
 from Submodules.utils import convert_coordname_elements, cmap
 import click
+import requests
+import pandas as pd
 
+r = requests.get(
+    "https://api.energidataservice.dk/dataset/PrivateConsumptionHeatingHour?offset=0&start=2023-01-01T00:00&end=2024-01-01T00:00&sort=TimeUTC%20DESC"
+)
+
+j = r.json()
+
+df = pd.DataFrame.from_dict(j)
 
 # %% ------------------------------- ###
 ### 1. Load & Format Energinet Data ###
