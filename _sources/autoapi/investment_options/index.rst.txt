@@ -1,0 +1,41 @@
+investment_options
+==================
+
+.. py:module:: investment_options
+
+.. autoapi-nested-parse::
+
+   TITLE
+
+   Description
+
+   Created on 25.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   investment_options.save_symbol_from_all_endofmodel
+   investment_options.base_AGKN
+   investment_options.industry_AGKN
+   investment_options.individual_AGKN
+   investment_options.main
+
+
+Module Contents
+---------------
+
+.. py:function:: save_symbol_from_all_endofmodel(symbol: str, columns: list, param_or_set: str, path_to_allendofmodel: str = 'C:\\Users\\mberos\\gitRepos\\Balmorel\\all_endofmodel.gdx')
+
+.. py:function:: base_AGKN(AGKN: pandas.DataFrame, print_options: bool = False)
+
+.. py:function:: industry_AGKN(AGKN: pandas.DataFrame, print_options: bool = False)
+
+.. py:function:: individual_AGKN(AGKN: pandas.DataFrame, print_options: bool = False)
+
+.. py:function:: main(large_munis: str, medium_munis: str, path_to_allendofmodel: str)
+

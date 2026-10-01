@@ -1,0 +1,73 @@
+clustering
+==========
+
+.. py:module:: clustering
+
+.. autoapi-nested-parse::
+
+   Clustering
+
+   Will cluster geographic regions depending on input data
+
+   Created on 11.09.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   clustering.cmap
+   clustering.columns
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   clustering.truncate_colormap
+   clustering.correct_VRE_data
+   clustering.convert_municipal_code_to_name
+   clustering.collect_clusterdata
+   clustering.apply_filters
+   clustering.gather_data
+   clustering.cluster
+   clustering.new_geofile
+   clustering.region_area_connection
+   clustering.main
+
+
+Module Contents
+---------------
+
+.. py:data:: cmap
+
+.. py:function:: truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100)
+
+.. py:function:: correct_VRE_data(path_to_file, generation_name: str)
+
+.. py:function:: convert_municipal_code_to_name(to_be_converted: pandas.DataFrame, column_to_convert: Tuple[str, int], pivot_table: bool = False, exclude_regions: list = ['Herlev', 'Christiansø'], muni_geofile_path: str = 'C:\\Users\\mberos\\gitRepos\\balmorel-preprocessing\\src\\Data\\Shapefiles\\Denmark\\Adm\\gadm36_DNK_2.shp')
+
+.. py:function:: collect_clusterdata(plot_cf: bool = False)
+
+.. py:function:: apply_filters(df: pandas.DataFrame, value_name: str, aggfunc: str = 'sum')
+
+.. py:data:: columns
+
+.. py:function:: gather_data(db: gams.GamsDatabase, cluster_params: list, aggfuncs: list)
+
+.. py:function:: cluster(model: pybalmorel.Balmorel, scenario: str, collected_data: pandas.DataFrame, n_clusters: int, use_connectivity: bool = True, manual_corrections: list = [], linkage: str = 'Ward', connection_remark: str = 'connec. included + artifical', data_remark: str = 'all combined + xy coords', include_coordinates: bool = True, second_order: bool = False, first_order_geofile: str = '')
+
+.. py:function:: new_geofile(clustering: geopandas.GeoDataFrame, plot: bool = False)
+
+.. py:function:: region_area_connection(input_data: gams.GamsDatabase, clustering: geopandas.GeoDataFrame)
+
+   Creates connections between regions and areas in a 2nd order clustering
+       
+
+
+.. py:function:: main(model_path: str, scenario: str, cluster_params: str, aggregation_functions: str, cluster_size: int, second_order: bool, first_order_geofile: str = '', plot_style: str = 'report', gams_sysdir: str = '/opt/gams/48.5')
+

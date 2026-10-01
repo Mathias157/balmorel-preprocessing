@@ -1,0 +1,76 @@
+format_dkstat
+=============
+
+.. py:module:: format_dkstat
+
+.. autoapi-nested-parse::
+
+   Processing data from Danmarks Statistik
+
+   Link:
+   https://www.statistikbanken.dk/
+   Search for:
+   - ENEGEO
+   - ENETYP
+   - ENE3H with choice H Transport
+
+   Created on 30.08.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   format_dkstat.style
+   format_dkstat.fc
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   format_dkstat.DKSTAT
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   format_dkstat.load_transport_demand
+   format_dkstat.main
+
+
+Module Contents
+---------------
+
+.. py:data:: style
+   :value: 'report'
+
+
+.. py:data:: fc
+   :value: 'white'
+
+
+.. py:class:: DKSTAT
+
+   .. py:attribute:: IND
+
+
+.. py:function:: load_transport_demand(include_bunkering: bool = False)
+
+   Loads Danish transport fuel demand in TWh
+
+   Args:
+       include_bunkering (bool, optional): Include bunkering demand or not. Defaults to False.
+
+   Returns:
+       pd.DataFrame: Most important fuel demands from 2000 to 2023
+
+
+.. py:function:: main(get_transport_demand: bool = False, include_bunkering: bool = False, get_industry_demand: bool = False)
+

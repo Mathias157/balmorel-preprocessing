@@ -1,0 +1,63 @@
+tech_potentials
+===============
+
+.. py:module:: tech_potentials
+
+.. autoapi-nested-parse::
+
+   TITLE
+
+   Description
+
+   Created on 21.10.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   tech_potentials.V_truncated_pyramid
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   tech_potentials.CLI
+   tech_potentials.ptes
+   tech_potentials.plot_style
+   tech_potentials.create_subtechgroupkpot
+
+
+Module Contents
+---------------
+
+.. py:function:: CLI(ctx, dark_style: bool, plot_ext: str)
+
+   Description of the CLI
+
+
+.. py:function:: ptes(frac: float)
+
+   Calculate technology potential for Pit Thermal Energy Storage
+
+   Args:
+       frac (float): Fraction of land that is available for PTES
+
+
+.. py:function:: plot_style(ctx, fig: matplotlib.pyplot.figure, ax: matplotlib.pyplot.axes, name: str, legend: bool = True)
+
+.. py:data:: V_truncated_pyramid
+
+.. py:function:: create_subtechgroupkpot(df: pandas.DataFrame, PTES_land_use: float)
+
+   Create subtechgroupkpot dataframe based on df with CCCRRRAAA in index and technology groups in the columns
+
+   Args:
+       df (pd.DataFrame): Dataframe containing MW/MWh potentials for capacity expansion of technologies (columns) per CCCRRRAAA (index) 
+
+

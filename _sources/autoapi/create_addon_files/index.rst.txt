@@ -1,0 +1,37 @@
+create_addon_files
+==================
+
+.. py:module:: create_addon_files
+
+.. autoapi-nested-parse::
+
+   Create Empty Sets for Aggregated Model
+
+   The clustered model will include exogenous heat and electricity demands from addons in DE, DE_VAR_T, DH, DH_VAR_T etc.
+   Thus, this script is needed to 1) create empty files for INDUSTRY_DH, INDIVUSERS_DH etc., 
+   and 2) to create the INDUSTRY_INDUSTRY_AAA and INDIVUSERS_INDIVUSERS_AAA etc. files required for categorising sets.
+
+   Created on 04.10.2024
+   @author: Mathias Berg Rosendal, PhD Student at DTU Management (Energy Economics & Modelling)
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   create_addon_files.create_empty_set_files
+   create_addon_files.create_category_files
+   create_addon_files.main
+
+
+Module Contents
+---------------
+
+.. py:function:: create_empty_set_files(addons: list, empty_files: list)
+
+.. py:function:: create_category_files(addons: list, clustering: geopandas.GeoDataFrame, category_files: list, **kwargs)
+
+.. py:function:: main(clusterfile: str, addons: Tuple[list, str] = ['INDUSTRY', 'HYDROGEN', 'INDIVUSERS'], empty_files: Tuple[list, str] = ['DE', 'DE_VAR_T', 'DH', 'DH_VAR_T', 'CCCRRRAAA', 'RRRAAA', 'AAA', 'AGKN', 'DISLOSS_E_AG'])
+

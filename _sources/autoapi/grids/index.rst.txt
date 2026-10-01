@@ -1,0 +1,74 @@
+grids
+=====
+
+.. py:module:: grids
+
+.. autoapi-nested-parse::
+
+   Created on Thu Dec 22 22:51:15 2022
+
+   @author: Mathias Berg Rosendal, PhD, DTU Management
+
+   Use electricity transmission cost data from DEA2021:
+   https://ens.dk/en/our-services/projections-and-models/technology-data/technology-catalogue-transport-energy
+   A map of the extisting transmission grids:
+   https://energinet.dk/media/gqjj2xpk/eksisterende-net-2021.pdf <- DK
+
+   This is used to create demand files for Balmorel.
+
+   Assumption of how much a certain kV of transmission line can transmit of power
+   comes from: https://wise-answer.com/how-much-power-can-a-transmission-line-carry/
+   765 kV => 2200-2400 MW
+   500 kV => 900 MW
+   345 kV => 400 MW
+   *300 kV => 300 MW
+   *132 kV => 100 MW
+   *220 kV => 200 MW
+   GET A BETTER SOURCE!!! Look in power grid course material?
+   * = derived from three data assumptions (2nd degree assumption)
+
+
+   Power grid is manually drawed from: https://energinet.dk/media/ouufo5ll/eksisterende-net-2021.jpeg
+   NEED automatic source! (ENTSO-E data)
+
+   Works with the environment.yaml distributed in XXX
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   grids.run_old_script
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   grids.get_distance_matrix
+   grids.get_connections
+   grids.create_grid_incfiles
+   grids.create_tech_specific_distribution_loss
+   grids.main
+
+
+Module Contents
+---------------
+
+.. py:function:: get_distance_matrix(areas: geopandas.GeoDataFrame)
+
+.. py:function:: get_connections(areas: pandas.DataFrame)
+
+.. py:function:: create_grid_incfiles(d: pandas.DataFrame, X: pandas.DataFrame, XE_cost: float, XCOST_E: float, XLOSS_E: float, DCOST_E: float, DLOSS_E: float, carrier: str)
+
+.. py:function:: create_tech_specific_distribution_loss(wind_offshore_loss: dict, industry_loss: float, individual_loss: float)
+
+.. py:function:: main()
+
+.. py:data:: run_old_script
+   :value: False
+
+
